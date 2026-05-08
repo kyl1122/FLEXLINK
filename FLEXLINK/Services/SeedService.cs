@@ -42,7 +42,7 @@ namespace FLEXLINK.Services
                         SecurityStamp = Guid.NewGuid().ToString()
                     };
 
-                    var result = await userManager.CreateAsync(adminUser, "Admin123");
+                    var result = await userManager.CreateAsync(adminUser, "Admin123!");
                     if (result.Succeeded)
                     {
                         logger.LogInformation("Assigning Admin role to the admin user.");

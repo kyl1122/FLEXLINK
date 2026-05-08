@@ -4,7 +4,7 @@
 <ul class="navbar-nav ms-auto align-items-center">
     @if (signInManager.IsSignedIn(User))
     {
-        <li class="mav-item">
+        <li class="nav-item">
             <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                 @Html.AntiForgeryToken()
                 <button type="submit" class="btn btn-link nav-link text-dark p-0">Logout</button>
