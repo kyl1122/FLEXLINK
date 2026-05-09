@@ -28,25 +28,37 @@ namespace FLEXLINK.Controllers
         }
 
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Login(LoginViewModel model)
+{
+    if (!ModelState.IsValid)
+    {
+        return View(model);
+    }
+
+    var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+
+    if (result.Succeeded)
+    {
+        var user = await userManager.FindByEmailAsync(model.Email);
+
+        if (user != null)
         {
-            if (!ModelState.IsValid)
+            
+            if (await userManager.IsInRoleAsync(user, "Admin"))
             {
-                return View(model);
+                return RedirectToAction("Index", "Admin"); 
             }
-
-            var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-
-            if (result.Succeeded)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
-            ModelState.AddModelError(string.Empty, "Invalid Login Attempt.");
-            return View(model);
         }
+
+       
+        return RedirectToAction("Index", "Home");
+    }
+
+    ModelState.AddModelError(string.Empty, "Invalid Login Attempt.");
+    return View(model);
+}
 
         [HttpGet]
         public IActionResult Register()
