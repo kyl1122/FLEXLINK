@@ -28,37 +28,42 @@ namespace FLEXLINK.Controllers
         }
 
 
-[HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> Login(LoginViewModel model)
-{
-    if (!ModelState.IsValid)
-    {
-        return View(model);
-    }
-
-    var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-
-    if (result.Succeeded)
-    {
-        var user = await userManager.FindByEmailAsync(model.Email);
-
-        if (user != null)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            
-            if (await userManager.IsInRoleAsync(user, "Admin"))
+            if (!ModelState.IsValid)
             {
-                return RedirectToAction("Index", "Admin"); 
+                return View(model);
             }
-        }
+
+            var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+
+            if (result.Succeeded)
+            {
+                var user = await userManager.FindByEmailAsync(model.Email);
+
+                if (user != null)
+                {
+            
+                    if (await userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        return RedirectToAction("Index", "Admin"); 
+                    }
+
+                    if (await userManager.IsInRoleAsync(user, "Trainer"))
+                    {
+                        return RedirectToAction("Index", "Trainer");
+                    }
+                }
 
        
-        return RedirectToAction("Index", "Home");
-    }
+                return RedirectToAction("Index", "Home");
+            }
 
-    ModelState.AddModelError(string.Empty, "Invalid Login Attempt.");
-    return View(model);
-}
+            ModelState.AddModelError(string.Empty, "Invalid Login Attempt.");
+            return View(model);
+        }
 
         [HttpGet]
         public IActionResult Register()

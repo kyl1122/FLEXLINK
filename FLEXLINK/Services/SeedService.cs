@@ -25,6 +25,7 @@ namespace FLEXLINK.Services
                 logger.LogInformation("Seeding roles.");
                 await AddRoleAsync(roleManager, "Admin");
                 await AddRoleAsync(roleManager, "User");
+                await AddRoleAsync(roleManager, "Trainer");
 
                 //Add admin user
                 logger.LogInformation("Seeding admin user.");
