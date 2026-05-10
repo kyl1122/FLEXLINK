@@ -15,6 +15,11 @@ namespace FLEXLINK.Controllers
             return View();
         }
 
+        public IActionResult MySchedule()
+        {
+            return View();
+        }
+
         // Example: A page where trainers can see their assigned clients/users
         public IActionResult MyClients()
         {
