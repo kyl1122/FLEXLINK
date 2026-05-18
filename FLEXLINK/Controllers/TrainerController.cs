@@ -15,6 +15,11 @@ namespace FLEXLINK.Controllers
             return View();
         }
 
+        public IActionResult EditProfile()
+        {
+            return View();
+        }
+
         public IActionResult MySchedule()
         {
             return View();

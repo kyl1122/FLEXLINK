@@ -1,8 +1,58 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "User Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-4">
+    @if (User.Identity.IsAuthenticated && User.IsInRole("User"))
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="p-5 mb-4 bg-light rounded-3 shadow-sm border">
+                    <h1 class="display-5 fw-bold">Hello, @User.Identity.Name!</h1>
+                    <p class="col-md-8 fs-4 text-muted">Welcome to your FLEXLINK portal. Track your progress and manage your sessions below.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-primary shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-primary">Our Trainers</h5>
+                        <p class="card-text text-muted small">Connect with professional trainers to reach your fitness goals.</p>
+                        <a asp-controller="Home" asp-action="Trainer" class="btn btn-outline-primary w-100">View Trainers</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 border-success shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-success">Membership</h5>
+                        <p class="card-text text-muted small">View your current plan details and billing information.</p>
+                        <a asp-controller="Home" asp-action="Membership" class="btn btn-outline-success w-100">Manage Plan</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 border-info shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-info">My Schedule</h5>
+                        <p class="card-text text-muted small">Check your upcoming workout sessions and history.</p>
+                        <a asp-controller="Home" asp-action="Schedule" class="btn btn-outline-info w-100">View Schedule</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <h1 class="display-4">Welcome to FLEXLINK</h1>
+            <p class="lead">Join us today to start your fitness journey.</p>
+            <hr class="my-4">
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">Join Now</a>
+        </div>
+    }
 </div>
