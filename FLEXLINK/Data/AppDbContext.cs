@@ -13,5 +13,7 @@ namespace FLEXLINK.Data
         protected AppDbContext()
         {
         }
+
+        public DbSet<ProfileTrainer> ProfileTrainer { get; set; }
     }
 }
