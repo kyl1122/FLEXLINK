@@ -61,6 +61,7 @@ namespace FLEXLINK.Controllers
                     Email = profile.Email,
                     PhoneNumber = profile.PhoneNumber,
                     Address = profile.Address,
+                    Expertise = profile.Expertise,
                     ExistingProfilePicture = profile.ProfilePicture ?? "/uploads/DefaultProfile.png"
                 };
             }
@@ -152,6 +153,7 @@ namespace FLEXLINK.Controllers
             profile.FullName = vm.FullName;
             profile.PhoneNumber = vm.PhoneNumber;
             profile.Address = vm.Address;
+            profile.Expertise = vm.Expertise;
 
             await _db.SaveChangesAsync();
 

@@ -62,6 +62,12 @@
                     <span asp-validation-for="Address" class="text-danger"></span>
                 </div>
 
+                <div class="mb-3">
+                    <label asp-for="Expertise" class="form-label">Expertise</label>
+                    <input asp-for="Expertise" class="form-control" />
+                    <span asp-validation-for="Expertise" class="text-danger"></span>
+                </div>
+
                 <button type="submit" class="btn btn-primary">Update Profile</button>
                 <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
 

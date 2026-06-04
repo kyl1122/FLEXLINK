@@ -14,8 +14,11 @@ namespace FLEXLINK.ViewModels
         [RegularExpression(@"^\d{11}$", ErrorMessage = "Phone number must be exactly 11 digits and contain only numbers.")]
         public string PhoneNumber { get; set; }
 
+        [Required(ErrorMessage = "Address is required.")]
         public string? Address { get; set; }
 
+        [Required(ErrorMessage = "Expertise is required.")]
+        public string? Expertise { get; set; }
         // Nullable — a trainer may not have uploaded a picture yet
         public string? ExistingProfilePicture { get; set; }
 
