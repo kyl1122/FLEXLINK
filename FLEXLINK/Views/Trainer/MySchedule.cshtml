@@ -1,6 +1,188 @@
-﻿@{
+﻿@model IEnumerable<FLEXLINK.Models.TrainerSchedule>
+@{
     ViewData["Title"] = "My Schedule";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<p>Use this page to detail your site's Schedule.</p>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">My Schedule</h2>
+            <p class="text-muted mb-0">Manage your session availability</p>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+            + Make Your Schedule
+        </button>
+    </div>
+
+    @* Success / Error alerts *@
+    @if (TempData["ScheduleSuccess"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["ScheduleSuccess"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ScheduleError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["ScheduleError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @* Summary badges *@
+    @if (Model.Any())
+    {
+        var totalSlots = Model.Count();
+        var bookedSlots = Model.Count(s => s.IsBooked);
+        var freeSlots = totalSlots - bookedSlots;
+
+        <div class="d-flex gap-2 mb-3 flex-wrap">
+            <span class="badge text-bg-primary fs-6 px-3 py-2">
+                <i class="bi bi-calendar3 me-1"></i> @totalSlots Total Slot@(totalSlots != 1 ? "s" : "")
+            </span>
+            <span class="badge text-bg-success fs-6 px-3 py-2">
+                <i class="bi bi-check-circle me-1"></i> @bookedSlots Booked
+            </span>
+            <span class="badge text-bg-secondary fs-6 px-3 py-2">
+                <i class="bi bi-calendar-check me-1"></i> @freeSlots Available
+            </span>
+        </div>
+    }
+
+    @* Schedule Table *@
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 border rounded" style="background:#f9f9f9;">
+            <p class="text-muted fs-5 mb-3">You have no scheduled sessions yet.</p>
+            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+                Create Your First Schedule
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Date</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Notes</th>
+                        <th class="text-center">Status</th>
+                        <th>Booked By</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        <tr class="@(s.IsBooked ? "table-success" : "")">
+                            <td>@s.ScheduleDate.ToString("MMMM dd, yyyy")</td>
+                            <td>@DateTime.Today.Add(s.StartTime).ToString("hh:mm tt")</td>
+                            <td>@DateTime.Today.Add(s.EndTime).ToString("hh:mm tt")</td>
+                            <td>@(string.IsNullOrEmpty(s.Notes) ? "—" : s.Notes)</td>
+                            <td class="text-center">
+                                @if (s.IsBooked)
+                                {
+                                    <span class="badge text-bg-success">
+                                        <i class="bi bi-check-circle me-1"></i> Booked
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge text-bg-secondary">
+                                        <i class="bi bi-calendar me-1"></i> Available
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (s.IsBooked && !string.IsNullOrEmpty(s.BookedByName))
+                                {
+                                    <span>
+                                        <i class="bi bi-person-check text-success me-1"></i>
+                                        @s.BookedByName
+                                    </span>
+                                    @if (s.BookedAt.HasValue)
+                                    {
+                                        <br />
+                                        <small class="text-muted">@s.BookedAt.Value.ToString("MMM dd, yyyy hh:mm tt")</small>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (!s.IsBooked)
+                                {
+                                    <form asp-action="DeleteSchedule" method="post"
+                                          onsubmit="return confirm('Remove this schedule slot?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@s.Id" />
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-trash me-1"></i> Remove
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small" title="Cannot remove a booked slot">
+                                        <i class="bi bi-lock"></i> Locked
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@* Add Schedule Modal *@
+<div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addScheduleModalLabel">Make Your Schedule</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="AddSchedule" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Date</label>
+                        <input type="date" name="scheduleDate" class="form-control"
+                               min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Start Time</label>
+                        <input type="time" name="startTime" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">End Time</label>
+                        <input type="time" name="endTime" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Notes <span class="text-muted fw-normal">(optional)</span></label>
+                        <input type="text" name="notes" class="form-control"
+                               placeholder="e.g. Strength Training, Cardio Session..." />
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Apply</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,6 +1,54 @@
-﻿@{
+﻿@model IEnumerable<FLEXLINK.Models.TrainerSchedule>
+@{
     ViewData["Title"] = "Schedule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's Schedule.</p>
+<div class="container mt-4">
+    <div class="mb-4">
+        <h2 class="fw-bold">Trainer Schedule</h2>
+        <p class="text-muted">View upcoming available sessions from our trainers.</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 border rounded" style="background:#f9f9f9;">
+            <p class="text-muted fs-5">No upcoming sessions scheduled yet. Check back soon!</p>
+        </div>
+    }
+    else
+    {
+        @* Group schedules by date *@
+        @foreach (var dateGroup in Model.GroupBy(s => s.ScheduleDate.Date))
+        {
+            <div class="mb-4">
+                <h5 class="fw-bold text-primary border-bottom pb-2">
+                    @dateGroup.Key.ToString("dddd, MMMM dd, yyyy")
+                </h5>
+                <div class="row g-3">
+                    @foreach (var s in dateGroup)
+                    {
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-1">@s.TrainerName</h6>
+                                    <p class="text-muted small mb-1">
+                                        <i class="bi bi-clock"></i>
+                                        @DateTime.Today.Add(s.StartTime).ToString("hh:mm tt") —
+                                        @DateTime.Today.Add(s.EndTime).ToString("hh:mm tt")
+                                    </p>
+                                    @if (!string.IsNullOrEmpty(s.Notes))
+                                    {
+                                        <p class="text-muted small mb-0">
+                                            <i class="bi bi-journal-text"></i> @s.Notes
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>

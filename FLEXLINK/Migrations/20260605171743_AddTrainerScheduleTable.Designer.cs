@@ -4,6 +4,7 @@ using FLEXLINK.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FLEXLINK.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260605171743_AddTrainerScheduleTable")]
+    partial class AddTrainerScheduleTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,23 +71,11 @@ namespace FLEXLINK.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("BookedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("BookedByName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BookedByUserId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("time");
-
-                    b.Property<bool>("IsBooked")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");

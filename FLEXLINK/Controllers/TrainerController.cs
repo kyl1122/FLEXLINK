@@ -163,19 +163,89 @@ namespace FLEXLINK.Controllers
             return RedirectToAction("EditProfile");
         }
 
-        public IActionResult MySchedule()
+        // ─── SCHEDULE ────────────────────────────────────────────────────────────
+
+        [HttpGet]
+        public async Task<IActionResult> MySchedule()
         {
-            return View();
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return RedirectToAction("Login", "Account");
+
+            // Load only this trainer's schedule slots, newest first
+            var schedules = _db.TrainerSchedule
+                               .Where(s => s.UserId == currentUser.Id)
+                               .OrderBy(s => s.ScheduleDate)
+                               .ThenBy(s => s.StartTime)
+                               .ToList();
+
+            return View(schedules);
         }
 
-        public IActionResult MyClients()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddSchedule(DateTime scheduleDate, TimeSpan startTime, TimeSpan endTime, string? notes)
         {
-            return View();
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return RedirectToAction("Login", "Account");
+
+            // Basic validation
+            if (endTime <= startTime)
+            {
+                TempData["ScheduleError"] = "End time must be after start time.";
+                return RedirectToAction("MySchedule");
+            }
+
+            if (scheduleDate.Date < DateTime.Today)
+            {
+                TempData["ScheduleError"] = "Schedule date cannot be in the past.";
+                return RedirectToAction("MySchedule");
+            }
+
+            // Get the trainer's name for display on the user's schedule page
+            var profile = _db.ProfileTrainer.FirstOrDefault(p => p.UserId == currentUser.Id);
+            string trainerName = profile?.FullName ?? currentUser.Email ?? "Trainer";
+
+            var schedule = new TrainerSchedule
+            {
+                UserId = currentUser.Id,
+                TrainerName = trainerName,
+                ScheduleDate = scheduleDate.Date,
+                StartTime = startTime,
+                EndTime = endTime,
+                Notes = notes,
+                CreatedAt = DateTime.Now
+            };
+
+            _db.TrainerSchedule.Add(schedule);
+            await _db.SaveChangesAsync();
+
+            TempData["ScheduleSuccess"] = "Schedule added successfully!";
+            return RedirectToAction("MySchedule");
         }
 
-        public IActionResult WorkoutPlans()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteSchedule(int id)
         {
-            return View();
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return RedirectToAction("Login", "Account");
+
+            var schedule = _db.TrainerSchedule
+                              .FirstOrDefault(s => s.Id == id && s.UserId == currentUser.Id);
+
+            if (schedule != null)
+            {
+                _db.TrainerSchedule.Remove(schedule);
+                await _db.SaveChangesAsync();
+                TempData["ScheduleSuccess"] = "Schedule removed.";
+            }
+
+            return RedirectToAction("MySchedule");
         }
+
+        public IActionResult MyClients() => View();
+        public IActionResult WorkoutPlans() => View();
     }
 }
+
+
