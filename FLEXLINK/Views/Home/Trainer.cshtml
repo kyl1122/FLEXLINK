@@ -9,7 +9,7 @@
         <p class="text-muted">Choose a professional trainer and pick your preferred session slots.</p>
     </div>
 
-    @* Global booking feedback *@
+    @* Global alerts *@
     @if (TempData["BookingSuccess"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show">
@@ -24,6 +24,21 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
+    @if (TempData["BookingConflict"] != null)
+    {
+        var conflicts = TempData["BookingConflict"].ToString().Split('|');
+        <div class="alert alert-warning alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            <strong>Schedule Conflict Detected:</strong>
+            <ul class="mb-0 mt-1">
+                @foreach (var msg in conflicts)
+                {
+                    <li>@msg</li>
+                }
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
     @if (!Model.Any())
     {
@@ -33,79 +48,77 @@
     }
     else
     {
-        <div class="row g-4">
+        <div class="row g-4 align-items-stretch">
             @foreach (var vm in Model)
             {
                 var trainer = vm.Trainer;
                 var schedules = vm.AvailableSchedules;
                 var modalId = "scheduleModal_" + trainer.Id;
 
-                <div class="col-md-4">
-                    <div class="card h-100 shadow-sm border-0" style="border-radius: 16px; overflow: hidden;">
+                <div class="col-md-4 d-flex">
+                    @* Fixed-height card — schedule list scrolls inside *@
+                    <div class="card shadow-sm border-0 w-100"
+                         style="border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
 
-                        @* Profile Picture *@
-                        <div class="text-center pt-4">
+                        @* ── Top: Profile info (fixed, never grows) ── *@
+                        <div class="text-center pt-4 px-3">
                             <img src="@(trainer.ProfilePicture ?? "/uploads/DefaultProfile.png")"
                                  alt="@trainer.FullName"
-                                 style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 3px solid #dee2e6;" />
-                        </div>
-
-                        <div class="card-body text-center">
-                            <h5 class="card-title fw-bold mb-1">@trainer.FullName</h5>
-
-                            <p class="text-muted small mb-1">
-                                <i class="bi bi-envelope"></i> @trainer.Email
-                            </p>
+                                 style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #dee2e6;" />
+                            <h5 class="fw-bold mt-2 mb-0">@trainer.FullName</h5>
+                            <p class="text-muted small mb-0"><i class="bi bi-envelope me-1"></i>@trainer.Email</p>
                             @if (!string.IsNullOrEmpty(trainer.PhoneNumber))
                             {
-                                <p class="text-muted small mb-1">
-                                    <i class="bi bi-telephone"></i> @trainer.PhoneNumber
-                                </p>
+                                <p class="text-muted small mb-0"><i class="bi bi-telephone me-1"></i>@trainer.PhoneNumber</p>
                             }
                             @if (!string.IsNullOrEmpty(trainer.Address))
                             {
-                                <p class="text-muted small mb-1">
-                                    <i class="bi bi-geo-alt"></i> @trainer.Address
-                                </p>
+                                <p class="text-muted small mb-0"><i class="bi bi-geo-alt me-1"></i>@trainer.Address</p>
                             }
                             @if (!string.IsNullOrEmpty(trainer.Expertise))
                             {
-                                <p class="text-muted small mb-2">
-                                    <i class="bi bi-trophy"></i> @trainer.Expertise
-                                </p>
+                                <p class="text-muted small mb-0"><i class="bi bi-trophy me-1"></i>@trainer.Expertise</p>
                             }
+                        </div>
 
-                            @* ── Available Schedules Section ── *@
+                        @* ── Middle: Scrollable schedule list (fixed height, always scrollable) ── *@
+                        <div class="px-3 mt-3">
                             @if (schedules.Any())
                             {
-                                <div class="mt-2 mb-3 text-start">
-                                    <p class="fw-semibold small mb-2 text-center">
-                                        <i class="bi bi-calendar-check text-success"></i>
-                                        @schedules.Count Available Session@(schedules.Count != 1 ? "s" : "")
-                                    </p>
-
-                                    @* Show up to 3 upcoming slots as a preview *@
-                                    <div class="d-flex flex-column gap-1">
-                                        @foreach (var slot in schedules.Take(3))
-                                        {
-                                            <div class="badge text-bg-light border text-dark fw-normal px-2 py-1 text-start" style="font-size:0.75rem;">
-                                                <i class="bi bi-clock me-1 text-primary"></i>
-                                                @slot.ScheduleDate.ToString("MMM dd") &nbsp;
-                                                @DateTime.Today.Add(slot.StartTime).ToString("hh:mm tt") –
-                                                @DateTime.Today.Add(slot.EndTime).ToString("hh:mm tt")
-                                                @if (!string.IsNullOrEmpty(slot.Notes))
-                                                {
-                                                    <span class="text-muted"> · @slot.Notes</span>
-                                                }
-                                            </div>
-                                        }
-                                        @if (schedules.Count > 3)
-                                        {
-                                            <span class="text-muted small text-center">+@(schedules.Count - 3) more slot@(schedules.Count - 3 != 1 ? "s" : "")…</span>
-                                        }
-                                    </div>
+                                <p class="fw-semibold small text-center mb-2">
+                                    <i class="bi bi-calendar-check text-success me-1"></i>
+                                    @schedules.Count Available Session@(schedules.Count != 1 ? "s" : "")
+                                </p>
+                                <div style="height:110px; overflow-y:auto; display:flex; flex-direction:column; gap:5px; padding-right:4px;">
+                                    @foreach (var slot in schedules)
+                                    {
+                                        <div class="border rounded px-2 py-1 bg-light flex-shrink-0"
+                                             style="font-size:0.76rem;">
+                                            <i class="bi bi-clock text-primary me-1"></i>
+                                            <strong>@slot.ScheduleDate.ToString("MMM dd")</strong>
+                                            &nbsp;@DateTime.Today.Add(slot.StartTime).ToString("hh:mm tt") – @DateTime.Today.Add(slot.EndTime).ToString("hh:mm tt")
+                                            @if (!string.IsNullOrEmpty(slot.Notes))
+                                            {
+                                                <span class="text-muted"> · @slot.Notes</span>
+                                            }
+                                        </div>
+                                    }
                                 </div>
+                            }
+                            else
+                            {
+                                <div class="text-center my-2" style="height:110px; display:flex; align-items:center; justify-content:center;">
+                                    <span class="badge text-bg-secondary px-3 py-2">
+                                        <i class="bi bi-calendar-x me-1"></i> No available sessions
+                                    </span>
+                                </div>
+                            }
+                        </div>
 
+                        @* ── Bottom: Button (always at the bottom) ── *@
+                        <div class="px-3 pb-4 pt-2">
+                            @if (schedules.Any())
+                            {
                                 <button class="btn btn-primary w-100"
                                         data-bs-toggle="modal"
                                         data-bs-target="#@modalId">
@@ -114,11 +127,6 @@
                             }
                             else
                             {
-                                <div class="mt-2 mb-3">
-                                    <span class="badge text-bg-secondary px-3 py-2">
-                                        <i class="bi bi-calendar-x me-1"></i> No available sessions
-                                    </span>
-                                </div>
                                 <button class="btn btn-outline-secondary w-100" disabled>
                                     No Sessions Available
                                 </button>
@@ -127,7 +135,7 @@
                     </div>
                 </div>
 
-                @* ── Per-Trainer Schedule Booking Modal ── *@
+                @* ── Per-Trainer Booking Modal ── *@
                 @if (schedules.Any())
                 {
                     <div class="modal fade" id="@modalId" tabindex="-1"
@@ -141,23 +149,19 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
 
-                                <form asp-controller="Home" asp-action="BookSchedules" method="post"
-                                      class="booking-form" data-trainer-id="@trainer.Id">
+                                <form asp-controller="Home" asp-action="BookSchedules" method="post" class="booking-form">
                                     @Html.AntiForgeryToken()
-                                    @* Hidden field populated by JS before submit *@
                                     <input type="hidden" name="scheduleIds" class="selected-ids-input" value="" />
 
                                     <div class="modal-body">
                                         <p class="text-muted small mb-3">
-                                            Select one or more sessions below. Each slot can only be booked by one person.
+                                            Select one or more sessions. You will be warned if any slot conflicts with an existing booking.
                                         </p>
-
                                         <div class="d-flex flex-column gap-2">
                                             @foreach (var slot in schedules)
                                             {
                                                 <label class="schedule-slot d-flex align-items-start gap-3 border rounded p-3"
-                                                       style="cursor:pointer; transition: background 0.15s;"
-                                                       data-slot-id="@slot.Id">
+                                                       style="cursor:pointer; transition:background 0.15s;">
                                                     <input type="checkbox"
                                                            class="form-check-input schedule-checkbox mt-1 flex-shrink-0"
                                                            value="@slot.Id" />
@@ -205,36 +209,27 @@
 
 @section Scripts {
     <script>
-        // ── Schedule slot checkbox interactivity ──────────────────────────────
         document.querySelectorAll('.booking-form').forEach(function (form) {
             const checkboxes = form.querySelectorAll('.schedule-checkbox');
-            const idsInput = form.querySelector('.selected-ids-input');
+            const idsInput   = form.querySelector('.selected-ids-input');
             const confirmBtn = form.querySelector('.confirm-book-btn');
             const countLabel = form.querySelector('.selection-count');
 
             function updateState() {
                 const checked = Array.from(checkboxes).filter(c => c.checked);
-                const ids = checked.map(c => c.value).join(',');
-                idsInput.value = ids;
+                idsInput.value = checked.map(c => c.value).join(',');
                 confirmBtn.disabled = checked.length === 0;
                 countLabel.textContent = checked.length + ' session' + (checked.length !== 1 ? 's' : '') + ' selected';
             }
 
-            // Highlight entire row on checkbox change
             checkboxes.forEach(function (cb) {
                 cb.addEventListener('change', function () {
                     const label = cb.closest('.schedule-slot');
-                    if (cb.checked) {
-                        label.style.background = '#e8f4ff';
-                        label.style.borderColor = '#0d6efd';
-                    } else {
-                        label.style.background = '';
-                        label.style.borderColor = '';
-                    }
+                    label.style.background   = cb.checked ? '#e8f4ff' : '';
+                    label.style.borderColor  = cb.checked ? '#0d6efd' : '';
                     updateState();
                 });
 
-                // Clicking the label row also toggles the checkbox
                 cb.closest('.schedule-slot').addEventListener('click', function (e) {
                     if (e.target !== cb) {
                         cb.checked = !cb.checked;
@@ -243,13 +238,9 @@
                 });
             });
 
-            // Guard: confirm before submitting
             form.addEventListener('submit', function (e) {
                 const checked = Array.from(checkboxes).filter(c => c.checked);
-                if (checked.length === 0) {
-                    e.preventDefault();
-                    return;
-                }
+                if (checked.length === 0) { e.preventDefault(); return; }
                 const noun = checked.length === 1 ? 'session' : 'sessions';
                 if (!confirm('Book ' + checked.length + ' ' + noun + '? This cannot be undone.')) {
                     e.preventDefault();

@@ -183,21 +183,55 @@ namespace FLEXLINK.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddSchedule(DateTime scheduleDate, TimeSpan startTime, TimeSpan endTime, string? notes)
+        public async Task<IActionResult> AddSchedule(DateTime scheduleDate, TimeSpan startTime, TimeSpan endTime, int durationMinutes, string? notes)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return RedirectToAction("Login", "Account");
 
             // Basic validation
-            if (endTime <= startTime)
-            {
-                TempData["ScheduleError"] = "End time must be after start time.";
-                return RedirectToAction("MySchedule");
-            }
-
             if (scheduleDate.Date < DateTime.Today)
             {
                 TempData["ScheduleError"] = "Schedule date cannot be in the past.";
+                return RedirectToAction("MySchedule");
+            }
+
+            // Enforce duration rules: minimum 60 min, multiples of 30 only
+            var allowedDurations = new[] { 60, 90, 120, 150, 180, 210, 240 };
+            if (!allowedDurations.Contains(durationMinutes))
+            {
+                TempData["ScheduleError"] = "Invalid duration. Please select a valid duration (1 hour minimum, in 30-minute increments).";
+                return RedirectToAction("MySchedule");
+            }
+
+            // Calculate end time from start + duration
+            endTime = startTime.Add(TimeSpan.FromMinutes(durationMinutes));
+
+            // Duration must be between 1 hour and 1 hour 30 minutes
+            var duration = endTime - startTime;
+            if (duration < TimeSpan.FromHours(1))
+            {
+                TempData["ScheduleError"] = "Session duration must be at least 1 hour.";
+                return RedirectToAction("MySchedule");
+            }
+            if (duration > TimeSpan.FromMinutes(90))
+            {
+                TempData["ScheduleError"] = "Session duration cannot exceed 1 hour and 30 minutes.";
+                return RedirectToAction("MySchedule");
+            }
+
+            // Check if this trainer already has a slot that overlaps with the new one
+            var conflict = _db.TrainerSchedule
+                .FirstOrDefault(s => s.UserId == currentUser.Id
+                                  && s.ScheduleDate.Date == scheduleDate.Date
+                                  && s.StartTime < endTime
+                                  && s.EndTime > startTime);
+
+            if (conflict != null)
+            {
+                TempData["ScheduleError"] =
+                    $"You already have a schedule on {scheduleDate:MMMM dd, yyyy} " +
+                    $"from {DateTime.Today.Add(conflict.StartTime):hh:mm tt} to {DateTime.Today.Add(conflict.EndTime):hh:mm tt} " +
+                    $"that conflicts with the new slot. Please choose a different time.";
                 return RedirectToAction("MySchedule");
             }
 

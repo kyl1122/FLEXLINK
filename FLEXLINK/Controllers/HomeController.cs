@@ -97,19 +97,40 @@ namespace FLEXLINK.Controllers
                 return RedirectToAction("Trainer");
             }
 
+            // Load the user's already-booked slots for conflict checking
+            var userBookedSlots = _db.TrainerSchedule
+                .Where(s => s.IsBooked && s.BookedByUserId == currentUser.Id)
+                .ToList();
+
             int bookedCount = 0;
             int alreadyTakenCount = 0;
+            var conflictMessages = new List<string>();
 
             foreach (var id in ids)
             {
                 var slot = _db.TrainerSchedule.FirstOrDefault(s => s.Id == id);
-
                 if (slot == null) continue;
 
+                // Already booked by someone else
                 if (slot.IsBooked)
                 {
-                    // Someone else grabbed it between page-load and submit
                     alreadyTakenCount++;
+                    continue;
+                }
+
+                // Check if this user already has a booking that overlaps with this slot
+                var conflict = userBookedSlots.FirstOrDefault(existing =>
+                    existing.ScheduleDate.Date == slot.ScheduleDate.Date &&
+                    existing.StartTime < slot.EndTime &&
+                    existing.EndTime > slot.StartTime);
+
+                if (conflict != null)
+                {
+                    conflictMessages.Add(
+                        $"You already have a booked session on {slot.ScheduleDate:MMMM dd, yyyy} " +
+                        $"from {DateTime.Today.Add(conflict.StartTime):hh:mm tt} to {DateTime.Today.Add(conflict.EndTime):hh:mm tt} " +
+                        $"with {conflict.TrainerName}. The slot {slot.ScheduleDate:MMM dd} " +
+                        $"{DateTime.Today.Add(slot.StartTime):hh:mm tt}–{DateTime.Today.Add(slot.EndTime):hh:mm tt} conflicts with it.");
                     continue;
                 }
 
@@ -117,17 +138,22 @@ namespace FLEXLINK.Controllers
                 slot.BookedByUserId = currentUser.Id;
                 slot.BookedByName = currentUser.FullName ?? currentUser.Email ?? "User";
                 slot.BookedAt = DateTime.Now;
+
+                // Add to local list so subsequent slots in same request are also checked
+                userBookedSlots.Add(slot);
                 bookedCount++;
             }
 
             await _db.SaveChangesAsync();
 
-            if (bookedCount > 0 && alreadyTakenCount == 0)
+            if (conflictMessages.Any())
+                TempData["BookingConflict"] = string.Join("|", conflictMessages);
+
+            if (bookedCount > 0 && alreadyTakenCount == 0 && !conflictMessages.Any())
                 TempData["BookingSuccess"] = $"Successfully booked {bookedCount} session{(bookedCount > 1 ? "s" : "")}!";
-            else if (bookedCount > 0 && alreadyTakenCount > 0)
-                TempData["BookingSuccess"] = $"Booked {bookedCount} session{(bookedCount > 1 ? "s" : "")}. " +
-                                             $"{alreadyTakenCount} slot{(alreadyTakenCount > 1 ? "s were" : " was")} already taken by someone else.";
-            else
+            else if (bookedCount > 0)
+                TempData["BookingSuccess"] = $"Booked {bookedCount} session{(bookedCount > 1 ? "s" : "")}.";
+            else if (!conflictMessages.Any())
                 TempData["BookingError"] = "All selected slots were already booked by someone else.";
 
             return RedirectToAction("Trainer");
@@ -149,11 +175,17 @@ namespace FLEXLINK.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        // Users' Schedule page — shows all trainer schedules from today onwards
-        public IActionResult Schedule()
+        // Users' Schedule page — shows ONLY the sessions booked by the logged-in user
+        public async Task<IActionResult> Schedule()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return RedirectToAction("Login", "Account");
+
             var schedules = _db.TrainerSchedule
-                               .Where(s => s.ScheduleDate.Date >= DateTime.Today)
+                               .Where(s => s.IsBooked
+                                        && s.BookedByUserId == currentUser.Id
+                                        && s.ScheduleDate.Date >= DateTime.Today)
                                .OrderBy(s => s.ScheduleDate)
                                .ThenBy(s => s.StartTime)
                                .ToList();

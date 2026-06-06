@@ -163,12 +163,31 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Start Time</label>
-                        <input type="time" name="startTime" class="form-control" required />
+                        <input type="time" name="startTime" id="startTime" class="form-control" required />
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">End Time</label>
-                        <input type="time" name="endTime" class="form-control" required />
+                        <label class="form-label fw-semibold">Duration</label>
+                        <select name="durationMinutes" id="durationMinutes" class="form-select" required>
+                            <option value="" disabled selected>Select duration</option>
+                            <option value="60">1 hour</option>
+                            <option value="90">1 hour 30 minutes</option>
+                            <option value="120">2 hours</option>
+                            <option value="150">2 hours 30 minutes</option>
+                            <option value="180">3 hours</option>
+                            <option value="210">3 hours 30 minutes</option>
+                            <option value="240">4 hours</option>
+                        </select>
+                        <div class="form-text text-muted">Minimum 1 hour, in 30-minute increments.</div>
+                    </div>
+
+                    @* Hidden end time — calculated by JS from start + duration *@
+                    <input type="hidden" name="endTime" id="endTime" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">End Time <span class="text-muted fw-normal">(auto-calculated)</span></label>
+                        <input type="text" id="endTimeDisplay" class="form-control" readonly
+                               placeholder="Select start time and duration" style="background:#f8f9fa;" />
                     </div>
 
                     <div class="mb-3">
@@ -186,3 +205,46 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function updateEndTime() {
+            const startVal = document.getElementById('startTime').value;
+            const durationVal = document.getElementById('durationMinutes').value;
+
+            if (!startVal || !durationVal) {
+                document.getElementById('endTime').value = '';
+                document.getElementById('endTimeDisplay').value = '';
+                return;
+            }
+
+            const [hours, minutes] = startVal.split(':').map(Number);
+            const startTotalMinutes = hours * 60 + minutes;
+            const endTotalMinutes = startTotalMinutes + parseInt(durationVal);
+
+            const endHours = Math.floor(endTotalMinutes / 60) % 24;
+            const endMins = endTotalMinutes % 60;
+
+            // HH:MM for the hidden input
+            const endTimeStr = String(endHours).padStart(2, '0') + ':' + String(endMins).padStart(2, '0');
+            document.getElementById('endTime').value = endTimeStr;
+
+            // Friendly display e.g. "02:30 PM"
+            const period = endHours >= 12 ? 'PM' : 'AM';
+            const displayHours = endHours % 12 || 12;
+            document.getElementById('endTimeDisplay').value =
+                String(displayHours).padStart(2, '0') + ':' + String(endMins).padStart(2, '0') + ' ' + period;
+        }
+
+        document.getElementById('startTime').addEventListener('change', updateEndTime);
+        document.getElementById('durationMinutes').addEventListener('change', updateEndTime);
+
+        // Guard: block submit if end time wasn't calculated
+        document.querySelector('#addScheduleModal form').addEventListener('submit', function(e) {
+            if (!document.getElementById('endTime').value) {
+                e.preventDefault();
+                alert('Please select both a start time and a duration.');
+            }
+        });
+    </script>
+}
