@@ -4,6 +4,7 @@ using FLEXLINK.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FLEXLINK.Controllers
 {
@@ -21,8 +22,15 @@ namespace FLEXLINK.Controllers
         }
 
         // The Trainer's Landing Page (Dashboard)
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            // Load all equipment with their repair notes
+            var equipment = await _db.Equipment
+                .Include(e => e.RepairNotes)
+                .OrderBy(e => e.Name)
+                .ToListAsync();
+
+            ViewBag.Equipment = equipment;
             return View();
         }
 
@@ -275,6 +283,45 @@ namespace FLEXLINK.Controllers
             }
 
             return RedirectToAction("MySchedule");
+        }
+
+        // ─── EQUIPMENT REPAIR NOTES ───────────────────────────────────────────────
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddRepairNote(int equipmentId, string note)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return RedirectToAction("Login", "Account");
+
+            if (string.IsNullOrWhiteSpace(note))
+            {
+                TempData["EquipmentError"] = "Repair note cannot be empty.";
+                return RedirectToAction("Index");
+            }
+
+            var equipment = await _db.Equipment.FindAsync(equipmentId);
+            if (equipment == null)
+            {
+                TempData["EquipmentError"] = "Equipment not found.";
+                return RedirectToAction("Index");
+            }
+
+            var profile = _db.ProfileTrainer.FirstOrDefault(p => p.UserId == currentUser.Id);
+            string trainerName = profile?.FullName ?? currentUser.Email ?? "Trainer";
+
+            _db.EquipmentRepairNote.Add(new EquipmentRepairNote
+            {
+                EquipmentId = equipmentId,
+                TrainerId = currentUser.Id,
+                TrainerName = trainerName,
+                Note = note.Trim(),
+                CreatedAt = DateTime.Now
+            });
+
+            await _db.SaveChangesAsync();
+            TempData["EquipmentSuccess"] = $"Repair note added for '{equipment.Name}'.";
+            return RedirectToAction("Index");
         }
 
         public IActionResult MyClients() => View();

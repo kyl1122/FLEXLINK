@@ -45,10 +45,10 @@ namespace FLEXLINK.Controllers
 
                 if (user != null)
                 {
-            
+
                     if (await userManager.IsInRoleAsync(user, "Admin"))
                     {
-                        return RedirectToAction("Index", "Admin"); 
+                        return RedirectToAction("Index", "Admin");
                     }
 
                     if (await userManager.IsInRoleAsync(user, "Trainer"))
@@ -57,7 +57,7 @@ namespace FLEXLINK.Controllers
                     }
                 }
 
-       
+
                 return RedirectToAction("Index", "Home");
             }
 

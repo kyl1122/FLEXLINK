@@ -5,6 +5,7 @@
 
     var users = ViewBag.Users as List<Users> ?? new List<Users>();
     var trainers = ViewBag.Trainers as List<Users> ?? new List<Users>();
+    var repairNotes = ViewBag.RepairNotes as List<EquipmentRepairNote> ?? new List<EquipmentRepairNote>();
 }
 
 <div class="container mt-4">
@@ -12,7 +13,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-0">Admin Dashboard</h2>
-            <p class="text-muted mb-0">Manage all users and trainers in the system.</p>
+            <p class="text-muted mb-0">Manage all users, trainers, and gym equipment.</p>
         </div>
         <a asp-controller="Admin" asp-action="CreateTrainer" class="btn btn-success">
             <i class="bi bi-person-plus me-1"></i> Create Trainer Account
@@ -34,6 +35,150 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
+
+    @* ── EQUIPMENT REPAIR NOTES ── *@
+    @if (repairNotes.Any())
+    {
+        <div class="card border-0 shadow-sm mb-4 border-danger">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center"
+                 style="border-radius:12px 12px 0 0;">
+                <span class="fw-bold fs-6">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Equipment Repair Reports
+                </span>
+                <span class="badge bg-white text-danger">@repairNotes.Count pending</span>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Equipment</th>
+                            <th>Reported By</th>
+                            <th>Issue</th>
+                            <th>Date Reported</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var note in repairNotes)
+                        {
+                            <tr>
+                                <td>
+                                    <i class="bi bi-wrench-adjustable text-danger me-2"></i>
+                                    <strong>@note.Equipment?.Name</strong>
+                                </td>
+                                <td>
+                                    <i class="bi bi-person-circle text-primary me-1"></i>
+                                    @note.TrainerName
+                                </td>
+                                <td>@note.Note</td>
+                                <td class="text-muted small">@note.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</td>
+                                <td class="text-center">
+                                    <form asp-controller="Admin" asp-action="MarkRepaired" method="post"
+                                          onsubmit="return confirm('Mark this equipment as repaired?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="noteId" value="@note.Id" />
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="bi bi-check-lg me-1"></i>Repaired
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success d-flex align-items-center mb-4">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <span>No equipment repair reports pending. All equipment is in good condition!</span>
+        </div>
+    }
+
+    @* ── EQUIPMENT MANAGEMENT ── *@
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center"
+             style="border-radius:12px 12px 0 0;">
+            <span class="fw-bold fs-6">
+                <i class="bi bi-tools me-2"></i>Equipment Management
+            </span>
+            <button class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
+                <i class="bi bi-plus-lg me-1"></i>Add Equipment
+            </button>
+        </div>
+        <div class="card-body p-0">
+            @{
+                var allEquipment = (ViewBag.RepairNotes as List<EquipmentRepairNote>)?.Select(r => r.Equipment).Distinct().ToList();
+                // Load fresh from DB — we need to build this from controller
+                // Use the equipment list passed via ViewBag
+            }
+            @{
+                // We'll re-query from repairNotes for equipment names, but the full list
+                // needs to come from the controller. We'll use a separate ViewBag key.
+                var equipmentList = ViewBag.EquipmentList as List<Equipment> ?? new List<Equipment>();
+            }
+            @if (!equipmentList.Any())
+            {
+                <p class="text-muted text-center py-4 mb-0">
+                    <i class="bi bi-inbox me-1"></i>No equipment added yet. Click "Add Equipment" to get started.
+                </p>
+            }
+            else
+            {
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Equipment Name</th>
+                            <th>Description</th>
+                            <th>Date Added</th>
+                            <th>Status</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var eq in equipmentList)
+                        {
+                            bool needsRepair = eq.RepairNotes.Any();
+                            <tr>
+                                <td>
+                                    <i class="bi bi-wrench-adjustable @(needsRepair ? "text-danger" : "text-success") me-2"></i>
+                                    <strong>@eq.Name</strong>
+                                </td>
+                                <td class="text-muted small">@(eq.Description ?? "—")</td>
+                                <td class="text-muted small">@eq.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    @if (needsRepair)
+                                    {
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>@eq.RepairNotes.Count report(s)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>OK
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <form asp-controller="Admin" asp-action="DeleteEquipment" method="post"
+                                          onsubmit="return confirm('Delete equipment \'@eq.Name\'? All its repair notes will also be removed.');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="equipmentId" value="@eq.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash me-1"></i>Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
 
     @* ── TRAINERS GROUP ── *@
     <div class="card border-0 shadow-sm mb-4">
@@ -145,7 +290,42 @@
 
 </div>
 
-@* ── Delete Confirmation Modal ── *@
+@* ── Add Equipment Modal ── *@
+<div class="modal fade" id="addEquipmentModal" tabindex="-1" aria-labelledby="addEquipmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="addEquipmentModalLabel">
+                    <i class="bi bi-tools me-2"></i>Add New Equipment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-controller="Admin" asp-action="AddEquipment" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="equipName" class="form-label fw-semibold">Equipment Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="equipName" name="name"
+                               placeholder="e.g. Treadmill, Barbell, Bench Press" required maxlength="200" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="equipDesc" class="form-label fw-semibold">Description <span class="text-muted small">(optional)</span></label>
+                        <textarea class="form-control" id="equipDesc" name="description" rows="2"
+                                  placeholder="e.g. Commercial-grade treadmill, Zone A" maxlength="500"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning text-dark fw-semibold">
+                        <i class="bi bi-plus-lg me-1"></i>Add Equipment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* ── Delete User Confirmation Modal ── *@
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -177,7 +357,6 @@
 
 @section Scripts {
     <script>
-        // Populate modal with the correct user when Delete is clicked
         document.getElementById('deleteModal').addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
             document.getElementById('deleteUserId').value = button.getAttribute('data-user-id');

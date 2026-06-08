@@ -4,6 +4,7 @@ using FLEXLINK.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FLEXLINK.Controllers
 {
@@ -19,7 +20,7 @@ namespace FLEXLINK.Controllers
             _db = db;
         }
 
-        // Landing page — shows all users and trainers grouped
+        // Landing page — shows all users, trainers, and repair notes
         public async Task<IActionResult> Index()
         {
             var allUsers = _userManager.Users.ToList();
@@ -30,7 +31,7 @@ namespace FLEXLINK.Controllers
             foreach (var u in allUsers)
             {
                 var roles = await _userManager.GetRolesAsync(u);
-                if (roles.Contains("Admin")) continue; // Don't show admins
+                if (roles.Contains("Admin")) continue;
                 if (roles.Contains("Trainer"))
                     trainers.Add(u);
                 else
@@ -39,6 +40,20 @@ namespace FLEXLINK.Controllers
 
             ViewBag.Users = users;
             ViewBag.Trainers = trainers;
+
+            // Load all repair notes with equipment info
+            var repairNotes = await _db.EquipmentRepairNote
+                .Include(r => r.Equipment)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+            ViewBag.RepairNotes = repairNotes;
+
+            // Load all equipment with their repair notes
+            var equipmentList = await _db.Equipment
+                .Include(e => e.RepairNotes)
+                .OrderBy(e => e.Name)
+                .ToListAsync();
+            ViewBag.EquipmentList = equipmentList;
 
             return View();
         }
@@ -55,7 +70,6 @@ namespace FLEXLINK.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Also remove their ProfileTrainer row and schedules if they are a trainer
             var roles = await _userManager.GetRolesAsync(user);
             if (roles.Contains("Trainer"))
             {
@@ -110,6 +124,63 @@ namespace FLEXLINK.Controllers
                     ModelState.AddModelError("", error.Description);
             }
             return View(model);
+        }
+
+        // ─── EQUIPMENT ────────────────────────────────────────────────────────────
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddEquipment(string name, string? description)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                TempData["AdminError"] = "Equipment name is required.";
+                return RedirectToAction("Index");
+            }
+
+            _db.Equipment.Add(new Equipment
+            {
+                Name = name.Trim(),
+                Description = description?.Trim(),
+                CreatedAt = DateTime.Now
+            });
+            await _db.SaveChangesAsync();
+
+            TempData["AdminSuccess"] = $"Equipment '{name.Trim()}' added successfully.";
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteEquipment(int equipmentId)
+        {
+            var equipment = await _db.Equipment.FindAsync(equipmentId);
+            if (equipment != null)
+            {
+                _db.Equipment.Remove(equipment);
+                await _db.SaveChangesAsync();
+                TempData["AdminSuccess"] = $"Equipment '{equipment.Name}' removed.";
+            }
+            return RedirectToAction("Index");
+        }
+
+        // Mark a repair note as resolved (repaired) — deletes the note
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkRepaired(int noteId)
+        {
+            var note = await _db.EquipmentRepairNote
+                .Include(r => r.Equipment)
+                .FirstOrDefaultAsync(r => r.Id == noteId);
+
+            if (note != null)
+            {
+                string equipmentName = note.Equipment?.Name ?? "Equipment";
+                _db.EquipmentRepairNote.Remove(note);
+                await _db.SaveChangesAsync();
+                TempData["AdminSuccess"] = $"'{equipmentName}' marked as repaired.";
+            }
+            return RedirectToAction("Index");
         }
     }
 }

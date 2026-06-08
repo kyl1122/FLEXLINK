@@ -1,22 +1,168 @@
-﻿@{
+﻿@using FLEXLINK.Models
+@{
     ViewData["Title"] = "Trainer Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var equipment = ViewBag.Equipment as List<Equipment> ?? new List<Equipment>();
 }
 
 <div class="container mt-5">
-    <div class="jumbotron bg-dark text-white p-5 rounded">
+
+    @* Welcome banner *@
+    <div class="jumbotron bg-dark text-white p-5 rounded mb-4">
         <h1>Welcome, Coach!</h1>
         <p class="lead">This is your Trainer Portal.</p>
         <hr class="my-4" style="background-color: white;">
         <p>Manage your clients, update workout programs, and track progress.</p>
-        
+
         <div class="mt-4">
             <a class="btn btn-info btn-lg" href="#" role="button">My Clients</a>
             <a class="btn btn-outline-light btn-lg" href="#" role="button">Workout Plans</a>
         </div>
-
         <div class="mt-4">
             <a class="btn btn-primary btn-lg" href="#" role="button">Training Schedule</a>
         </div>
     </div>
+
+    @* Alerts *@
+    @if (TempData["EquipmentSuccess"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle me-1"></i> @TempData["EquipmentSuccess"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["EquipmentError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle me-1"></i> @TempData["EquipmentError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @* Equipment Section *@
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-warning text-dark d-flex align-items-center"
+             style="border-radius:12px 12px 0 0;">
+            <i class="bi bi-tools me-2 fs-5"></i>
+            <span class="fw-bold fs-6">Gym Equipment</span>
+            <span class="badge bg-dark text-white ms-2">@equipment.Count</span>
+        </div>
+
+        @if (!equipment.Any())
+        {
+            <div class="card-body text-muted text-center py-4">
+                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                No equipment added yet. Ask the admin to add equipment.
+            </div>
+        }
+        else
+        {
+            <div class="card-body p-0">
+                <div class="row g-0">
+                    @foreach (var item in equipment)
+                    {
+                        var hasNote = item.RepairNotes.Any();
+                        <div class="col-12 border-bottom px-4 py-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <i class="bi bi-wrench-adjustable@(hasNote ? " text-danger" : " text-success")"></i>
+                                        <strong>@item.Name</strong>
+                                        @if (hasNote)
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>Needs Repair
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>OK
+                                            </span>
+                                        }
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(item.Description))
+                                    {
+                                        <p class="text-muted small mb-1">@item.Description</p>
+                                    }
+
+                                    @* Existing repair notes *@
+                                    @if (item.RepairNotes.Any())
+                                    {
+                                        <div class="mt-2">
+                                            @foreach (var rn in item.RepairNotes.OrderByDescending(r => r.CreatedAt))
+                                            {
+                                                <div class="alert alert-warning py-2 px-3 mb-1 small">
+                                                    <i class="bi bi-chat-left-text me-1"></i>
+                                                    <strong>@rn.TrainerName</strong> &mdash; @rn.Note
+                                                    <span class="text-muted ms-2">(@rn.CreatedAt.ToString("MMM dd, yyyy hh:mm tt"))</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+
+                                @* Report repair button *@
+                                <button class="btn btn-sm btn-outline-danger ms-3 flex-shrink-0"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#repairModal"
+                                        data-equipment-id="@item.Id"
+                                        data-equipment-name="@item.Name">
+                                    <i class="bi bi-flag me-1"></i>Report Repair
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
 </div>
+
+@* ── Repair Note Modal ── *@
+<div class="modal fade" id="repairModal" tabindex="-1" aria-labelledby="repairModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="repairModalLabel">
+                    <i class="bi bi-wrench me-2"></i>Report Repair Needed
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-controller="Trainer" asp-action="AddRepairNote" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="equipmentId" id="repairEquipmentId" />
+                <div class="modal-body">
+                    <p class="mb-3">
+                        Equipment: <strong id="repairEquipmentName"></strong>
+                    </p>
+                    <div class="mb-3">
+                        <label for="noteInput" class="form-label fw-semibold">Describe the issue</label>
+                        <textarea class="form-control" id="noteInput" name="note" rows="3"
+                                  placeholder="e.g. Treadmill belt is slipping, needs lubrication..."
+                                  required maxlength="1000"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-send me-1"></i>Submit Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('repairModal').addEventListener('show.bs.modal', function (event) {
+            const btn = event.relatedTarget;
+            document.getElementById('repairEquipmentId').value = btn.getAttribute('data-equipment-id');
+            document.getElementById('repairEquipmentName').textContent = btn.getAttribute('data-equipment-name');
+            document.getElementById('noteInput').value = '';
+        });
+    </script>
+}

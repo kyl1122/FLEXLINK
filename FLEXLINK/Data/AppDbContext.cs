@@ -16,5 +16,7 @@ namespace FLEXLINK.Data
 
         public DbSet<ProfileTrainer> ProfileTrainer { get; set; }
         public DbSet<TrainerSchedule> TrainerSchedule { get; set; }
+        public DbSet<Equipment> Equipment { get; set; }
+        public DbSet<EquipmentRepairNote> EquipmentRepairNote { get; set; }
     }
 }
