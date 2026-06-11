@@ -12,5 +12,10 @@ namespace FLEXLINK.ViewModels
 
         /// <summary>All future, unbooked slots belonging to this trainer.</summary>
         public List<TrainerSchedule> AvailableSchedules { get; set; } = new();
+
+        public double AverageRating { get; set; }       
+        public int RatingCount { get; set; }            
+        public int? CurrentUserRating { get; set; }      
+        public bool CurrentUserHasBooked { get; set; }   
     }
 }

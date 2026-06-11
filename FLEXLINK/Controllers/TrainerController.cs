@@ -221,11 +221,7 @@ namespace FLEXLINK.Controllers
                 TempData["ScheduleError"] = "Session duration must be at least 1 hour.";
                 return RedirectToAction("MySchedule");
             }
-            if (duration > TimeSpan.FromMinutes(90))
-            {
-                TempData["ScheduleError"] = "Session duration cannot exceed 1 hour and 30 minutes.";
-                return RedirectToAction("MySchedule");
-            }
+
 
             // Check if this trainer already has a slot that overlaps with the new one
             var conflict = _db.TrainerSchedule

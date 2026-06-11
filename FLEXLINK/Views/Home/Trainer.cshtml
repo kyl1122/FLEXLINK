@@ -54,13 +54,13 @@
                 var trainer = vm.Trainer;
                 var schedules = vm.AvailableSchedules;
                 var modalId = "scheduleModal_" + trainer.Id;
+                var rateModalId = "rateModal_" + trainer.Id;
 
                 <div class="col-md-4 d-flex">
-                    @* Fixed-height card — schedule list scrolls inside *@
                     <div class="card shadow-sm border-0 w-100"
                          style="border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
 
-                        @* ── Top: Profile info (fixed, never grows) ── *@
+                        @* ── Top: Profile info ── *@
                         <div class="text-center pt-4 px-3">
                             <img src="@(trainer.ProfilePicture ?? "/uploads/DefaultProfile.png")"
                                  alt="@trainer.FullName"
@@ -81,7 +81,7 @@
                             }
                         </div>
 
-                        @* ── Middle: Scrollable schedule list (fixed height, always scrollable) ── *@
+                        @* ── Middle: Scrollable schedule list ── *@
                         <div class="px-3 mt-3">
                             @if (schedules.Any())
                             {
@@ -115,8 +115,8 @@
                             }
                         </div>
 
-                        @* ── Bottom: Button (always at the bottom) ── *@
-                        <div class="px-3 pb-4 pt-2">
+                        @* ── Bottom: Book button ── *@
+                        <div class="px-3 pb-2 pt-2">
                             @if (schedules.Any())
                             {
                                 <button class="btn btn-primary w-100"
@@ -129,6 +129,57 @@
                             {
                                 <button class="btn btn-outline-secondary w-100" disabled>
                                     No Sessions Available
+                                </button>
+                            }
+                        </div>
+
+                        @* ── Rating Section ── *@
+                        <div class="px-3 pb-4 pt-1">
+                            <hr class="my-2" />
+
+                            @* Public rating summary — visible to everyone *@
+                            <div class="text-center mb-2">
+                                @{
+                                    var fullStars = (int)Math.Floor(vm.AverageRating);
+                                    var halfStar = (vm.AverageRating - fullStars) >= 0.5;
+                                }
+                                <div class="d-inline-flex align-items-center gap-1">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= fullStars)
+                                        {
+                                            <i class="bi bi-star-fill" style="color:#f5a623; font-size:1.1rem;"></i>
+                                        }
+                                        else if (i == fullStars + 1 && halfStar)
+                                        {
+                                            <i class="bi bi-star-half" style="color:#f5a623; font-size:1.1rem;"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star" style="color:#ccc; font-size:1.1rem;"></i>
+                                        }
+                                    }
+                                </div>
+                                <div class="text-muted small mt-1">
+                                    @if (vm.RatingCount == 0)
+                                    {
+                                        <span>No ratings yet</span>
+                                    }
+                                    else
+                                    {
+                                        <span><strong>@vm.AverageRating</strong> / 5 &nbsp;·&nbsp; @vm.RatingCount user@(vm.RatingCount != 1 ? "s" : "") rated</span>
+                                    }
+                                </div>
+                            </div>
+
+                            @* Rate button — only for logged-in users who have booked this trainer *@
+                            @if (User.Identity?.IsAuthenticated == true && vm.CurrentUserHasBooked)
+                            {
+                                <button class="btn btn-outline-warning btn-sm w-100"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#@rateModalId">
+                                    <i class="bi bi-star me-1"></i>
+                                    @(vm.CurrentUserRating.HasValue ? $"Update Your Rating ({vm.CurrentUserRating}★)" : "Rate This Trainer")
                                 </button>
                             }
                         </div>
@@ -202,6 +253,50 @@
                         </div>
                     </div>
                 }
+
+                @* ── Rating Modal ── *@
+                @if (User.Identity?.IsAuthenticated == true && vm.CurrentUserHasBooked)
+                {
+                    <div class="modal fade" id="@rateModalId" tabindex="-1"
+                         aria-labelledby="@(rateModalId)_label" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-sm">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="@(rateModalId)_label">
+                                        Rate @trainer.FullName
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form asp-controller="Home" asp-action="RateTrainer" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="trainerId" value="@trainer.Id" />
+                                    <input type="hidden" name="stars" class="star-value-input-@trainer.Id" value="@(vm.CurrentUserRating ?? 0)" />
+
+                                    <div class="modal-body text-center">
+                                        <p class="text-muted small mb-3">How would you rate your experience with this trainer?</p>
+                                        <div class="star-rating d-inline-flex gap-2" data-trainer-id="@trainer.Id">
+                                            @for (int s = 1; s <= 5; s++)
+                                            {
+                                                <i class="bi @(s <= (vm.CurrentUserRating ?? 0) ? "bi-star-fill" : "bi-star") star-btn"
+                                                   data-value="@s"
+                                                   style="font-size:2rem; cursor:pointer; color:@(s <= (vm.CurrentUserRating ?? 0) ? "#f5a623" : "#ccc"); transition:color 0.1s;"></i>
+                                            }
+                                        </div>
+                                        <p class="mt-2 mb-0 text-muted small star-label-@trainer.Id">
+                                            @(vm.CurrentUserRating.HasValue ? $"Your current rating: {vm.CurrentUserRating}★" : "Click a star to rate")
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-warning btn-sm submit-rating-btn-@trainer.Id" @(vm.CurrentUserRating.HasValue ? "" : "disabled")>
+                                            <i class="bi bi-check2 me-1"></i> Submit Rating
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
             }
         </div>
     }
@@ -209,6 +304,7 @@
 
 @section Scripts {
     <script>
+        // ── Booking modal logic ──────────────────────────────────────────────
         document.querySelectorAll('.booking-form').forEach(function (form) {
             const checkboxes = form.querySelectorAll('.schedule-checkbox');
             const idsInput   = form.querySelector('.selected-ids-input');
@@ -225,8 +321,8 @@
             checkboxes.forEach(function (cb) {
                 cb.addEventListener('change', function () {
                     const label = cb.closest('.schedule-slot');
-                    label.style.background   = cb.checked ? '#e8f4ff' : '';
-                    label.style.borderColor  = cb.checked ? '#0d6efd' : '';
+                    label.style.background  = cb.checked ? '#e8f4ff' : '';
+                    label.style.borderColor = cb.checked ? '#0d6efd' : '';
                     updateState();
                 });
 
@@ -245,6 +341,43 @@
                 if (!confirm('Book ' + checked.length + ' ' + noun + '? This cannot be undone.')) {
                     e.preventDefault();
                 }
+            });
+        });
+
+        // ── Star rating logic ────────────────────────────────────────────────
+        document.querySelectorAll('.star-rating').forEach(function (container) {
+            const trainerId  = container.dataset.trainerId;
+            const stars      = container.querySelectorAll('.star-btn');
+            const hiddenInput = document.querySelector('.star-value-input-' + trainerId);
+            const label      = document.querySelector('.star-label-' + trainerId);
+            const submitBtn  = document.querySelector('.submit-rating-btn-' + trainerId);
+            const labels     = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+
+            function paint(upTo) {
+                stars.forEach(function (s, idx) {
+                    s.className = 'bi ' + (idx < upTo ? 'bi-star-fill' : 'bi-star') + ' star-btn';
+                    s.style.color = idx < upTo ? '#f5a623' : '#ccc';
+                });
+            }
+
+            // Hover
+            stars.forEach(function (star) {
+                star.addEventListener('mouseenter', function () {
+                    paint(parseInt(star.dataset.value));
+                    label.textContent = labels[parseInt(star.dataset.value)];
+                });
+                star.addEventListener('mouseleave', function () {
+                    const current = parseInt(hiddenInput.value) || 0;
+                    paint(current);
+                    label.textContent = current > 0 ? 'Your current rating: ' + current + '★' : 'Click a star to rate';
+                });
+                star.addEventListener('click', function () {
+                    const val = parseInt(star.dataset.value);
+                    hiddenInput.value = val;
+                    paint(val);
+                    label.textContent = labels[val] + ' (' + val + '★)';
+                    submitBtn.disabled = false;
+                });
             });
         });
     </script>

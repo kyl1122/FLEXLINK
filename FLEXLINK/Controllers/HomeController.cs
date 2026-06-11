@@ -36,8 +36,10 @@ namespace FLEXLINK.Controllers
         // ── Trainers page ─────────────────────────────────────────────────────
         // Shows every trainer who has filled in their profile, together with
         // their upcoming available (unbooked) schedule slots.
-        public IActionResult Trainer()
+        public async Task<IActionResult> Trainer()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+
             // Only fetch trainers that have filled in at least their name
             var trainers = _db.ProfileTrainer
                               .Where(p => p.FullName != null && p.FullName != "")
@@ -51,16 +53,90 @@ namespace FLEXLINK.Controllers
                                         .ThenBy(s => s.StartTime)
                                         .ToList();
 
-            // Combine into view-models
-            var viewModel = trainers.Select(t => new TrainerWithSchedulesViewModel
+            // Load all ratings once
+            var allRatings = _db.TrainerRating.ToList();
+
+            // Load current user's bookings (to know which trainers they can rate)
+            List<TrainerSchedule> userBookings = new();
+            List<TrainerRating> userRatings = new();
+            if (currentUser != null)
             {
-                Trainer = t,
-                AvailableSchedules = availableSchedules
-                                        .Where(s => s.UserId == t.UserId)
-                                        .ToList()
+                userBookings = _db.TrainerSchedule
+                    .Where(s => s.IsBooked && s.BookedByUserId == currentUser.Id)
+                    .ToList();
+                userRatings = allRatings
+                    .Where(r => r.UserId == currentUser.Id)
+                    .ToList();
+            }
+
+            // Combine into view-models
+            var viewModel = trainers.Select(t =>
+            {
+                var trainerRatings = allRatings.Where(r => r.TrainerId == t.Id).ToList();
+                var myRating = currentUser != null
+                    ? userRatings.FirstOrDefault(r => r.TrainerId == t.Id)
+                    : null;
+                bool hasBooked = currentUser != null &&
+                    userBookings.Any(s => s.TrainerName == t.FullName || s.UserId == t.UserId);
+
+                return new TrainerWithSchedulesViewModel
+                {
+                    Trainer = t,
+                    AvailableSchedules = availableSchedules
+                                            .Where(s => s.UserId == t.UserId)
+                                            .ToList(),
+                    AverageRating = trainerRatings.Any()
+                        ? Math.Round(trainerRatings.Average(r => r.Stars), 1)
+                        : 0,
+                    RatingCount = trainerRatings.Count,
+                    CurrentUserRating = myRating?.Stars,
+                    CurrentUserHasBooked = hasBooked
+                };
             }).ToList();
 
             return View(viewModel);
+        }
+
+        // ── Rate a Trainer ────────────────────────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RateTrainer(int trainerId, int stars)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                TempData["BookingError"] = "You must be logged in to rate a trainer.";
+                return RedirectToAction("Trainer");
+            }
+
+            if (stars < 1 || stars > 5)
+            {
+                TempData["BookingError"] = "Invalid rating.";
+                return RedirectToAction("Trainer");
+            }
+
+            var existing = _db.TrainerRating
+                .FirstOrDefault(r => r.TrainerId == trainerId && r.UserId == currentUser.Id);
+
+            if (existing != null)
+            {
+                existing.Stars = stars;
+                existing.RatedAt = DateTime.Now;
+            }
+            else
+            {
+                _db.TrainerRating.Add(new TrainerRating
+                {
+                    TrainerId = trainerId,
+                    UserId = currentUser.Id,
+                    Stars = stars,
+                    RatedAt = DateTime.Now
+                });
+            }
+
+            await _db.SaveChangesAsync();
+            TempData["BookingSuccess"] = "Your rating has been submitted!";
+            return RedirectToAction("Trainer");
         }
 
         // ── Book Schedules ────────────────────────────────────────────────────
@@ -189,6 +265,23 @@ namespace FLEXLINK.Controllers
                                .OrderBy(s => s.ScheduleDate)
                                .ThenBy(s => s.StartTime)
                                .ToList();
+
+            // Pass trainer IDs (by name) so the Schedule view can show rating prompts
+            // Map trainer name → ProfileTrainer.Id
+            var trainerNames = schedules.Select(s => s.TrainerName).Distinct().ToList();
+            var trainerProfiles = _db.ProfileTrainer
+                .Where(p => trainerNames.Contains(p.FullName))
+                .ToList();
+
+            var userRatings = _db.TrainerRating
+                .Where(r => r.UserId == currentUser.Id)
+                .ToList();
+
+            var allRatings = _db.TrainerRating.ToList();
+
+            ViewBag.TrainerProfiles = trainerProfiles;
+            ViewBag.UserRatings = userRatings;
+            ViewBag.AllRatings = allRatings;
 
             return View(schedules);
         }
