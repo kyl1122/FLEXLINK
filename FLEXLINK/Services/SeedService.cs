@@ -26,6 +26,7 @@ namespace FLEXLINK.Services
                 await AddRoleAsync(roleManager, "Admin");
                 await AddRoleAsync(roleManager, "User");
                 await AddRoleAsync(roleManager, "Trainer");
+                await AddRoleAsync(roleManager, "Staff");
 
                 //Add admin user
                 logger.LogInformation("Seeding admin user.");
@@ -53,6 +54,34 @@ namespace FLEXLINK.Services
                     {
                         logger.LogError("Failed to create admin user: {Errores}", string.Join(", ", result.Errors.Select(e => e.Description)));
 
+                    }
+                }
+
+                //Add staff user
+                logger.LogInformation("Seeding staff user.");
+                var staffEmail = "staff@gmail.com";
+                if (await userManager.FindByEmailAsync(staffEmail) == null)
+                {
+                    var staffUser = new Users
+                    {
+                        FullName = "Staff Member",
+                        UserName = staffEmail,
+                        NormalizedUserName = staffEmail.ToUpper(),
+                        Email = staffEmail,
+                        NormalizedEmail = staffEmail.ToUpper(),
+                        EmailConfirmed = true,
+                        SecurityStamp = Guid.NewGuid().ToString()
+                    };
+
+                    var staffResult = await userManager.CreateAsync(staffUser, "Staff123!");
+                    if (staffResult.Succeeded)
+                    {
+                        logger.LogInformation("Assigning Staff role to the staff user.");
+                        await userManager.AddToRoleAsync(staffUser, "Staff");
+                    }
+                    else
+                    {
+                        logger.LogError("Failed to create staff user: {Errores}", string.Join(", ", staffResult.Errors.Select(e => e.Description)));
                     }
                 }
 

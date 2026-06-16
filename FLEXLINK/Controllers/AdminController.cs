@@ -55,6 +55,14 @@ namespace FLEXLINK.Controllers
                 .ToListAsync();
             ViewBag.EquipmentList = equipmentList;
 
+            // Space capacity — counts today's check-ins (members + guests)
+            var today = DateTime.Today;
+            int currentCount = await _db.Attendance
+                .Where(a => a.CheckedInAt.Date == today)
+                .CountAsync();
+            ViewBag.CurrentCount = currentCount;
+            ViewBag.MaxCapacity = 50;
+
             return View();
         }
 

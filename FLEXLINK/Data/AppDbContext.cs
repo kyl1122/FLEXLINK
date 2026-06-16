@@ -19,5 +19,7 @@ namespace FLEXLINK.Data
         public DbSet<Equipment> Equipment { get; set; }
         public DbSet<EquipmentRepairNote> EquipmentRepairNote { get; set; }
         public DbSet<TrainerRating> TrainerRating { get; set; }
+
+        public DbSet<Attendance> Attendance { get; set; }
     }
 }
