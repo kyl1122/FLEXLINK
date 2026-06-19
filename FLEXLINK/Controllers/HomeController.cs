@@ -23,6 +23,11 @@ namespace FLEXLINK.Controllers
             return View();
         }
 
+        public IActionResult Wallet()
+        {
+            return View();
+        }
+
         public IActionResult Privacy()
         {
             return View();
