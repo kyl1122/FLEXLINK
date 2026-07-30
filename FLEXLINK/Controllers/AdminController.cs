@@ -20,26 +20,11 @@ namespace FLEXLINK.Controllers
             _db = db;
         }
 
-        // Landing page — shows all users, trainers, and repair notes
+        // Landing page — shows dashboard overview (equipment, capacity, repair notes)
         public async Task<IActionResult> Index()
         {
-            var allUsers = _userManager.Users.ToList();
-
-            var users = new List<Users>();
-            var trainers = new List<Users>();
-
-            foreach (var u in allUsers)
-            {
-                var roles = await _userManager.GetRolesAsync(u);
-                if (roles.Contains("Admin")) continue;
-                if (roles.Contains("Trainer"))
-                    trainers.Add(u);
-                else
-                    users.Add(u);
-            }
-
-            ViewBag.Users = users;
-            ViewBag.Trainers = trainers;
+            // CHANGED: Removed individual user/trainer lists from Index to simplify the main dashboard overview
+            // (They are now isolated in their own dedicated pages below).
 
             // Load all repair notes with equipment info
             var repairNotes = await _db.EquipmentRepairNote
@@ -66,7 +51,52 @@ namespace FLEXLINK.Controllers
             return View();
         }
 
-        // DELETE a user or trainer account
+        // =========================================================================
+        // ADDED: Dedicated Page Action for Trainers Navigation
+        // =========================================================================
+        [HttpGet]
+        public async Task<IActionResult> Trainers()
+        {
+            var allUsers = await _userManager.Users.ToListAsync();
+            var trainers = new List<Users>();
+
+            foreach (var user in allUsers)
+            {
+                // Filter specifically for users assigned to the Trainer role
+                if (await _userManager.IsInRoleAsync(user, "Trainer"))
+                {
+                    trainers.Add(user);
+                }
+            }
+
+            // Passes the List<Users> directly as a Strongly-Typed Model to Views/Admin/Trainers.cshtml
+            return View(trainers);
+        }
+
+        // =========================================================================
+        // ADDED: Dedicated Page Action for Users Navigation
+        // =========================================================================
+        [HttpGet]
+        public async Task<IActionResult> Users()
+        {
+            var allUsers = await _userManager.Users.ToListAsync();
+            var regularUsers = new List<Users>();
+
+            foreach (var user in allUsers)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                // Exclude Admin and Trainer roles to keep only regular members
+                if (!roles.Contains("Admin") && !roles.Contains("Trainer"))
+                {
+                    regularUsers.Add(user);
+                }
+            }
+
+            // Passes the List<Users> directly as a Strongly-Typed Model to Views/Admin/Users.cshtml
+            return View(regularUsers);
+        }
+
+        // DELETE a user or trainer account (Unchanged - existing logic works for both new pages)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(string userId)
@@ -98,6 +128,13 @@ namespace FLEXLINK.Controllers
                 TempData["AdminError"] = "Failed to delete account: " +
                     string.Join(", ", result.Errors.Select(e => e.Description));
 
+            // CHANGED: Redirect back to referring page or default to Index
+            string? returnUrl = Request.Headers["Referer"].ToString();
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
             return RedirectToAction("Index");
         }
 
@@ -125,7 +162,9 @@ namespace FLEXLINK.Controllers
                 {
                     await _userManager.AddToRoleAsync(user, "Trainer");
                     TempData["AdminSuccess"] = $"Trainer account '{model.Email}' created successfully.";
-                    return RedirectToAction("Index");
+
+                    // CHANGED: Redirects directly to the new Trainers page after creation
+                    return RedirectToAction("Trainers");
                 }
 
                 foreach (var error in result.Errors)
