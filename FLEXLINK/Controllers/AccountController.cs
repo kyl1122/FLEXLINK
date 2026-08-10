@@ -83,10 +83,14 @@ namespace FLEXLINK.Controllers
             var user = new Users
             {
                 FullName = model.Name,
+                Age = model.Age,
+                Address = model.Address,
+                PhoneNumber = model.PhoneNumber,
                 UserName = model.Email,
                 NormalizedUserName = model.Email.ToUpper(),
                 Email = model.Email,
                 NormalizedEmail = model.Email.ToUpper()
+
             };
 
             var result = await userManager.CreateAsync(user, model.Password);

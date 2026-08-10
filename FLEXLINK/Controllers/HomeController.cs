@@ -38,6 +38,8 @@ namespace FLEXLINK.Controllers
             return View();
         }
 
+
+
         // ── Trainers page ─────────────────────────────────────────────────────
         // Shows every trainer who has filled in their profile, together with
         // their upcoming available (unbooked) schedule slots.

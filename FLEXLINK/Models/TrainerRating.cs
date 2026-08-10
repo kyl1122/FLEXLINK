@@ -8,7 +8,7 @@ namespace FLEXLINK.Models
         public int TrainerId { get; set; }
 
         // The user who gave the rating
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
 
         // Rating value 1–5
         public int Stars { get; set; }

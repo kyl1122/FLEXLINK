@@ -5,10 +5,10 @@ namespace FLEXLINK.Models
         public int Id { get; set; }
 
         // Which trainer owns this schedule slot
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
 
         // Trainer's name (for display on users' Schedule page)
-        public string TrainerName { get; set; }
+        public string? TrainerName { get; set; }
 
         // The date of the session
         public DateTime ScheduleDate { get; set; }

@@ -151,6 +151,9 @@ namespace FLEXLINK.Controllers
                 {
                     FullName = model.Name,
                     UserName = model.Email,
+                    Age = model.Age,
+                    Address = model.Address,
+                    PhoneNumber = model.PhoneNumber,
                     NormalizedUserName = model.Email.ToUpper(),
                     Email = model.Email,
                     NormalizedEmail = model.Email.ToUpper()
