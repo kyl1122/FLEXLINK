@@ -28,6 +28,80 @@ namespace FLEXLINK.Controllers
             return View();
         }
 
+        // ── User Profile ──────────────────────────────────────────────────────
+        // Shows the logged-in user's profile with an option to upload a picture.
+        public async Task<IActionResult> UserProfile()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return RedirectToAction("Login", "Account");
+
+            return View(currentUser);
+        }
+
+        // Handles profile picture upload AND editable info (FullName, PhoneNumber, Address)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateUserProfile(
+            IFormFile? ProfileImage,
+            string? FullName,
+            string? PhoneNumber,
+            string? Address)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return RedirectToAction("Login", "Account");
+
+            // Update text fields if provided
+            if (!string.IsNullOrWhiteSpace(FullName))
+                currentUser.FullName = FullName.Trim();
+
+            currentUser.PhoneNumber = string.IsNullOrWhiteSpace(PhoneNumber)
+                ? null : PhoneNumber.Trim();
+
+            currentUser.Address = string.IsNullOrWhiteSpace(Address)
+                ? null : Address.Trim();
+
+            // Handle profile picture upload if a file was selected
+            if (ProfileImage != null && ProfileImage.Length > 0)
+            {
+                // FILE SIZE VALIDATION (2MB max)
+                if (ProfileImage.Length > 2 * 1024 * 1024)
+                {
+                    TempData["ProfileError"] = "File size must not exceed 2MB.";
+                    return RedirectToAction("UserProfile");
+                }
+
+                // FILE TYPE VALIDATION
+                string[] allowedExtensions = { ".jpg", ".jpeg", ".png" };
+                string extension = Path.GetExtension(ProfileImage.FileName).ToLower();
+                if (!allowedExtensions.Contains(extension))
+                {
+                    TempData["ProfileError"] = "Only JPG, JPEG, and PNG files are allowed.";
+                    return RedirectToAction("UserProfile");
+                }
+
+                // SAVE THE FILE to wwwroot/uploads
+                string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                if (!Directory.Exists(folder))
+                    Directory.CreateDirectory(folder);
+
+                string fileName = Guid.NewGuid().ToString() + extension;
+                string filePath = Path.Combine(folder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await ProfileImage.CopyToAsync(stream);
+                }
+
+                currentUser.ProfilePicture = "/uploads/" + fileName;
+            }
+
+            await _userManager.UpdateAsync(currentUser);
+            TempData["ProfileSuccess"] = "Profile updated successfully!";
+            return RedirectToAction("UserProfile");
+        }
+
         public IActionResult Privacy()
         {
             return View();
@@ -37,8 +111,6 @@ namespace FLEXLINK.Controllers
         {
             return View();
         }
-
-
 
         // ── Trainers page ─────────────────────────────────────────────────────
         // Shows every trainer who has filled in their profile, together with

@@ -212,7 +212,120 @@
         </div>
     </div>
 
-   
+    @* ── TRAINERS GROUP ── *@
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center"
+             style="border-radius:12px 12px 0 0;">
+            <span class="fw-bold fs-6">
+                <i class="bi bi-person-badge me-2"></i>Trainers
+            </span>
+            <span class="badge bg-white text-primary">@trainers.Count</span>
+        </div>
+        <div class="card-body p-0">
+            @if (!trainers.Any())
+            {
+                <p class="text-muted text-center py-4 mb-0">No trainers registered yet.</p>
+            }
+            else
+            {
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Username</th>
+                            <th>Date Created</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var trainer in trainers)
+                        {
+                            <tr>
+                                <td>
+                                    <i class="bi bi-person-circle text-primary me-2"></i>
+                                    @(trainer.FullName ?? "—")
+                                </td>
+                                <td>@trainer.Email</td>
+                                <td class="text-muted small">@trainer.UserName</td>
+                                <td class="text-muted small">@trainer.CreatedAt.ToString("MMMM dd, yyyy")</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal"
+                                            data-user-id="@trainer.Id"
+                                            data-user-email="@trainer.Email">
+                                        <i class="bi bi-trash me-1"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    @* ── USERS GROUP ── *@
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center"
+             style="border-radius:12px 12px 0 0;">
+            <span class="fw-bold fs-6">
+                <i class="bi bi-people me-2"></i>Users
+            </span>
+            <span class="badge bg-white text-secondary">@users.Count</span>
+        </div>
+        <div class="card-body p-0">
+            @if (!users.Any())
+            {
+                <p class="text-muted text-center py-4 mb-0">No users registered yet.</p>
+            }
+            else
+            {
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Photo</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Username</th>
+                            <th>Date Created</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in users)
+                        {
+                            <tr>
+                                <td>
+                                    <img src="@(string.IsNullOrEmpty(user.ProfilePicture) ? "/uploads/DefaultProfile.png" : user.ProfilePicture)"
+                                         alt="@user.FullName"
+                                         style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #dee2e6;" />
+                                </td>
+                                <td>
+                                    @(user.FullName ?? "—")
+                                </td>
+                                <td>@user.Email</td>
+                                <td class="text-muted small">@user.UserName</td>
+                                <td class="text-muted small">@user.CreatedAt.ToString("MMMM dd, yyyy")</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal"
+                                            data-user-id="@user.Id"
+                                            data-user-email="@user.Email">
+                                        <i class="bi bi-trash me-1"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+</div>
 
 @* ── Add Equipment Modal ── *@
 <div class="modal fade" id="addEquipmentModal" tabindex="-1" aria-labelledby="addEquipmentModalLabel" aria-hidden="true">
