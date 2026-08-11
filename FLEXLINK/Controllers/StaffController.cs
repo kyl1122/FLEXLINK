@@ -22,7 +22,7 @@ namespace FLEXLINK.Controllers
             _db = db;
         }
 
-        // Landing page — shows Login / Login as Guest + current space capacity + pending registrations
+        // ── Landing Page ──────────────────────────────────────────────────────
         public async Task<IActionResult> Index()
         {
             int currentCount = await GetTodayAttendanceCountAsync();
@@ -30,7 +30,7 @@ namespace FLEXLINK.Controllers
             ViewBag.MaxCapacity = MaxCapacity;
             ViewBag.IsFull = currentCount >= MaxCapacity;
 
-            // Load all pending registration requests for the notification panel
+            // Load pending registration requests for the notification panel
             var pendingRequests = _db.RegistrationRequest
                 .Where(r => r.Status == "Pending")
                 .OrderBy(r => r.RequestedAt)
@@ -41,7 +41,7 @@ namespace FLEXLINK.Controllers
             return View(new LoginViewModel());
         }
 
-        // Approve a user's registration request
+        // ── Approve Registration ──────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApproveUser(int requestId)
@@ -61,7 +61,7 @@ namespace FLEXLINK.Controllers
             return RedirectToAction("Index");
         }
 
-        // Reject a user's registration request
+        // ── Reject Registration ───────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RejectUser(int requestId)
@@ -81,7 +81,7 @@ namespace FLEXLINK.Controllers
             return RedirectToAction("Index");
         }
 
-        // Member check-in — validates the account's credentials, then logs attendance
+        // ── Member Check-In ───────────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MemberLogin(LoginViewModel model)
@@ -113,20 +113,38 @@ namespace FLEXLINK.Controllers
                 return RedirectToAction("Index");
             }
 
+            string memberName = user.FullName ?? user.Email ?? "Member";
+
+            // Check membership BEFORE allowing check-in
+            var activeMembership = _db.UserMembership
+                .Where(m => m.UserId == user.Id && m.ExpiryDate >= DateTime.Now)
+                .OrderByDescending(m => m.ExpiryDate)
+                .FirstOrDefault();
+
+            if (activeMembership == null)
+            {
+                // No membership — block check-in, do NOT add to attendance
+                TempData["AttendanceError"] = $"{memberName} cannot check in — no active membership plan.";
+                TempData["MembershipWarning"] = $"⚠️ No active membership. {memberName} does not have a current membership plan.";
+                return RedirectToAction("Index");
+            }
+
+            // Has active membership — allow check-in
             _db.Attendance.Add(new Attendance
             {
                 UserId = user.Id,
-                Name = user.FullName ?? user.Email ?? "Member",
+                Name = memberName,
                 Type = "Member",
                 CheckedInAt = DateTime.Now
             });
             await _db.SaveChangesAsync();
 
-            TempData["AttendanceSuccess"] = $"{(user.FullName ?? user.Email)} has been checked in successfully.";
+            TempData["AttendanceSuccess"] = $"{memberName} checked in successfully.";
+            TempData["MembershipStatus"] = $"✅ Active membership — valid until {activeMembership.ExpiryDate:MMMM dd, yyyy}.";
             return RedirectToAction("Index");
         }
 
-        // Guest check-in — no account required
+        // ── Guest Check-In ────────────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GuestLogin()

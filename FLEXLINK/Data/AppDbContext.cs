@@ -6,21 +6,16 @@ namespace FLEXLINK.Data
 {
     public class AppDbContext : IdentityDbContext<Users>
     {
-        public AppDbContext(DbContextOptions options) : base(options)
-        {
-        }
-
-        protected AppDbContext()
-        {
-        }
+        public AppDbContext(DbContextOptions options) : base(options) { }
+        protected AppDbContext() { }
 
         public DbSet<ProfileTrainer> ProfileTrainer { get; set; }
         public DbSet<TrainerSchedule> TrainerSchedule { get; set; }
         public DbSet<Equipment> Equipment { get; set; }
         public DbSet<EquipmentRepairNote> EquipmentRepairNote { get; set; }
         public DbSet<TrainerRating> TrainerRating { get; set; }
-
         public DbSet<Attendance> Attendance { get; set; }
         public DbSet<RegistrationRequest> RegistrationRequest { get; set; }
+        public DbSet<UserMembership> UserMembership { get; set; }  
     }
 }

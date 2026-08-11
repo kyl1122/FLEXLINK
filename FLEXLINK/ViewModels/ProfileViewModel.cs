@@ -15,14 +15,15 @@ namespace FLEXLINK.ViewModels
         public string PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "Address is required.")]
-        public string? Address { get; set; }
+        public string Address { get; set; }
 
-        [Required(ErrorMessage = "Expertise is required.")]
+        // Optional — trainer may not fill this in
         public string? Expertise { get; set; }
-        // Nullable — a trainer may not have uploaded a picture yet
+
+        // Nullable — trainer may not have uploaded a picture yet
         public string? ExistingProfilePicture { get; set; }
 
-        // Not required — user may skip uploading a new photo
+        // Not required — trainer may skip uploading a new photo
         public IFormFile? ProfileImage { get; set; }
     }
 }

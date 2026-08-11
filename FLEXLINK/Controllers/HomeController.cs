@@ -28,6 +28,16 @@ namespace FLEXLINK.Controllers
             return View();
         }
 
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        public IActionResult About()
+        {
+            return View();
+        }
+
         // ── User Profile ──────────────────────────────────────────────────────
         // Shows the logged-in user's profile with an option to upload a picture.
         public async Task<IActionResult> UserProfile()
@@ -39,7 +49,6 @@ namespace FLEXLINK.Controllers
             return View(currentUser);
         }
 
-        // Handles profile picture upload AND editable info (FullName, PhoneNumber, Address)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateUserProfile(
@@ -52,27 +61,51 @@ namespace FLEXLINK.Controllers
             if (currentUser == null)
                 return RedirectToAction("Login", "Account");
 
-            // Update text fields if provided
-            if (!string.IsNullOrWhiteSpace(FullName))
-                currentUser.FullName = FullName.Trim();
+            // ── VALIDATION — all fields required ─────────────────────────────────
+            if (string.IsNullOrWhiteSpace(FullName))
+            {
+                TempData["ProfileError"] = "Full Name is required.";
+                return RedirectToAction("UserProfile");
+            }
 
-            currentUser.PhoneNumber = string.IsNullOrWhiteSpace(PhoneNumber)
-                ? null : PhoneNumber.Trim();
+            if (string.IsNullOrWhiteSpace(PhoneNumber))
+            {
+                TempData["ProfileError"] = "Phone Number is required.";
+                return RedirectToAction("UserProfile");
+            }
 
-            currentUser.Address = string.IsNullOrWhiteSpace(Address)
-                ? null : Address.Trim();
+            if (string.IsNullOrWhiteSpace(Address))
+            {
+                TempData["ProfileError"] = "Address is required.";
+                return RedirectToAction("UserProfile");
+            }
 
-            // Handle profile picture upload if a file was selected
+            // ── PHONE NUMBER VALIDATION ───────────────────────────────────────────
+            if (!PhoneNumber.Trim().All(char.IsDigit))
+            {
+                TempData["ProfileError"] = "Phone Number must contain numbers only.";
+                return RedirectToAction("UserProfile");
+            }
+
+            if (PhoneNumber.Trim().Length != 11)
+            {
+                TempData["ProfileError"] = "Phone Number must be exactly 11 digits.";
+                return RedirectToAction("UserProfile");
+            }
+            // ── UPDATE TEXT FIELDS ────────────────────────────────────────────────
+            currentUser.FullName = FullName.Trim();
+            currentUser.PhoneNumber = PhoneNumber.Trim();
+            currentUser.Address = Address.Trim();
+
+            // ── HANDLE PROFILE PICTURE ────────────────────────────────────────────
             if (ProfileImage != null && ProfileImage.Length > 0)
             {
-                // FILE SIZE VALIDATION (2MB max)
                 if (ProfileImage.Length > 2 * 1024 * 1024)
                 {
                     TempData["ProfileError"] = "File size must not exceed 2MB.";
                     return RedirectToAction("UserProfile");
                 }
 
-                // FILE TYPE VALIDATION
                 string[] allowedExtensions = { ".jpg", ".jpeg", ".png" };
                 string extension = Path.GetExtension(ProfileImage.FileName).ToLower();
                 if (!allowedExtensions.Contains(extension))
@@ -81,7 +114,6 @@ namespace FLEXLINK.Controllers
                     return RedirectToAction("UserProfile");
                 }
 
-                // SAVE THE FILE to wwwroot/uploads
                 string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
                 if (!Directory.Exists(folder))
                     Directory.CreateDirectory(folder);
@@ -90,9 +122,7 @@ namespace FLEXLINK.Controllers
                 string filePath = Path.Combine(folder, fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
-                {
                     await ProfileImage.CopyToAsync(stream);
-                }
 
                 currentUser.ProfilePicture = "/uploads/" + fileName;
             }
@@ -100,16 +130,6 @@ namespace FLEXLINK.Controllers
             await _userManager.UpdateAsync(currentUser);
             TempData["ProfileSuccess"] = "Profile updated successfully!";
             return RedirectToAction("UserProfile");
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        public IActionResult About()
-        {
-            return View();
         }
 
         // ── Trainers page ─────────────────────────────────────────────────────
@@ -314,9 +334,60 @@ namespace FLEXLINK.Controllers
             return RedirectToAction("Trainer");
         }
 
-        public IActionResult Membership()
+        public async Task<IActionResult> Membership()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            UserMembership? activeMembership = null;
+            if (currentUser != null)
+            {
+                activeMembership = _db.UserMembership
+                    .Where(m => m.UserId == currentUser.Id && m.ExpiryDate >= DateTime.Now)
+                    .OrderByDescending(m => m.ExpiryDate)
+                    .FirstOrDefault();
+            }
+
+            ViewBag.ActiveMembership = activeMembership;
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Subscribe(int months)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return RedirectToAction("Login", "Account");
+
+            var validMonths = new[] { 1, 2, 3 };
+            if (!validMonths.Contains(months))
+            {
+                TempData["MembershipError"] = "Invalid plan selected.";
+                return RedirectToAction("Membership");
+            }
+
+            // Extend from existing expiry if user already has an active plan
+            var existing = _db.UserMembership
+                .Where(m => m.UserId == currentUser.Id && m.ExpiryDate >= DateTime.Now)
+                .OrderByDescending(m => m.ExpiryDate)
+                .FirstOrDefault();
+
+            var startDate = existing != null ? existing.ExpiryDate : DateTime.Now;
+            var expiryDate = startDate.AddMonths(months);
+
+            _db.UserMembership.Add(new UserMembership
+            {
+                UserId = currentUser.Id,
+                Months = months,
+                StartDate = startDate,
+                ExpiryDate = expiryDate
+            });
+
+            await _db.SaveChangesAsync();
+
+            TempData["MembershipSuccess"] = $"Successfully subscribed to the {months}-month plan! " +
+                $"Valid until {expiryDate:MMMM dd, yyyy}.";
+            return RedirectToAction("Membership");
         }
 
         public IActionResult Contact()

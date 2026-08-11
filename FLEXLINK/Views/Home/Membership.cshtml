@@ -1,5 +1,7 @@
-﻿@{
+﻿@using FLEXLINK.Models
+@{
     ViewData["Title"] = "Membership Plans";
+    var activeMembership = ViewBag.ActiveMembership as UserMembership;
 }
 
 <div class="container py-5">
@@ -8,99 +10,133 @@
         <p class="lead text-muted">Select the membership that fits your fitness goals.</p>
     </div>
 
+    @* Alerts *@
+    @if (TempData["MembershipSuccess"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show text-center">
+            <i class="bi bi-check-circle me-1"></i> @TempData["MembershipSuccess"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["MembershipError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show text-center">
+            <i class="bi bi-exclamation-circle me-1"></i> @TempData["MembershipError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @* Active membership banner *@
+    @if (activeMembership != null)
+    {
+        <div class="alert border-0 shadow-sm mb-4 d-flex align-items-center gap-3"
+             style="background:#e8f5e9; border-left:4px solid #28a745 !important; border-radius:12px;">
+            <i class="bi bi-patch-check-fill text-success fs-4"></i>
+            <div>
+                <strong class="text-success">You have an active membership!</strong>
+                <p class="mb-0 small text-muted">
+                    @activeMembership.Months-month plan &nbsp;·&nbsp;
+                    Valid until <strong>@activeMembership.ExpiryDate.ToString("MMMM dd, yyyy")</strong>
+                </p>
+            </div>
+        </div>
+    }
+
     <div class="row row-cols-1 row-cols-md-3 g-4">
+
+        @* 1 Month *@
         <div class="col">
             <div class="card h-100 shadow-sm border-0">
                 <div class="card-header py-3 bg-white border-0 text-center">
                     <h4 class="my-0 fw-normal">1 Month</h4>
                 </div>
-                <div class="card-body">
-                    <h1 class="card-title pricing-card-title text-center">300php</h1>
-                    <button type="button" class="btn btn-lg btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#confirmPlan1">Get Started</button>
+                <div class="card-body text-center">
+                    <h1 class="card-title pricing-card-title">₱300</h1>
+                    <p class="text-muted small">Basic access for one month.</p>
+                    <button type="button" class="btn btn-lg btn-outline-primary w-100"
+                            data-bs-toggle="modal" data-bs-target="#confirmPlan1">
+                        Get Started
+                    </button>
                 </div>
             </div>
         </div>
 
+        @* 2 Months *@
         <div class="col">
             <div class="card h-100 shadow border-primary border-2">
                 <div class="card-header py-3 bg-primary text-white border-primary text-center">
                     <h4 class="my-0 fw-normal">2 Months</h4>
                 </div>
-                <div class="card-body">
-                    <h1 class="card-title pricing-card-title text-center">550php</h1>
-                    <button type="button" class="btn btn-lg btn-primary w-100" data-bs-toggle="modal" data-bs-target="#confirmPlan2">Most Popular</button>
+                <div class="card-body text-center">
+                    <h1 class="card-title pricing-card-title">₱550</h1>
+                    <p class="text-muted small">Best value for regular members.</p>
+                    <button type="button" class="btn btn-lg btn-primary w-100"
+                            data-bs-toggle="modal" data-bs-target="#confirmPlan2">
+                        Most Popular
+                    </button>
                 </div>
             </div>
         </div>
 
+        @* 3 Months *@
         <div class="col">
             <div class="card h-100 shadow-sm border-0">
                 <div class="card-header py-3 bg-white border-0 text-center">
                     <h4 class="my-0 fw-normal">3 Months</h4>
                 </div>
-                <div class="card-body">
-                    <h1 class="card-title pricing-card-title text-center">800php</h1>
-                    <button type="button" class="btn btn-lg btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#confirmPlan3">Go Elite</button>
+                <div class="card-body text-center">
+                    <h1 class="card-title pricing-card-title">₱800</h1>
+                    <p class="text-muted small">Maximum savings for committed athletes.</p>
+                    <button type="button" class="btn btn-lg btn-outline-primary w-100"
+                            data-bs-toggle="modal" data-bs-target="#confirmPlan3">
+                        Go Elite
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@* ── Confirm Modals ── *@
+@foreach (var plan in new[] {
+    new { Id = "confirmPlan1", Months = 1, Price = "₱300", Label = "1 Month Plan",   BgClass = "bg-dark" },
+    new { Id = "confirmPlan2", Months = 2, Price = "₱550", Label = "2 Months Plan",  BgClass = "bg-primary" },
+    new { Id = "confirmPlan3", Months = 3, Price = "₱800", Label = "3 Months Plan",  BgClass = "bg-dark" }
+})
+{
+    <div class="modal fade" id="@plan.Id" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header @plan.BgClass text-white">
+                    <h5 class="modal-title fw-bold">Confirm Purchase</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <h5>You selected the <strong>@plan.Label</strong></h5>
+                    <p class="text-muted mb-1">Price: <strong>@plan.Price</strong></p>
+                    <p class="text-muted small">
+                        @if (activeMembership != null)
+                        {
+                            <span>Your plan will be extended from <strong>@activeMembership.ExpiryDate.ToString("MMMM dd, yyyy")</strong>.</span>
+                        }
+                        else
+                        {
+                            <span>Your membership starts today.</span>
+                        }
+                    </p>
+                </div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form asp-action="Subscribe" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="months" value="@plan.Months" />
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check2-circle me-1"></i> Confirm & Activate
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<div class="modal fade" id="confirmPlan1" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold">Confirm Purchase</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4 text-center">
-                <h5>You selected the <strong>1 Month Plan</strong></h5>
-                <p class="text-muted">Total amount due: <strong>300php</strong></p>
-                <p class="small text-secondary">Proceeding will activate this plan for your FLEXLINK account.</p>
-            </div>
-            <div class="modal-footer bg-light border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <a asp-controller="Home" asp-action="Subscribe" asp-route-months="1" class="btn btn-primary px-4">Confirm & Pay</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="confirmPlan2" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold">Confirm Purchase</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4 text-center">
-                <h5>You selected the <strong>2 Months Plan</strong></h5>
-                <p class="text-muted">Total amount due: <strong>550php</strong></p>
-            </div>
-            <div class="modal-footer bg-light border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <a asp-controller="Home" asp-action="Subscribe" asp-route-months="2" class="btn btn-primary px-4">Confirm & Pay</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="confirmPlan3" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold">Confirm Purchase</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4 text-center">
-                <h5>You selected the <strong>3 Months Plan</strong></h5>
-                <p class="text-muted">Total amount due: <strong>800php</strong></p>
-            </div>
-            <div class="modal-footer bg-light border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <a asp-controller="Home" asp-action="Subscribe" asp-route-months="3" class="btn btn-primary px-4">Confirm & Pay</a>
-            </div>
-        </div>
-    </div>
-</div>
+}
