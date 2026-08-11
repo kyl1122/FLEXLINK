@@ -21,5 +21,6 @@ namespace FLEXLINK.Data
         public DbSet<TrainerRating> TrainerRating { get; set; }
 
         public DbSet<Attendance> Attendance { get; set; }
+        public DbSet<RegistrationRequest> RegistrationRequest { get; set; }
     }
 }

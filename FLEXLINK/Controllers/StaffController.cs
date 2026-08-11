@@ -22,7 +22,7 @@ namespace FLEXLINK.Controllers
             _db = db;
         }
 
-        // Landing page — shows Login / Login as Guest + current space capacity
+        // Landing page — shows Login / Login as Guest + current space capacity + pending registrations
         public async Task<IActionResult> Index()
         {
             int currentCount = await GetTodayAttendanceCountAsync();
@@ -30,7 +30,55 @@ namespace FLEXLINK.Controllers
             ViewBag.MaxCapacity = MaxCapacity;
             ViewBag.IsFull = currentCount >= MaxCapacity;
 
+            // Load all pending registration requests for the notification panel
+            var pendingRequests = _db.RegistrationRequest
+                .Where(r => r.Status == "Pending")
+                .OrderBy(r => r.RequestedAt)
+                .ToList();
+            ViewBag.PendingRequests = pendingRequests;
+            ViewBag.PendingCount = pendingRequests.Count;
+
             return View(new LoginViewModel());
+        }
+
+        // Approve a user's registration request
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveUser(int requestId)
+        {
+            var request = _db.RegistrationRequest.FirstOrDefault(r => r.Id == requestId);
+            if (request == null)
+            {
+                TempData["AttendanceError"] = "Registration request not found.";
+                return RedirectToAction("Index");
+            }
+
+            request.Status = "Approved";
+            request.ReviewedAt = DateTime.Now;
+            await _db.SaveChangesAsync();
+
+            TempData["AttendanceSuccess"] = $"{request.FullName}'s account has been approved. They can now log in.";
+            return RedirectToAction("Index");
+        }
+
+        // Reject a user's registration request
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectUser(int requestId)
+        {
+            var request = _db.RegistrationRequest.FirstOrDefault(r => r.Id == requestId);
+            if (request == null)
+            {
+                TempData["AttendanceError"] = "Registration request not found.";
+                return RedirectToAction("Index");
+            }
+
+            request.Status = "Rejected";
+            request.ReviewedAt = DateTime.Now;
+            await _db.SaveChangesAsync();
+
+            TempData["AttendanceError"] = $"{request.FullName}'s registration has been rejected.";
+            return RedirectToAction("Index");
         }
 
         // Member check-in — validates the account's credentials, then logs attendance
