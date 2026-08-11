@@ -22,7 +22,27 @@ namespace FLEXLINK.Controllers
             _db = db;
         }
 
-        // ── Landing Page ──────────────────────────────────────────────────────
+        // ── Space Capacity Page ───────────────────────────────────────────────
+        public async Task<IActionResult> SpaceCapacity()
+        {
+            int currentCount = await GetTodayAttendanceCountAsync();
+            ViewBag.CurrentCount = currentCount;
+            ViewBag.MaxCapacity = MaxCapacity;
+            ViewBag.IsFull = currentCount >= MaxCapacity;
+
+            // Full list of pending requests loaded here
+            var pendingRequests = await _db.RegistrationRequest
+                .Where(r => r.Status == "Pending")
+                .OrderBy(r => r.RequestedAt)
+                .ToListAsync();
+
+            ViewBag.PendingRequests = pendingRequests;
+            ViewBag.PendingCount = pendingRequests.Count;
+
+            return View();
+        }
+
+        // ── Landing Page (Staffers Dashboard) ─────────────────────────────────
         public async Task<IActionResult> Index()
         {
             int currentCount = await GetTodayAttendanceCountAsync();
@@ -30,13 +50,10 @@ namespace FLEXLINK.Controllers
             ViewBag.MaxCapacity = MaxCapacity;
             ViewBag.IsFull = currentCount >= MaxCapacity;
 
-            // Load pending registration requests for the notification panel
-            var pendingRequests = _db.RegistrationRequest
-                .Where(r => r.Status == "Pending")
-                .OrderBy(r => r.RequestedAt)
-                .ToList();
-            ViewBag.PendingRequests = pendingRequests;
-            ViewBag.PendingCount = pendingRequests.Count;
+            // Only retrieve the count for the dashboard indicator
+            int pendingCount = await _db.RegistrationRequest
+                .CountAsync(r => r.Status == "Pending");
+            ViewBag.PendingCount = pendingCount;
 
             return View(new LoginViewModel());
         }
@@ -46,11 +63,11 @@ namespace FLEXLINK.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApproveUser(int requestId)
         {
-            var request = _db.RegistrationRequest.FirstOrDefault(r => r.Id == requestId);
+            var request = await _db.RegistrationRequest.FirstOrDefaultAsync(r => r.Id == requestId);
             if (request == null)
             {
                 TempData["AttendanceError"] = "Registration request not found.";
-                return RedirectToAction("Index");
+                return RedirectToAction("SpaceCapacity");
             }
 
             request.Status = "Approved";
@@ -58,7 +75,7 @@ namespace FLEXLINK.Controllers
             await _db.SaveChangesAsync();
 
             TempData["AttendanceSuccess"] = $"{request.FullName}'s account has been approved. They can now log in.";
-            return RedirectToAction("Index");
+            return RedirectToAction("SpaceCapacity");
         }
 
         // ── Reject Registration ───────────────────────────────────────────────
@@ -66,11 +83,11 @@ namespace FLEXLINK.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RejectUser(int requestId)
         {
-            var request = _db.RegistrationRequest.FirstOrDefault(r => r.Id == requestId);
+            var request = await _db.RegistrationRequest.FirstOrDefaultAsync(r => r.Id == requestId);
             if (request == null)
             {
                 TempData["AttendanceError"] = "Registration request not found.";
-                return RedirectToAction("Index");
+                return RedirectToAction("SpaceCapacity");
             }
 
             request.Status = "Rejected";
@@ -78,10 +95,10 @@ namespace FLEXLINK.Controllers
             await _db.SaveChangesAsync();
 
             TempData["AttendanceError"] = $"{request.FullName}'s registration has been rejected.";
-            return RedirectToAction("Index");
+            return RedirectToAction("SpaceCapacity");
         }
 
-        // ── Member Check-In ───────────────────────────────────────────────────
+        // ── Member Check-In (Email Only) ──────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MemberLogin(LoginViewModel model)
@@ -93,9 +110,9 @@ namespace FLEXLINK.Controllers
                 return RedirectToAction("Index");
             }
 
-            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
+            if (string.IsNullOrWhiteSpace(model.Email))
             {
-                TempData["AttendanceError"] = "Please enter a valid email and password.";
+                TempData["AttendanceError"] = "Please enter a valid email address.";
                 return RedirectToAction("Index");
             }
 
@@ -106,24 +123,16 @@ namespace FLEXLINK.Controllers
                 return RedirectToAction("Index");
             }
 
-            var passwordValid = await _userManager.CheckPasswordAsync(user, model.Password);
-            if (!passwordValid)
-            {
-                TempData["AttendanceError"] = "Incorrect password.";
-                return RedirectToAction("Index");
-            }
-
             string memberName = user.FullName ?? user.Email ?? "Member";
 
-            // Check membership BEFORE allowing check-in
-            var activeMembership = _db.UserMembership
+            // Check active membership BEFORE allowing check-in
+            var activeMembership = await _db.UserMembership
                 .Where(m => m.UserId == user.Id && m.ExpiryDate >= DateTime.Now)
                 .OrderByDescending(m => m.ExpiryDate)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             if (activeMembership == null)
             {
-                // No membership — block check-in, do NOT add to attendance
                 TempData["AttendanceError"] = $"{memberName} cannot check in — no active membership plan.";
                 TempData["MembershipWarning"] = $"⚠️ No active membership. {memberName} does not have a current membership plan.";
                 return RedirectToAction("Index");

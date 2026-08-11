@@ -7,6 +7,7 @@
     int currentCount = ViewBag.CurrentCount;
     int maxCapacity = ViewBag.MaxCapacity;
     bool isFull = ViewBag.IsFull;
+    int pendingCount = ViewBag.PendingCount ?? 0;
     double percent = maxCapacity > 0 ? Math.Round((double)currentCount / maxCapacity * 100, 0) : 0;
 }
 
@@ -33,56 +34,25 @@
         </div>
     }
 
-    @* ── Pending Registration Requests Notification ── *@
-    @{
-        var pendingRequests = ViewBag.PendingRequests as List<FLEXLINK.Models.RegistrationRequest> ?? new();
-        int pendingCount = ViewBag.PendingCount ?? 0;
-    }
+    @* ── Pending Count Indicator ── *@
     @if (pendingCount > 0)
     {
         <div class="card border-0 shadow-sm mb-4" style="border-radius:14px; border-left: 4px solid #f5a623 !important;">
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
+            <div class="card-body d-flex justify-content-between align-items-center py-3">
+                <div class="d-flex align-items-center">
                     <span class="badge bg-warning text-dark me-2" style="font-size:0.85rem;">
                         <i class="bi bi-bell-fill me-1"></i> @pendingCount Pending
                     </span>
-                    <h6 class="fw-bold mb-0">Registration Requests</h6>
+                    <span class="fw-bold mb-0">Registration Requests</span>
                 </div>
-
-                <div class="d-flex flex-column gap-2">
-                    @foreach (var req in pendingRequests)
-                    {
-                        <div class="d-flex align-items-center justify-content-between border rounded px-3 py-2 bg-light">
-                            <div>
-                                <p class="fw-semibold mb-0 small">@req.FullName</p>
-                                <p class="text-muted mb-0" style="font-size:0.75rem;">
-                                    @req.Email &nbsp;·&nbsp; Requested @req.RequestedAt.ToString("MMM dd, hh:mm tt")
-                                </p>
-                            </div>
-                            <div class="d-flex gap-2 ms-3">
-                                <form asp-controller="Staff" asp-action="ApproveUser" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="requestId" value="@req.Id" />
-                                    <button type="submit" class="btn btn-success btn-sm">
-                                        <i class="bi bi-check-lg me-1"></i> Approve
-                                    </button>
-                                </form>
-                                <form asp-controller="Staff" asp-action="RejectUser" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="requestId" value="@req.Id" />
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="bi bi-x-lg me-1"></i> Reject
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    }
-                </div>
+                <a asp-controller="Staff" asp-action="SpaceCapacity" class="btn btn-outline-warning btn-sm text-dark fw-semibold">
+                    View Requests <i class="bi bi-arrow-right ms-1"></i>
+                </a>
             </div>
         </div>
     }
 
-    @* ── Space Capacity ── *@
+    @* ── Space Capacity Summary ── *@
     <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -108,28 +78,24 @@
         </div>
     </div>
 
-    @* ── Member Login (Attendance) ── *@
+    @* ── Member Check-In (Email Only) ── *@
     <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;">
         <div class="card-body">
-            <h5 class="fw-bold mb-3"><i class="bi bi-box-arrow-in-right me-1"></i>Member Login</h5>
+            <h5 class="fw-bold mb-3"><i class="bi bi-person-check me-1"></i>Member Check-In</h5>
             <form asp-controller="Staff" asp-action="MemberLogin" method="post">
                 @Html.AntiForgeryToken()
                 <div class="mb-3">
-                    <label asp-for="Email" class="form-label"></label>
-                    <input asp-for="Email" class="form-control" placeholder="member@email.com" />
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Password" class="form-label"></label>
-                    <input asp-for="Password" class="form-control" placeholder="Password" />
+                    <label asp-for="Email" class="form-label">Member Email</label>
+                    <input asp-for="Email" class="form-control" placeholder="member@email.com" required />
                 </div>
                 <button type="submit" class="btn btn-primary w-100" @(isFull ? "disabled" : "")>
-                    <i class="bi bi-door-open me-1"></i> Login &amp; Check In
+                    <i class="bi bi-door-open me-1"></i> Check In Member
                 </button>
             </form>
         </div>
     </div>
 
-    @* ── Guest Login (Attendance) ── *@
+    @* ── Guest Check-In (Attendance) ── *@
     <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;">
         <div class="card-body text-center">
             <h5 class="fw-bold mb-2"><i class="bi bi-person-badge me-1"></i>No Account?</h5>
