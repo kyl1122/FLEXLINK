@@ -73,6 +73,14 @@
                 </div>
 
                 <div class="mb-3">
+                    <label class="form-label fw-semibold">Age</label>
+                    <input type="number" name="Age" class="form-control"
+                           value="@(Model.Age > 0 ? Model.Age.ToString() : "")"
+                           min="1" max="120"
+                           placeholder="Enter your age" />
+                </div>
+
+                <div class="mb-3">
                     <label class="form-label fw-semibold">Phone Number</label>
                     <input type="text" name="PhoneNumber" class="form-control"
                            value="@(Model.PhoneNumber ?? "")"

@@ -1,3 +1,4 @@
+using Azure;
 using FLEXLINK.Data;
 using FLEXLINK.Models;
 using FLEXLINK.ViewModels;
@@ -55,7 +56,8 @@ namespace FLEXLINK.Controllers
             IFormFile? ProfileImage,
             string? FullName,
             string? PhoneNumber,
-            string? Address)
+            string? Address,
+            int? Age)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -80,6 +82,19 @@ namespace FLEXLINK.Controllers
                 return RedirectToAction("UserProfile");
             }
 
+            // ── AGE VALIDATION ─────────────────────────────────────────────────
+            if (Age == null)
+            {
+                TempData["ProfileError"] = "Age is required.";
+                return RedirectToAction("UserProfile");
+            }
+
+            if (Age < 18 || Age > 80)
+            {
+                TempData["ProfileError"] = "Invalid age.";
+                return RedirectToAction("UserProfile");
+            }
+
             // ── PHONE NUMBER VALIDATION ───────────────────────────────────────────
             if (!PhoneNumber.Trim().All(char.IsDigit))
             {
@@ -92,10 +107,12 @@ namespace FLEXLINK.Controllers
                 TempData["ProfileError"] = "Phone Number must be exactly 11 digits.";
                 return RedirectToAction("UserProfile");
             }
+
             // ── UPDATE TEXT FIELDS ────────────────────────────────────────────────
             currentUser.FullName = FullName.Trim();
             currentUser.PhoneNumber = PhoneNumber.Trim();
             currentUser.Address = Address.Trim();
+            currentUser.Age = Age.Value;
 
             // ── HANDLE PROFILE PICTURE ────────────────────────────────────────────
             if (ProfileImage != null && ProfileImage.Length > 0)

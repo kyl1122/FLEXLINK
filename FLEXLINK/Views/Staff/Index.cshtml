@@ -9,6 +9,249 @@
     bool isFull = ViewBag.IsFull;
     int pendingCount = ViewBag.PendingCount ?? 0;
     double percent = maxCapacity > 0 ? Math.Round((double)currentCount / maxCapacity * 100, 0) : 0;
+
+    // Retrieve Member Check-In details from TempData
+    string? memberName = TempData["MemberCheckInName"] as string;
+    string? memberEmail = TempData["MemberCheckInEmail"] as string;
+    string? memberPic = TempData["MemberCheckInPic"] as string;
+    string? memberStatus = TempData["MemberCheckInStatus"] as string;
+    string? expiryDate = TempData["MemberExpiryDate"] as string;
+
+    // Ensure a safe fallback avatar URL
+    string displayPic = !string.IsNullOrWhiteSpace(memberPic) ? memberPic : "/uploads/default-avatar.png";
+}
+
+<!-- Custom Styles for Prominent Staff Check-In Modal & Profile Lightbox -->
+<style>
+    /* Dark semi-transparent backdrop */
+    .floating-card-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(5px);
+        z-index: 1080;
+    }
+
+    /* Modal dialog container centered on screen */
+    .floating-status-card {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1090;
+        width: 92%;
+        max-width: 720px;
+        animation: modalPop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35) !important;
+        border-radius: 24px !important;
+        overflow: hidden;
+    }
+
+    @@keyframes modalPop {
+        0% {
+            opacity: 0;
+            transform: translate(-50%, -45%) scale(0.9);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    }
+
+    /* Extra large avatar profile image container */
+    .avatar-wrapper-xl {
+        position: relative;
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        background-color: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .avatar-wrapper-xl:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .avatar-wrapper-xl img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    /* Interactive Lightbox Overlay for Enlarged Profile Picture */
+    .profile-lightbox-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(8px);
+        z-index: 1150;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    .profile-lightbox-card {
+        position: relative;
+        background: #ffffff;
+        padding: 16px;
+        border-radius: 50%;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        animation: zoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .profile-lightbox-img {
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes zoomIn {
+        from {
+            opacity: 0;
+            transform: scale(0.7);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+</style>
+
+@* ── PROMINENT CENTERED PROFILE POPUP OVERLAY ── *@
+@if (!string.IsNullOrEmpty(memberName))
+{
+    bool isActive = memberStatus == "Active";
+
+    <!-- Backdrop overlay -->
+    <div class="floating-card-backdrop" id="cardBackdrop" onclick="closeProfileModal()"></div>
+
+    <div id="checkInFloatingCard" class="card border-0 floating-status-card p-3"
+         style="background: #ffffff; border-top: 10px solid @(isActive ? "#10b981" : "#ef4444") !important;">
+
+        <div class="card-body p-4 p-md-5">
+            <button type="button" class="btn-close" onclick="closeProfileModal()" aria-label="Close" style="font-size: 1.2rem; position: absolute; top: 24px; right: 24px; z-index: 10;"></button>
+
+            <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-start text-center text-sm-start">
+
+                <!-- Clickable Profile Image with Hover Tooltip -->
+                <div class="avatar-wrapper-xl me-0 me-sm-4 mb-3 mb-sm-0 flex-shrink-0 shadow-lg"
+                     style="border: 4px solid @(isActive ? "#10b981" : "#ef4444");"
+                     onclick="openProfileLightbox('@displayPic')"
+                     title="Click to view full image">
+                    <img src="@displayPic"
+                         alt="@memberName"
+                         onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                    <div style="display: none;" class="w-100 h-100 align-items-center justify-content-center bg-light text-secondary">
+                        <i class="bi bi-person-fill" style="font-size: 4rem;"></i>
+                    </div>
+                </div>
+
+                <!-- Member Info -->
+                <div class="flex-grow-1 w-100">
+                    <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between mb-2">
+                        <h2 class="fw-bolder mb-1 text-dark" style="font-size: 2rem;">@memberName</h2>
+                        <span class="badge @(isActive ? "bg-success" : "bg-danger") px-3 py-2 fs-6" style="letter-spacing: 0.5px; border-radius: 10px;">
+                            @(isActive ? "ACTIVE MEMBERSHIP" : "NO ACTIVE PLAN")
+                        </span>
+                    </div>
+
+                    <p class="text-muted mb-3 fs-5">@memberEmail</p>
+
+                    @if (isActive)
+                    {
+                        <div class="p-3 text-success fw-bold d-flex align-items-center justify-content-center justify-content-sm-start fs-5" style="background-color: #ecfdf5; border-radius: 12px;">
+                            <i class="bi bi-check-circle-fill me-2 fs-4"></i> Valid until @expiryDate
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-3 text-danger fw-bold d-flex align-items-center justify-content-center justify-content-sm-start fs-5" style="background-color: #fef2f2; border-radius: 12px;">
+                            <i class="bi bi-x-circle-fill me-2 fs-4"></i> Check-in restricted (No active membership)
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var autoCloseTimer;
+
+        function closeProfileModal() {
+            var card = document.getElementById('checkInFloatingCard');
+            var backdrop = document.getElementById('cardBackdrop');
+
+            if (card) card.remove();
+            if (backdrop) backdrop.remove();
+
+            closeProfileLightbox();
+
+            if (autoCloseTimer) clearTimeout(autoCloseTimer);
+        }
+
+        function openProfileLightbox(imageSrc) {
+            // Check if lightbox already exists
+            if (document.getElementById('profileLightbox')) return;
+
+            var lightbox = document.createElement('div');
+            lightbox.id = 'profileLightbox';
+            lightbox.className = 'profile-lightbox-backdrop';
+            lightbox.onclick = closeProfileLightbox;
+
+            lightbox.innerHTML = `
+                <div class="profile-lightbox-card" onclick="event.stopPropagation();">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" onclick="closeProfileLightbox()" aria-label="Close"></button>
+                    <img src="${imageSrc}" class="profile-lightbox-img" alt="Profile Picture Preview" />
+                </div>
+            `;
+
+            document.body.appendChild(lightbox);
+        }
+
+        function closeProfileLightbox() {
+            var lightbox = document.getElementById('profileLightbox');
+            if (lightbox) lightbox.remove();
+        }
+
+        // Close lightbox on Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeProfileLightbox();
+            }
+        });
+
+        // Auto-dismiss main modal after 8 seconds
+        autoCloseTimer = setTimeout(function () {
+            closeProfileModal();
+        }, 8000);
+    </script>
 }
 
 <div class="container mt-4" style="max-width: 600px;">
@@ -18,18 +261,18 @@
         <p class="text-muted">Check in members or guests as they arrive at the gym.</p>
     </div>
 
-    @* ── Alerts ── *@
-    @if (TempData["AttendanceSuccess"] != null)
+    @* ── Standard Alerts ── *@
+    @if (TempData["AttendanceSuccess"] != null && string.IsNullOrEmpty(memberName))
     {
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="bi bi-check-circle me-1"></i> @TempData["AttendanceSuccess"]
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" style="border-radius: 12px;">
+            <i class="bi bi-check-circle-fill me-1"></i> @TempData["AttendanceSuccess"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
-    @if (TempData["AttendanceError"] != null)
+    @if (TempData["AttendanceError"] != null && string.IsNullOrEmpty(memberName))
     {
-        <div class="alert alert-danger alert-dismissible fade show">
-            <i class="bi bi-exclamation-circle me-1"></i> @TempData["AttendanceError"]
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" style="border-radius: 12px;">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> @TempData["AttendanceError"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
@@ -91,6 +334,9 @@
                 <button type="submit" class="btn btn-primary w-100" @(isFull ? "disabled" : "")>
                     <i class="bi bi-door-open me-1"></i> Check In Member
                 </button>
+                <button type="submit" asp-action="CheckOutMember" class="btn btn-outline-danger flex-fill">
+                    <i class="bi bi-box-arrow-right me-1"></i> Sign Out
+                </button>
             </form>
         </div>
     </div>
@@ -104,6 +350,12 @@
                 @Html.AntiForgeryToken()
                 <button type="submit" class="btn btn-outline-secondary w-100" @(isFull ? "disabled" : "")>
                     <i class="bi bi-person-plus me-1"></i> Login as Guest
+                </button>
+            </form>
+            <form asp-controller="Staff" asp-action="CheckOutGuest" method="post" class="flex-fill">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-danger w-100">
+                    <i class="bi bi-person-dash me-1"></i> Sign Out Guest
                 </button>
             </form>
         </div>

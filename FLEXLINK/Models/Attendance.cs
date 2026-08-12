@@ -14,5 +14,8 @@ namespace FLEXLINK.Models
         public string Type { get; set; } = "Guest";
 
         public DateTime CheckedInAt { get; set; } = DateTime.Now;
+
+        // Null until the member or guest checks out
+        public DateTime? CheckedOutAt { get; set; }
     }
 }

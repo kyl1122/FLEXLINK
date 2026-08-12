@@ -124,6 +124,12 @@ namespace FLEXLINK.Controllers
             }
 
             string memberName = user.FullName ?? user.Email ?? "Member";
+            string profilePic = !string.IsNullOrEmpty(user.ProfilePicture) ? user.ProfilePicture : "/uploads/default-avatar.png";
+
+            // Set common member information for the status card
+            TempData["MemberCheckInName"] = memberName;
+            TempData["MemberCheckInEmail"] = user.Email;
+            TempData["MemberCheckInPic"] = profilePic;
 
             // Check active membership BEFORE allowing check-in
             var activeMembership = await _db.UserMembership
@@ -133,8 +139,8 @@ namespace FLEXLINK.Controllers
 
             if (activeMembership == null)
             {
+                TempData["MemberCheckInStatus"] = "Inactive";
                 TempData["AttendanceError"] = $"{memberName} cannot check in — no active membership plan.";
-                TempData["MembershipWarning"] = $"⚠️ No active membership. {memberName} does not have a current membership plan.";
                 return RedirectToAction("Index");
             }
 
@@ -148,8 +154,10 @@ namespace FLEXLINK.Controllers
             });
             await _db.SaveChangesAsync();
 
+            TempData["MemberCheckInStatus"] = "Active";
+            TempData["MemberExpiryDate"] = activeMembership.ExpiryDate.ToString("MMMM dd, yyyy");
             TempData["AttendanceSuccess"] = $"{memberName} checked in successfully.";
-            TempData["MembershipStatus"] = $"✅ Active membership — valid until {activeMembership.ExpiryDate:MMMM dd, yyyy}.";
+
             return RedirectToAction("Index");
         }
 
@@ -178,12 +186,78 @@ namespace FLEXLINK.Controllers
             return RedirectToAction("Index");
         }
 
+
+
+        // ── Member Check-Out ──────────────────────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CheckOutMember(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                TempData["AttendanceError"] = "Please enter an email to check out.";
+                return RedirectToAction("Index");
+            }
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                TempData["AttendanceError"] = "No account found with that email.";
+                return RedirectToAction("Index");
+            }
+
+            var today = DateTime.Today;
+            var activeAttendance = await _db.Attendance
+                .Where(a => a.UserId == user.Id && a.CheckedInAt.Date == today && a.CheckedOutAt == null)
+                .OrderByDescending(a => a.CheckedInAt)
+                .FirstOrDefaultAsync();
+
+            if (activeAttendance == null)
+            {
+                TempData["AttendanceError"] = $"{user.FullName ?? user.Email} is not currently checked in.";
+                return RedirectToAction("Index");
+            }
+
+            activeAttendance.CheckedOutAt = DateTime.Now;
+            await _db.SaveChangesAsync();
+
+            TempData["AttendanceSuccess"] = $"{user.FullName ?? user.Email} signed out successfully.";
+            return RedirectToAction("Index");
+        }
+
+        // ── Guest Check-Out ───────────────────────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CheckOutGuest()
+        {
+            var today = DateTime.Today;
+            var activeGuest = await _db.Attendance
+                .Where(a => a.Type == "Guest" && a.CheckedInAt.Date == today && a.CheckedOutAt == null)
+                .OrderBy(a => a.CheckedInAt)
+                .FirstOrDefaultAsync();
+
+            if (activeGuest == null)
+            {
+                TempData["AttendanceError"] = "No active guests currently checked in.";
+                return RedirectToAction("Index");
+            }
+
+            activeGuest.CheckedOutAt = DateTime.Now;
+            await _db.SaveChangesAsync();
+
+            TempData["AttendanceSuccess"] = "Guest signed out successfully.";
+            return RedirectToAction("Index");
+        }
+
+        // ── Updated Capacity Helper ──────────────────────────────────────────
         private async Task<int> GetTodayAttendanceCountAsync()
         {
             var today = DateTime.Today;
             return await _db.Attendance
-                .Where(a => a.CheckedInAt.Date == today)
+                .Where(a => a.CheckedInAt.Date == today && a.CheckedOutAt == null)
                 .CountAsync();
         }
+
+
     }
 }
