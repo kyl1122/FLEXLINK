@@ -9,6 +9,8 @@
 
     var pendingRequests = ViewBag.PendingRequests as List<FLEXLINK.Models.RegistrationRequest> ?? new();
     int pendingCount = ViewBag.PendingCount ?? 0;
+    var paymentUsers = ViewBag.PaymentUsers as Dictionary<string, FLEXLINK.Models.Users> ?? new();
+    var pendingPayments = ViewBag.PendingPayments as List<FLEXLINK.Models.UserMembership> ?? new();
 }
 
 <div class="container mt-4" style="max-width: 700px;">
@@ -70,5 +72,59 @@
             }
         </div>
     </div>
+    
+    @* ── Membership Payment Approvals ── *@
+    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px; border-left: 4px solid #3b82f6 !important;">
+        <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+                <span class="badge bg-primary text-white me-2" style="font-size:0.85rem;">
+                    <i class="bi bi-credit-card-fill me-1"></i> @pendingPayments.Count Pending
+                </span>
+                <h6 class="fw-bold mb-0">Pending Membership Payments</h6>
+            </div>
+            @if (pendingPayments.Any())
+            {
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var pay in pendingPayments)
+                    {
+                        <div class="d-flex align-items-center justify-content-between border rounded px-3 py-2 bg-light">
+                            <div>
+                                <p class="fw-semibold mb-0 small">
+                                    @{
+                                        var hasUser = paymentUsers.TryGetValue(pay.UserId, out var payUser);
+                                    }
+                                    @(hasUser ? (payUser!.FullName ?? payUser.Email) : "Unknown user")
+                                </p>
+                                <p class="text-muted mb-0" style="font-size:0.75rem;">
+                                    @pay.Months-month plan &nbsp;·&nbsp; @pay.StartDate.ToString("MMM dd") – @pay.ExpiryDate.ToString("MMM dd, yyyy")
+                                </p>
+                            </div>
+                            <div class="d-flex gap-2 ms-3">
+                                <form asp-controller="Staff" asp-action="ApprovePayment" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="paymentId" value="@pay.Id" />
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="bi bi-check-lg me-1"></i> Approve
+                                    </button>
+                                </form>
+                                <form asp-controller="Staff" asp-action="RejectPayment" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="paymentId" value="@pay.Id" />
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="bi bi-x-lg me-1"></i> Reject
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted text-center my-3 small">No pending membership payments at this time.</p>
+            }
+        </div>
+    </div>
 
 </div>
+

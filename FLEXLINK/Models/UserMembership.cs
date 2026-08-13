@@ -16,5 +16,10 @@ namespace FLEXLINK.Models
 
         // Whether this plan is still active
         public bool IsActive => DateTime.Now <= ExpiryDate;
+
+        //review and approve/reject membership payments
+        public string Status { get; set; } = "Pending";
+
+        public DateTime? ReviewedAt { get; set; }
     }
 }

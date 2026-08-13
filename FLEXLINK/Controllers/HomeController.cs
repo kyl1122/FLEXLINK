@@ -359,12 +359,17 @@ namespace FLEXLINK.Controllers
             if (currentUser != null)
             {
                 activeMembership = _db.UserMembership
-                    .Where(m => m.UserId == currentUser.Id && m.ExpiryDate >= DateTime.Now)
+                    .Where(m => m.UserId == currentUser.Id && m.ExpiryDate >= DateTime.Now && m.Status == "Approved")
                     .OrderByDescending(m => m.ExpiryDate)
                     .FirstOrDefault();
             }
 
             ViewBag.ActiveMembership = activeMembership;
+            ViewBag.PendingMembership = _db.UserMembership
+            .Where(m => m.UserId == currentUser.Id && m.Status == "Pending")
+            .OrderByDescending(m => m.StartDate)
+            .FirstOrDefault();
+
             return View();
         }
 
@@ -391,20 +396,21 @@ namespace FLEXLINK.Controllers
 
             var startDate = existing != null ? existing.ExpiryDate : DateTime.Now;
             var expiryDate = startDate.AddMonths(months);
-
             _db.UserMembership.Add(new UserMembership
             {
                 UserId = currentUser.Id,
                 Months = months,
                 StartDate = startDate,
-                ExpiryDate = expiryDate
+                ExpiryDate = expiryDate,
+                Status = "Pending"
             });
 
             await _db.SaveChangesAsync();
 
-            TempData["MembershipSuccess"] = $"Successfully subscribed to the {months}-month plan! " +
-                $"Valid until {expiryDate:MMMM dd, yyyy}.";
+            TempData["MembershipSuccess"] = $"Your {months}-month plan request has been submitted and is awaiting staff approval.";
             return RedirectToAction("Membership");
+
+
         }
 
         public IActionResult Contact()

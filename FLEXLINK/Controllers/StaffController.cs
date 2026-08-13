@@ -25,23 +25,46 @@ namespace FLEXLINK.Controllers
         // ── Space Capacity Page ───────────────────────────────────────────────
         public async Task<IActionResult> SpaceCapacity()
         {
+            // 1. Attendance & Space Capacity calculations
             int currentCount = await GetTodayAttendanceCountAsync();
             ViewBag.CurrentCount = currentCount;
             ViewBag.MaxCapacity = MaxCapacity;
             ViewBag.IsFull = currentCount >= MaxCapacity;
 
-            // Full list of pending requests loaded here
+            // 2. Fetch pending registration requests sorted by RequestedAt
             var pendingRequests = await _db.RegistrationRequest
                 .Where(r => r.Status == "Pending")
                 .OrderBy(r => r.RequestedAt)
                 .ToListAsync();
 
+            var pendingPayments = await _db.UserMembership
+            .Where(p => p.Status == "Pending")
+            .OrderBy(p => p.StartDate)
+            .ToListAsync();
+
+            var userIds = pendingPayments.Select(p => p.UserId).Distinct().ToList();
+            var users = await _db.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, u => u);
+
+            // 3. Keep existing ViewBag items
             ViewBag.PendingRequests = pendingRequests;
             ViewBag.PendingCount = pendingRequests.Count;
+            ViewBag.PendingPaymentsCount = pendingPayments.Count;
+            ViewBag.PendingPayments = pendingPayments;
+            ViewBag.PaymentUsers = users;
 
-            return View();
+            // 4. Build the ViewModel with both PendingRegistrations and PendingPayments
+            var viewModel = new StaffApprovalViewModel
+            {
+                PendingRegistrations = pendingRequests,
+                PendingPayments = pendingPayments
+            };
+
+            return View(viewModel);
         }
 
+        
         // ── Landing Page (Staffers Dashboard) ─────────────────────────────────
         public async Task<IActionResult> Index()
         {
@@ -53,12 +76,19 @@ namespace FLEXLINK.Controllers
             // Only retrieve the count for the dashboard indicator
             int pendingCount = await _db.RegistrationRequest
                 .CountAsync(r => r.Status == "Pending");
+
+            int pendingPaymentsCount = await _db.UserMembership
+            .Where(p => p.Status == "Pending") 
+            .CountAsync();
             ViewBag.PendingCount = pendingCount;
+            ViewBag.PendingPaymentsCount = pendingPaymentsCount;
 
             return View(new LoginViewModel());
+
+
         }
 
-        // ── Approve Registration ──────────────────────────────────────────────
+        // — Approve Registration —
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApproveUser(int requestId)
@@ -78,7 +108,45 @@ namespace FLEXLINK.Controllers
             return RedirectToAction("SpaceCapacity");
         }
 
-        // ── Reject Registration ───────────────────────────────────────────────
+        // — Approve Membership Payment —
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApprovePayment(int paymentId)
+        {
+            var payment = await _db.UserMembership.FirstOrDefaultAsync(p => p.Id == paymentId);
+            if (payment == null)
+            {
+                TempData["AttendanceError"] = "Membership payment not found.";
+                return RedirectToAction("SpaceCapacity");
+            }
+            payment.Status = "Approved";
+            payment.ReviewedAt = DateTime.Now;
+            await _db.SaveChangesAsync();
+
+            TempData["AttendanceSuccess"] = "Membership payment approved.";
+            return RedirectToAction("SpaceCapacity");
+        }
+
+        // — Reject / Delete Membership Payment —
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectPayment(int paymentId)
+        {
+            var payment = await _db.UserMembership.FirstOrDefaultAsync(p => p.Id == paymentId);
+            if (payment == null)
+            {
+                TempData["AttendanceError"] = "Membership payment not found.";
+                return RedirectToAction("SpaceCapacity");
+            }
+
+            _db.UserMembership.Remove(payment); // delete outright, since it's an unpaid/invalid request
+            await _db.SaveChangesAsync();
+
+            TempData["AttendanceError"] = "Membership payment rejected and removed.";
+            return RedirectToAction("SpaceCapacity");
+        }
+
+        // — Reject Registration —
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RejectUser(int requestId)
@@ -133,7 +201,7 @@ namespace FLEXLINK.Controllers
 
             // Check active membership BEFORE allowing check-in
             var activeMembership = await _db.UserMembership
-                .Where(m => m.UserId == user.Id && m.ExpiryDate >= DateTime.Now)
+                .Where(m => m.UserId == user.Id && m.ExpiryDate >= DateTime.Now && m.Status == "Approved")
                 .OrderByDescending(m => m.ExpiryDate)
                 .FirstOrDefaultAsync();
 
