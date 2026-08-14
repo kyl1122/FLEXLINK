@@ -32,5 +32,10 @@ namespace FLEXLINK.ViewModels
         [Required(ErrorMessage ="Confirm Password is required.")]
         [DataType(DataType.Password)]
         [Display(Name = "Confirm Password")]
-        public string ConfirmPassword { get; set; }    }
+        public string ConfirmPassword { get; set; }
+
+        public IFormFile? ProfileImage { get; set; }
+    }
+
+
 }

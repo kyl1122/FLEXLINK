@@ -139,14 +139,13 @@ namespace FLEXLINK.Controllers
                 return RedirectToAction("SpaceCapacity");
             }
 
-            _db.UserMembership.Remove(payment); // delete outright, since it's an unpaid/invalid request
+            _db.UserMembership.Remove(payment); 
             await _db.SaveChangesAsync();
 
             TempData["AttendanceError"] = "Membership payment rejected and removed.";
             return RedirectToAction("SpaceCapacity");
         }
 
-        // — Reject Registration —
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RejectUser(int requestId)
@@ -154,15 +153,37 @@ namespace FLEXLINK.Controllers
             var request = await _db.RegistrationRequest.FirstOrDefaultAsync(r => r.Id == requestId);
             if (request == null)
             {
-                TempData["AttendanceError"] = "Registration request not found.";
+                TempData["AttendanceError"] = "Registration request not found or already processed.";
                 return RedirectToAction("SpaceCapacity");
             }
 
-            request.Status = "Rejected";
-            request.ReviewedAt = DateTime.Now;
-            await _db.SaveChangesAsync();
+            var user = await _userManager.FindByIdAsync(request.UserId);
 
-            TempData["AttendanceError"] = $"{request.FullName}'s registration has been rejected.";
+            try
+            {
+                _db.RegistrationRequest.Remove(request);
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Row was already deleted (e.g., double submit) — safe to ignore
+                TempData["AttendanceError"] = "This registration was already processed.";
+                return RedirectToAction("SpaceCapacity");
+            }
+
+            if (user != null)
+            {
+                if (!string.IsNullOrEmpty(user.ProfilePicture))
+                {
+                    var picPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", user.ProfilePicture.TrimStart('/'));
+                    if (System.IO.File.Exists(picPath))
+                        System.IO.File.Delete(picPath);
+                }
+
+                await _userManager.DeleteAsync(user);
+            }
+
+            TempData["AttendanceError"] = $"{request.FullName}'s registration has been rejected and removed.";
             return RedirectToAction("SpaceCapacity");
         }
 

@@ -20,10 +20,6 @@
         <p class="text-muted">review member registration requests.</p>
     </div>
 
-
-
-   
-
     @* ── Registration Requests Management ── *@
     <div class="card border-0 shadow-sm mb-4" style="border-radius:14px; border-left: 4px solid #f5a623 !important;">
         <div class="card-body">
@@ -40,11 +36,16 @@
                     @foreach (var req in pendingRequests)
                     {
                         <div class="d-flex align-items-center justify-content-between border rounded px-3 py-2 bg-light">
-                            <div>
-                                <p class="fw-semibold mb-0 small">@req.FullName</p>
-                                <p class="text-muted mb-0" style="font-size:0.75rem;">
-                                    @req.Email &nbsp;·&nbsp; Requested @req.RequestedAt.ToString("MMM dd, hh:mm tt")
-                                </p>
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="@(string.IsNullOrEmpty(req.ProfilePicture) ? "/uploads/DefaultProfile.png" : req.ProfilePicture)"
+                                     style="width:48px; height:48px; border-radius:50%; object-fit:cover; cursor:pointer;"
+                                     onclick="showProfilePreview('@(string.IsNullOrEmpty(req.ProfilePicture) ? "/uploads/DefaultProfile.png" : req.ProfilePicture)', '@req.FullName')" />
+                                <div>
+                                    <p class="fw-semibold mb-0 small">@req.FullName</p>
+                                    <p class="text-muted mb-0" style="font-size:0.75rem;">
+                                        @req.Email &nbsp;·&nbsp; Requested @req.RequestedAt.ToString("MMM dd, hh:mm tt")
+                                    </p>
+                                </div>
                             </div>
                             <div class="d-flex gap-2 ms-3">
                                 <form asp-controller="Staff" asp-action="ApproveUser" method="post">
@@ -72,7 +73,7 @@
             }
         </div>
     </div>
-    
+
     @* ── Membership Payment Approvals ── *@
     <div class="card border-0 shadow-sm mb-4" style="border-radius:14px; border-left: 4px solid #3b82f6 !important;">
         <div class="card-body">
@@ -128,3 +129,29 @@
 
 </div>
 
+@* ── Profile Picture Preview Modal ── *@
+<div class="modal fade" id="profilePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px; overflow:hidden;">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold" id="profilePreviewName"></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center pt-2 pb-4">
+                <img id="profilePreviewImage" src="" alt="Profile Picture"
+                     style="width:100%; max-width:320px; aspect-ratio:1/1; object-fit:cover; border-radius:12px;" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showProfilePreview(imageUrl, name) {
+            document.getElementById('profilePreviewImage').src = imageUrl;
+            document.getElementById('profilePreviewName').textContent = name;
+            var modal = new bootstrap.Modal(document.getElementById('profilePreviewModal'));
+            modal.show();
+        }
+    </script>
+}

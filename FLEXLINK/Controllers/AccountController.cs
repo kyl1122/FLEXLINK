@@ -106,13 +106,56 @@ namespace FLEXLINK.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
+            // ── PROFILE PICTURE IS REQUIRED ────────────────────────────────────────
+            if (model.ProfileImage == null || model.ProfileImage.Length == 0)
+            {
+                ModelState.AddModelError(string.Empty, "Profile picture is required.");
+                return View(model);
+            }
+
+            // ── HANDLE PROFILE PICTURE (before creating the user) ─────────────────
+            string? profilePicturePath = null;
+
+            if (model.ProfileImage != null && model.ProfileImage.Length > 0)
+            {
+                if (model.ProfileImage.Length > 2 * 1024 * 1024)
+                {
+                    ModelState.AddModelError(string.Empty, "File size must not exceed 2MB.");
+                    return View(model);
+                }
+
+                string[] allowedExtensions = { ".jpg", ".jpeg", ".png" };
+                string extension = Path.GetExtension(model.ProfileImage.FileName).ToLower();
+                if (!allowedExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError(string.Empty, "Only JPG, JPEG, and PNG files are allowed.");
+                    return View(model);
+                }
+
+                string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                if (!Directory.Exists(folder))
+                    Directory.CreateDirectory(folder);
+
+                string fileName = Guid.NewGuid().ToString() + extension;
+                string filePath = Path.Combine(folder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                    await model.ProfileImage.CopyToAsync(stream);
+
+                profilePicturePath = "/uploads/" + fileName;
+            }
+
             var user = new Users
             {
                 FullName = model.Name,
                 UserName = model.Email,
                 NormalizedUserName = model.Email.ToUpper(),
                 Email = model.Email,
-                NormalizedEmail = model.Email.ToUpper()
+                NormalizedEmail = model.Email.ToUpper(),
+                Age = model.Age,
+                Address = model.Address,
+                PhoneNumber = model.PhoneNumber,
+                ProfilePicture = profilePicturePath
             };
 
             var result = await userManager.CreateAsync(user, model.Password);
@@ -131,6 +174,7 @@ namespace FLEXLINK.Controllers
                     UserId = user.Id,
                     FullName = user.FullName ?? user.Email ?? "Unknown",
                     Email = user.Email ?? "",
+                    ProfilePicture = profilePicturePath,
                     Status = "Pending",
                     RequestedAt = DateTime.Now
                 });

@@ -14,6 +14,8 @@ namespace FLEXLINK.Models
         // "Pending", "Approved", "Rejected"
         public string Status { get; set; } = "Pending";
 
+        public string? ProfilePicture { get; set; }
+
         public DateTime RequestedAt { get; set; } = DateTime.Now;
 
         public DateTime? ReviewedAt { get; set; }
