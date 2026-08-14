@@ -20,11 +20,18 @@ namespace FLEXLINK.Controllers
             _db = db;
         }
 
+        // Maps a membership's Months to its price. Keep in sync with Subscribe()'s plans.
+        private static decimal GetMembershipPrice(int months) => months switch
+        {
+            1 => 300m,
+            2 => 550m,
+            3 => 800m,
+            _ => 0m
+        };
+
         // Landing page — shows dashboard overview (equipment, capacity, repair notes)
         public async Task<IActionResult> Index()
         {
-            // CHANGED: Removed individual user/trainer lists from Index to simplify the main dashboard overview
-            // (They are now isolated in their own dedicated pages below).
 
             // Load all repair notes with equipment info
             var repairNotes = await _db.EquipmentRepairNote
@@ -48,11 +55,89 @@ namespace FLEXLINK.Controllers
             ViewBag.CurrentCount = currentCount;
             ViewBag.MaxCapacity = 50;
 
+            // just counts, not full lists — the dashboard only shows totals
+            var allUsers = await _userManager.Users.ToListAsync();
+            int trainerCount = 0;
+            int userCount = 0;
+            foreach (var user in allUsers)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Contains("Trainer")) trainerCount++;
+                else if (!roles.Contains("Admin")) userCount++;
+            }
+            ViewBag.TrainerCount = trainerCount;
+            ViewBag.UserCount = userCount;
+
+            // equipment counts only
+            ViewBag.EquipmentCount = await _db.Equipment.CountAsync();
+            ViewBag.PendingRepairCount = await _db.EquipmentRepairNote.CountAsync();
+
+            // income summary (based on approved/paid memberships)
+            var approvedMemberships = await _db.UserMembership
+                .Where(m => m.Status == "Approved")
+                .ToListAsync();
+
+            var now = DateTime.Now;
+            ViewBag.CurrentMonthIncome = approvedMemberships
+                .Where(m => m.StartDate.Year == now.Year && m.StartDate.Month == now.Month)
+                .Sum(m => GetMembershipPrice(m.Months));
+            ViewBag.TotalIncome = approvedMemberships.Sum(m => GetMembershipPrice(m.Months));
+
+            // monthly breakdown, shown directly on the dashboard
+            ViewBag.MonthlyIncome = approvedMemberships
+                .GroupBy(m => new { m.StartDate.Year, m.StartDate.Month })
+                .Select(g => new MonthlyIncomeViewModel
+                {
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                    MembershipCount = g.Count(),
+                    Total = g.Sum(m => GetMembershipPrice(m.Months)),
+                    OneMonthCount = g.Count(m => m.Months == 1),
+                    TwoMonthCount = g.Count(m => m.Months == 2),
+                    ThreeMonthCount = g.Count(m => m.Months == 3)
+
+
+                })
+                .OrderByDescending(x => x.Year)
+                .ThenByDescending(x => x.Month)
+                .ToList();
+
             return View();
         }
 
         // =========================================================================
-        // ADDED: Dedicated Page Action for Trainers Navigation
+        // Page Action for Income Reports
+        // =========================================================================
+        [HttpGet]
+        public async Task<IActionResult> Income()
+        {
+            var approvedMemberships = await _db.UserMembership
+                .Where(m => m.Status == "Approved")
+                .ToListAsync();
+
+            var monthlyIncome = approvedMemberships
+                .GroupBy(m => new { m.StartDate.Year, m.StartDate.Month })
+                .Select(g => new MonthlyIncomeViewModel
+                {
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                    MembershipCount = g.Count(),
+                    Total = g.Sum(m => GetMembershipPrice(m.Months)),
+                    OneMonthCount = g.Count(m => m.Months == 1),
+                    TwoMonthCount = g.Count(m => m.Months == 2),
+                    ThreeMonthCount = g.Count(m => m.Months == 3)
+                })
+                .OrderByDescending(x => x.Year)
+                .ThenByDescending(x => x.Month)
+                .ToList();
+
+            ViewBag.TotalIncome = monthlyIncome.Sum(x => x.Total);
+
+            return View(monthlyIncome);
+        }
+
+        // =========================================================================
+        // Page Action for Trainers Navigation
         // =========================================================================
         [HttpGet]
         public async Task<IActionResult> Trainers()
@@ -177,6 +262,24 @@ namespace FLEXLINK.Controllers
         }
 
         // ─── EQUIPMENT ────────────────────────────────────────────────────────────
+        [HttpGet]
+        public async Task<IActionResult> Equipment()
+        {
+            var equipmentList = await _db.Equipment
+                .Include(e => e.RepairNotes)
+                .OrderBy(e => e.Name)
+                .ToListAsync();
+
+            var repairNotes = await _db.EquipmentRepairNote
+                .Include(r => r.Equipment)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+            ViewBag.RepairNotes = repairNotes;
+
+            return View(equipmentList);
+        }
+
+        // ─── ADD EQUIPMENT ────────────────────────────────────────────────────────────
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -211,7 +314,7 @@ namespace FLEXLINK.Controllers
                 await _db.SaveChangesAsync();
                 TempData["AdminSuccess"] = $"Equipment '{equipment.Name}' removed.";
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("Equipment");
         }
 
         // Mark a repair note as resolved (repaired) — deletes the note

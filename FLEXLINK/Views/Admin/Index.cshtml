@@ -3,9 +3,7 @@
     ViewData["Title"] = "Admin Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    var users = ViewBag.Users as List<Users> ?? new List<Users>();
-    var trainers = ViewBag.Trainers as List<Users> ?? new List<Users>();
-    var repairNotes = ViewBag.RepairNotes as List<EquipmentRepairNote> ?? new List<EquipmentRepairNote>();
+
 }
 
 <div class="container mt-4">
@@ -68,93 +66,85 @@
         </div>
     </div>
 
-    @* ── EQUIPMENT REPAIR NOTES ── *@
-    @if (repairNotes.Any())
-    {
-        <div class="card border-0 shadow-sm mb-4 border-danger">
-            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center"
-                 style="border-radius:12px 12px 0 0;">
-                <span class="fw-bold fs-6">
-                    <i class="bi bi-exclamation-triangle me-2"></i>Equipment Repair Reports
-                </span>
-                <span class="badge bg-white text-danger">@repairNotes.Count pending</span>
-            </div>
-            <div class="card-body p-0">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Equipment</th>
-                            <th>Reported By</th>
-                            <th>Issue</th>
-                            <th>Date Reported</th>
-                            <th class="text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var note in repairNotes)
-                        {
-                            <tr>
-                                <td>
-                                    <i class="bi bi-wrench-adjustable text-danger me-2"></i>
-                                    <strong>@note.Equipment?.Name</strong>
-                                </td>
-                                <td>
-                                    <i class="bi bi-person-circle text-primary me-1"></i>
-                                    @note.TrainerName
-                                </td>
-                                <td>@note.Note</td>
-                                <td class="text-muted small">@note.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</td>
-                                <td class="text-center">
-                                    <form asp-controller="Admin" asp-action="MarkRepaired" method="post"
-                                          onsubmit="return confirm('Mark this equipment as repaired?');">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="noteId" value="@note.Id" />
-                                        <button type="submit" class="btn btn-sm btn-success">
-                                            <i class="bi bi-check-lg me-1"></i>Repaired
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+@* ── TRAINERS, USERS & EQUIPMENT SUMMARY ── *@
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-start border-4 border-primary shadow-sm h-100" style="border-radius:12px;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-primary mb-1">
+                            <i class="bi bi-person-badge me-1"></i>@ViewBag.TrainerCount Total
+                        </span>
+                        <div class="fw-semibold">Trainers</div>
+                    </div>
+                    <a asp-controller="Admin" asp-action="Trainers" class="btn btn-outline-primary btn-sm">
+                        View Trainers <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
             </div>
         </div>
-    }
-    else
-    {
-        <div class="alert alert-success d-flex align-items-center mb-4">
-            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-            <span>No equipment repair reports pending. All equipment is in good condition!</span>
+        <div class="col-md-4">
+            <div class="card border-start border-4 border-secondary shadow-sm h-100" style="border-radius:12px;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-secondary mb-1">
+                            <i class="bi bi-people me-1"></i>@ViewBag.UserCount Total
+                        </span>
+                        <div class="fw-semibold">Users</div>
+                    </div>
+                    <a asp-controller="Admin" asp-action="Users" class="btn btn-outline-secondary btn-sm">
+                        View Users <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
         </div>
-    }
+        <div class="col-md-4">
+            <div class="card border-start border-4 border-warning shadow-sm h-100" style="border-radius:12px;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-warning text-dark mb-1">
+                            <i class="bi bi-tools me-1"></i>@ViewBag.EquipmentCount Total
+                        </span>
+                        <div class="fw-semibold">
+                            Equipment
+                            @if ((int)ViewBag.PendingRepairCount > 0)
+                            {
+                                <span class="badge bg-danger ms-1">@ViewBag.PendingRepairCount pending</span>
+                            }
+                        </div>
+                    </div>
+                    <a asp-controller="Admin" asp-action="Equipment" class="btn btn-outline-warning btn-sm">
+                        View Equipment <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    @* ── EQUIPMENT MANAGEMENT ── *@
+@* ── INCOME REPORTS ── *@
+@{
+    var monthlyIncome = ViewBag.MonthlyIncome as List<FLEXLINK.ViewModels.MonthlyIncomeViewModel> ?? new();
+}
+    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <span class="fw-semibold"><i class="bi bi-cash-stack me-1"></i>All-Time Income</span>
+            <span class="fw-bold text-success fs-4">₱@(((decimal)ViewBag.TotalIncome).ToString("N0"))</span>
+        </div>
+    </div>
+
     <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center"
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center"
              style="border-radius:12px 12px 0 0;">
             <span class="fw-bold fs-6">
-                <i class="bi bi-tools me-2"></i>Equipment Management
+                <i class="bi bi-graph-up me-2"></i>Monthly Income Breakdown
             </span>
-            <button class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
-                <i class="bi bi-plus-lg me-1"></i>Add Equipment
-            </button>
+            <span class="badge bg-white text-success">@monthlyIncome.Count month@(monthlyIncome.Count != 1 ? "s" : "")</span>
         </div>
         <div class="card-body p-0">
-            @{
-                var allEquipment = (ViewBag.RepairNotes as List<EquipmentRepairNote>)?.Select(r => r.Equipment).Distinct().ToList();
-                // Load fresh from DB — we need to build this from controller
-                // Use the equipment list passed via ViewBag
-            }
-            @{
-                // We'll re-query from repairNotes for equipment names, but the full list
-                // needs to come from the controller. We'll use a separate ViewBag key.
-                var equipmentList = ViewBag.EquipmentList as List<Equipment> ?? new List<Equipment>();
-            }
-            @if (!equipmentList.Any())
+            @if (!monthlyIncome.Any())
             {
                 <p class="text-muted text-center py-4 mb-0">
-                    <i class="bi bi-inbox me-1"></i>No equipment added yet. Click "Add Equipment" to get started.
+                    <i class="bi bi-inbox me-1"></i>No approved memberships yet.
                 </p>
             }
             else
@@ -162,48 +152,34 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th>Equipment Name</th>
-                            <th>Description</th>
-                            <th>Date Added</th>
-                            <th>Status</th>
-                            <th class="text-center">Action</th>
+                            <th>Month</th>
+                            <th class="text-center">Memberships Sold</th>
+                            <th class="text-end">Income</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var eq in equipmentList)
+                        @foreach (var row in monthlyIncome)
                         {
-                            bool needsRepair = eq.RepairNotes.Any();
                             <tr>
-                                <td>
-                                    <i class="bi bi-wrench-adjustable @(needsRepair ? "text-danger" : "text-success") me-2"></i>
-                                    <strong>@eq.Name</strong>
-                                </td>
-                                <td class="text-muted small">@(eq.Description ?? "—")</td>
-                                <td class="text-muted small">@eq.CreatedAt.ToString("MMM dd, yyyy")</td>
-                                <td>
-                                    @if (needsRepair)
-                                    {
-                                        <span class="badge bg-danger">
-                                            <i class="bi bi-exclamation-triangle me-1"></i>@eq.RepairNotes.Count report(s)
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-success">
-                                            <i class="bi bi-check-circle me-1"></i>OK
-                                        </span>
-                                    }
-                                </td>
+                                <td><i class="bi bi-calendar3 me-2 text-success"></i>@row.MonthLabel</td>
                                 <td class="text-center">
-                                    <form asp-controller="Admin" asp-action="DeleteEquipment" method="post"
-                                          onsubmit="return confirm('Delete equipment \'@eq.Name\'? All its repair notes will also be removed.');">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="equipmentId" value="@eq.Id" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-trash me-1"></i>Delete
-                                        </button>
-                                    </form>
+                                    @row.MembershipCount
+                                    <div class="mt-1">
+                                        @if (row.OneMonthCount > 0)
+                                        {
+                                            <span class="badge bg-light text-dark border me-1">1mo × @row.OneMonthCount</span>
+                                        }
+                                        @if (row.TwoMonthCount > 0)
+                                        {
+                                            <span class="badge bg-light text-dark border me-1">2mo × @row.TwoMonthCount</span>
+                                        }
+                                        @if (row.ThreeMonthCount > 0)
+                                        {
+                                            <span class="badge bg-light text-dark border">3mo × @row.ThreeMonthCount</span>
+                                        }
+                                    </div>
                                 </td>
+                                <td class="text-end fw-semibold">₱@row.Total.ToString("N0")</td>
                             </tr>
                         }
                     </tbody>
@@ -212,155 +188,10 @@
         </div>
     </div>
 
-    @* ── TRAINERS GROUP ── *@
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center"
-             style="border-radius:12px 12px 0 0;">
-            <span class="fw-bold fs-6">
-                <i class="bi bi-person-badge me-2"></i>Trainers
-            </span>
-            <span class="badge bg-white text-primary">@trainers.Count</span>
-        </div>
-        <div class="card-body p-0">
-            @if (!trainers.Any())
-            {
-                <p class="text-muted text-center py-4 mb-0">No trainers registered yet.</p>
-            }
-            else
-            {
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Full Name</th>
-                            <th>Email</th>
-                            <th>Username</th>
-                            <th>Date Created</th>
-                            <th class="text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var trainer in trainers)
-                        {
-                            <tr>
-                                <td>
-                                    <i class="bi bi-person-circle text-primary me-2"></i>
-                                    @(trainer.FullName ?? "—")
-                                </td>
-                                <td>@trainer.Email</td>
-                                <td class="text-muted small">@trainer.UserName</td>
-                                <td class="text-muted small">@trainer.CreatedAt.ToString("MMMM dd, yyyy")</td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-danger"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#deleteModal"
-                                            data-user-id="@trainer.Id"
-                                            data-user-email="@trainer.Email">
-                                        <i class="bi bi-trash me-1"></i> Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-        </div>
-    </div>
 
-    @* ── USERS GROUP ── *@
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center"
-             style="border-radius:12px 12px 0 0;">
-            <span class="fw-bold fs-6">
-                <i class="bi bi-people me-2"></i>Users
-            </span>
-            <span class="badge bg-white text-secondary">@users.Count</span>
-        </div>
-        <div class="card-body p-0">
-            @if (!users.Any())
-            {
-                <p class="text-muted text-center py-4 mb-0">No users registered yet.</p>
-            }
-            else
-            {
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Photo</th>
-                            <th>Full Name</th>
-                            <th>Email</th>
-                            <th>Username</th>
-                            <th>Date Created</th>
-                            <th class="text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var user in users)
-                        {
-                            <tr>
-                                <td>
-                                    <img src="@(string.IsNullOrEmpty(user.ProfilePicture) ? "/uploads/DefaultProfile.png" : user.ProfilePicture)"
-                                         alt="@user.FullName"
-                                         style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid #dee2e6;" />
-                                </td>
-                                <td>
-                                    @(user.FullName ?? "—")
-                                </td>
-                                <td>@user.Email</td>
-                                <td class="text-muted small">@user.UserName</td>
-                                <td class="text-muted small">@user.CreatedAt.ToString("MMMM dd, yyyy")</td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-danger"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#deleteModal"
-                                            data-user-id="@user.Id"
-                                            data-user-email="@user.Email">
-                                        <i class="bi bi-trash me-1"></i> Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-        </div>
-    </div>
+    
 
-</div>
 
-@* ── Add Equipment Modal ── *@
-<div class="modal fade" id="addEquipmentModal" tabindex="-1" aria-labelledby="addEquipmentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title" id="addEquipmentModalLabel">
-                    <i class="bi bi-tools me-2"></i>Add New Equipment
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form asp-controller="Admin" asp-action="AddEquipment" method="post">
-                @Html.AntiForgeryToken()
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="equipName" class="form-label fw-semibold">Equipment Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="equipName" name="name"
-                               placeholder="e.g. Treadmill, Barbell, Bench Press" required maxlength="200" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="equipDesc" class="form-label fw-semibold">Description <span class="text-muted small">(optional)</span></label>
-                        <textarea class="form-control" id="equipDesc" name="description" rows="2"
-                                  placeholder="e.g. Commercial-grade treadmill, Zone A" maxlength="500"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning text-dark fw-semibold">
-                        <i class="bi bi-plus-lg me-1"></i>Add Equipment
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 @* ── Delete User Confirmation Modal ── *@
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">

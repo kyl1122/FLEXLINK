@@ -56,6 +56,7 @@
                                 <th class="ps-3">Full Name</th>
                                 <th>Email</th>
                                 <th>Username</th>
+                                <th>Date Created</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -68,6 +69,7 @@
                                     </td>
                                     <td class="text-primary">@trainer.Email</td>
                                     <td>@trainer.UserName</td>
+                                    <td class="text-muted small">@trainer.CreatedAt.ToString("MMM dd, yyyy")</td>
                                     <td>
                                         <form asp-action="DeleteUser" method="post" onsubmit="return confirm('Are you sure you want to delete this trainer?');">
                                             <input type="hidden" name="userId" value="@trainer.Id" />
