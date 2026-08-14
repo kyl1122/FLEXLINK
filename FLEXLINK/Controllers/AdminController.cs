@@ -72,6 +72,9 @@ namespace FLEXLINK.Controllers
             ViewBag.EquipmentCount = await _db.Equipment.CountAsync();
             ViewBag.PendingRepairCount = await _db.EquipmentRepairNote.CountAsync();
 
+            // dictionary for resolving UserId -> display name
+            var userLookup = allUsers.ToDictionary(u => u.Id, u => u.FullName ?? u.Email ?? "Unknown");
+
             // income summary (based on approved/paid memberships)
             var approvedMemberships = await _db.UserMembership
                 .Where(m => m.Status == "Approved")
@@ -94,7 +97,18 @@ namespace FLEXLINK.Controllers
                     Total = g.Sum(m => GetMembershipPrice(m.Months)),
                     OneMonthCount = g.Count(m => m.Months == 1),
                     TwoMonthCount = g.Count(m => m.Months == 2),
-                    ThreeMonthCount = g.Count(m => m.Months == 3)
+                    ThreeMonthCount = g.Count(m => m.Months == 3),
+                    Details = g.Select(m => new MembershipSaleDetail
+                    {
+                        UserName = userLookup.TryGetValue(m.UserId, out var name) ? name : "Unknown",
+                        Months = m.Months,
+                        Price = GetMembershipPrice(m.Months),
+                        StartDate = m.StartDate,
+                        ExpiryDate = m.ExpiryDate
+                    })
+                    .OrderBy(d => d.UserName)
+                    .ToList()
+
 
 
                 })
@@ -111,6 +125,9 @@ namespace FLEXLINK.Controllers
         [HttpGet]
         public async Task<IActionResult> Income()
         {
+            var allUsers = await _userManager.Users.ToListAsync();
+            var userLookup = allUsers.ToDictionary(u => u.Id, u => u.FullName ?? u.Email ?? "Unknown");
+
             var approvedMemberships = await _db.UserMembership
                 .Where(m => m.Status == "Approved")
                 .ToListAsync();
@@ -125,7 +142,17 @@ namespace FLEXLINK.Controllers
                     Total = g.Sum(m => GetMembershipPrice(m.Months)),
                     OneMonthCount = g.Count(m => m.Months == 1),
                     TwoMonthCount = g.Count(m => m.Months == 2),
-                    ThreeMonthCount = g.Count(m => m.Months == 3)
+                    ThreeMonthCount = g.Count(m => m.Months == 3),
+                    Details = g.Select(m => new MembershipSaleDetail
+                    {
+                        UserName = userLookup.TryGetValue(m.UserId, out var name) ? name : "Unknown",
+                        Months = m.Months,
+                        Price = GetMembershipPrice(m.Months),
+                        StartDate = m.StartDate,
+                        ExpiryDate = m.ExpiryDate
+                    })
+                    .OrderBy(d => d.UserName)
+                    .ToList()
                 })
                 .OrderByDescending(x => x.Year)
                 .ThenByDescending(x => x.Month)

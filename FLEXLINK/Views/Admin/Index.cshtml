@@ -158,10 +158,18 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @{
+                            int rowIndex = 0;
+                        }
                         @foreach (var row in monthlyIncome)
                         {
-                            <tr>
-                                <td><i class="bi bi-calendar3 me-2 text-success"></i>@row.MonthLabel</td>
+                            rowIndex++;
+                            string collapseId = $"monthDetail{rowIndex}";
+                            <tr style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#@collapseId">
+                                <td>
+                                    <i class="bi bi-chevron-right me-2 text-muted"></i>
+                                    <i class="bi bi-calendar3 me-2 text-success"></i>@row.MonthLabel
+                                </td>
                                 <td class="text-center">
                                     @row.MembershipCount
                                     <div class="mt-1">
@@ -180,6 +188,33 @@
                                     </div>
                                 </td>
                                 <td class="text-end fw-semibold">₱@row.Total.ToString("N0")</td>
+                            </tr>
+                            <tr class="collapse" id="@collapseId">
+                                <td colspan="3" class="bg-light p-0">
+                                    <table class="table table-sm mb-0">
+                                        <thead>
+                                            <tr class="small text-muted">
+                                                <th class="ps-4">Member</th>
+                                                <th>Plan</th>
+                                                <th>Start Date</th>
+                                                <th>Expiry Date</th>
+                                                <th class="text-end pe-4">Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var detail in row.Details)
+                                            {
+                                                <tr>
+                                                    <td class="ps-4">@detail.UserName</td>
+                                                    <td>@detail.PlanLabel</td>
+                                                    <td>@detail.StartDate.ToString("MMM dd, yyyy")</td>
+                                                    <td>@detail.ExpiryDate.ToString("MMM dd, yyyy")</td>
+                                                    <td class="text-end pe-4">₱@detail.Price.ToString("N0")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </td>
                             </tr>
                         }
                     </tbody>
