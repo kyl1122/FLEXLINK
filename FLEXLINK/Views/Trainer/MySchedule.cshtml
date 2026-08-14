@@ -14,7 +14,7 @@
             + Make Your Schedule
         </button>
     </div>
-
+    
     @* Success / Error alerts *@
     @if (TempData["ScheduleSuccess"] != null)
     {
@@ -157,13 +157,15 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Date</label>
-                        <input type="date" name="scheduleDate" class="form-control"
+                        <input type="date" name="scheduleDate" id="scheduleDate" class="form-control"
                                min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Start Time</label>
-                        <input type="time" name="startTime" id="startTime" class="form-control" required />
+                        <input type="time" name="startTime" id="startTime" class="form-control"
+                               min="08:00" max="23:59" required />
+                        <div class="form-text text-muted">Sessions can start between 8:00 AM and 11:59 PM.</div>
                     </div>
 
                     <div class="mb-3">
@@ -208,9 +210,32 @@
 
 @section Scripts {
     <script>
+        // Existing slots for THIS trainer, sent from the server so JS can check conflicts live
+        const existingSchedules = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Model.Select(s => new {
+                date = s.ScheduleDate.ToString("yyyy-MM-dd"),
+                startMinutes = s.StartTime.Hours * 60 + s.StartTime.Minutes,
+                endMinutes = s.EndTime.Hours * 60 + s.EndTime.Minutes
+            })
+        ));
+
+        function formatMinutes(totalMinutes) {
+            const h = Math.floor(totalMinutes / 60) % 24;
+            const m = totalMinutes % 60;
+            const period = h >= 12 ? 'PM' : 'AM';
+            const displayH = h % 12 || 12;
+            return String(displayH).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ' ' + period;
+        }
+
         function updateEndTime() {
-            const startVal = document.getElementById('startTime').value;
+            const startInput = document.getElementById('startTime');
+            const dateInput = document.getElementById('scheduleDate');
+            const startVal = startInput.value;
+            const dateVal = dateInput.value;
             const durationVal = document.getElementById('durationMinutes').value;
+
+            // Always clear any previous custom error first
+            startInput.setCustomValidity('');
 
             if (!startVal || !durationVal) {
                 document.getElementById('endTime').value = '';
@@ -220,30 +245,69 @@
 
             const [hours, minutes] = startVal.split(':').map(Number);
             const startTotalMinutes = hours * 60 + minutes;
-            const endTotalMinutes = startTotalMinutes + parseInt(durationVal);
 
-            const endHours = Math.floor(endTotalMinutes / 60) % 24;
-            const endMins = endTotalMinutes % 60;
+            if (startTotalMinutes < 8 * 60) {
+                startInput.setCustomValidity('Value must be 8:00 AM or later.');
+                startInput.reportValidity();
+                document.getElementById('endTime').value = '';
+                document.getElementById('endTimeDisplay').value = '';
+                return;
+            }
 
-            // HH:MM for the hidden input
+            const rawEndTotalMinutes = startTotalMinutes + parseInt(durationVal);
+
+            // Would this session cross midnight?
+            if (rawEndTotalMinutes >= 24 * 60) {
+                startInput.setCustomValidity(
+                    'This session would cross into the next day. Choose an earlier start time or a shorter duration.'
+                );
+                startInput.reportValidity();
+                document.getElementById('endTime').value = '';
+                document.getElementById('endTimeDisplay').value = '';
+                return;
+            }
+
+            // Does this overlap an existing slot on the same date?
+            if (dateVal) {
+                const conflict = existingSchedules.find(function (s) {
+                    return s.date === dateVal &&
+                        startTotalMinutes < s.endMinutes &&
+                        rawEndTotalMinutes > s.startMinutes;
+                });
+
+                if (conflict) {
+                    startInput.setCustomValidity(
+                        'This overlaps an existing schedule from ' +
+                        formatMinutes(conflict.startMinutes) + ' to ' +
+                        formatMinutes(conflict.endMinutes) + '. Choose a different time.'
+                    );
+                    startInput.reportValidity();
+                    document.getElementById('endTime').value = '';
+                    document.getElementById('endTimeDisplay').value = '';
+                    return;
+                }
+            }
+
+            const endHours = Math.floor(rawEndTotalMinutes / 60) % 24;
+            const endMins = rawEndTotalMinutes % 60;
+
             const endTimeStr = String(endHours).padStart(2, '0') + ':' + String(endMins).padStart(2, '0');
             document.getElementById('endTime').value = endTimeStr;
 
-            // Friendly display e.g. "02:30 PM"
-            const period = endHours >= 12 ? 'PM' : 'AM';
-            const displayHours = endHours % 12 || 12;
-            document.getElementById('endTimeDisplay').value =
-                String(displayHours).padStart(2, '0') + ':' + String(endMins).padStart(2, '0') + ' ' + period;
+            document.getElementById('endTimeDisplay').value = formatMinutes(rawEndTotalMinutes);
         }
 
+        document.getElementById('startTime').addEventListener('input', updateEndTime);
         document.getElementById('startTime').addEventListener('change', updateEndTime);
         document.getElementById('durationMinutes').addEventListener('change', updateEndTime);
+        document.getElementById('scheduleDate').addEventListener('change', updateEndTime);
 
-        // Guard: block submit if end time wasn't calculated
-        document.querySelector('#addScheduleModal form').addEventListener('submit', function(e) {
+        // Guard: block submit if end time wasn't calculated (covers midnight-crossing, conflicts, and empty fields)
+        document.querySelector('#addScheduleModal form').addEventListener('submit', function (e) {
+            const startInput = document.getElementById('startTime');
             if (!document.getElementById('endTime').value) {
                 e.preventDefault();
-                alert('Please select both a start time and a duration.');
+                startInput.reportValidity();
             }
         });
     </script>

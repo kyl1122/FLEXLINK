@@ -196,10 +196,22 @@ namespace FLEXLINK.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return RedirectToAction("Login", "Account");
 
+
+
             // Basic validation
             if (scheduleDate.Date < DateTime.Today)
             {
                 TempData["ScheduleError"] = "Schedule date cannot be in the past.";
+                return RedirectToAction("MySchedule");
+            }
+
+            // Enforce gym operating hours: trainers can only schedule between 8:00 AM and 11:59 PM
+            var openingTime = new TimeSpan(8, 0, 0);
+            var closingTime = new TimeSpan(23, 59, 0);
+
+            if (startTime < openingTime || startTime > closingTime)
+            {
+                TempData["ScheduleError"] = "Sessions can only start between 8:00 AM and 11:59 PM.";
                 return RedirectToAction("MySchedule");
             }
 
@@ -211,16 +223,21 @@ namespace FLEXLINK.Controllers
                 return RedirectToAction("MySchedule");
             }
 
-            // Calculate end time from start + duration
-            endTime = startTime.Add(TimeSpan.FromMinutes(durationMinutes));
-
-            // Duration must be between 1 hour and 1 hour 30 minutes
-            var duration = endTime - startTime;
-            if (duration < TimeSpan.FromHours(1))
+            // Block sessions that would cross midnight — SQL Server's `time` column
+            // (00:00:00–23:59:59.9999999) can't store a value past 24 hours, and our
+            // schema has no EndDate to represent an overnight session.
+            var rawEndTime = startTime.Add(TimeSpan.FromMinutes(durationMinutes));
+            if (rawEndTime >= TimeSpan.FromHours(24))
             {
-                TempData["ScheduleError"] = "Session duration must be at least 1 hour.";
+                TempData["ScheduleError"] =
+                    $"A session starting at {DateTime.Today.Add(startTime):hh:mm tt} with a " +
+                    $"{durationMinutes / 60.0:0.#}-hour duration would cross into the next day. " +
+                    "Please choose an earlier start time or a shorter duration.";
                 return RedirectToAction("MySchedule");
             }
+
+            // Calculate end time from start + duration
+            endTime = rawEndTime;
 
 
             // Check if this trainer already has a slot that overlaps with the new one
