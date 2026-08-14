@@ -29,3 +29,26 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+.flexlink-navbar {
+    background-color: #000000;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+    .flexlink-navbar .nav-link {
+        color: #ffffff !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 200;
+        font-size: 0.9rem;
+        margin: 0 8px;
+    }
+
+        .flexlink-navbar .nav-link:hover {
+            color: #cccccc !important;
+        }
+
+    .flexlink-navbar .navbar-brand img {
+        height: 15px;
+    }
