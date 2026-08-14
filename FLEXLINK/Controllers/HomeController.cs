@@ -24,10 +24,7 @@ namespace FLEXLINK.Controllers
             return View();
         }
 
-        public IActionResult Wallet()
-        {
-            return View();
-        }
+
 
         public IActionResult Privacy()
         {
@@ -156,6 +153,17 @@ namespace FLEXLINK.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
+            // check if this user has an active, approved membership
+            bool hasActiveMembership = false;
+            if (currentUser != null)
+            {
+                hasActiveMembership = _db.UserMembership
+                    .Any(m => m.UserId == currentUser.Id
+                           && m.ExpiryDate >= DateTime.Now
+                           && m.Status == "Approved");
+            }
+            ViewBag.HasActiveMembership = hasActiveMembership;
+
             // Only fetch trainers that have filled in at least their name
             var trainers = _db.ProfileTrainer
                               .Where(p => p.FullName != null && p.FullName != "")
@@ -266,6 +274,24 @@ namespace FLEXLINK.Controllers
             if (currentUser == null)
             {
                 TempData["BookingError"] = "You must be logged in to book a session.";
+                return RedirectToAction("Trainer");
+            }
+
+            // must have an active, approved membership
+            bool hasActiveMembership = _db.UserMembership
+                .Any(m => m.UserId == currentUser.Id
+                       && m.ExpiryDate >= DateTime.Now
+                       && m.Status == "Approved");
+
+            if (!hasActiveMembership)
+            {
+                TempData["BookingError"] = "You need an active membership to book a session. Please subscribe first.";
+                return RedirectToAction("Trainer");
+            }
+
+            if (string.IsNullOrWhiteSpace(scheduleIds))
+            {
+                TempData["BookingError"] = "Please select at least one schedule slot.";
                 return RedirectToAction("Trainer");
             }
 
