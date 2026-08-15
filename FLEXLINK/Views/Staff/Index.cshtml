@@ -17,6 +17,8 @@
     string? memberPic = TempData["MemberCheckInPic"] as string;
     string? memberStatus = TempData["MemberCheckInStatus"] as string;
     string? expiryDate = TempData["MemberExpiryDate"] as string;
+    string? memberId = ViewBag.CheckedInUserId as string;
+
 
     // Ensure a safe fallback avatar URL
     string displayPic = !string.IsNullOrWhiteSpace(memberPic) ? memberPic : "/uploads/default-avatar.png";
@@ -196,6 +198,22 @@
                         <div class="p-3 text-danger fw-bold d-flex align-items-center justify-content-center justify-content-sm-start fs-5" style="background-color: #fef2f2; border-radius: 12px;">
                             <i class="bi bi-x-circle-fill me-2 fs-4"></i> Check-in restricted (No active membership)
                         </div>
+
+                        <form asp-controller="Staff" asp-action="AddMembershipQuick" method="post"
+                              class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 p-3"
+                              style="background-color: #f8fafc; border-radius: 12px;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@memberId" />
+                            <label class="fw-semibold text-nowrap me-sm-2 mb-0">Add Membership:</label>
+                            <select name="months" class="form-select form-select-sm" style="max-width: 160px;">
+                                <option value="1">1 Month</option>
+                                <option value="2">2 Months</option>
+                                <option value="3">3 Months</option>
+                            </select>
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="bi bi-plus-circle me-1"></i> Grant Membership
+                            </button>
+                        </form>
                     }
                 </div>
             </div>

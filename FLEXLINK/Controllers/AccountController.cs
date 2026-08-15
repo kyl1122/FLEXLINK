@@ -68,7 +68,7 @@ namespace FLEXLINK.Controllers
             }
 
             var result = await signInManager.PasswordSignInAsync(
-                model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
 
             if (result.Succeeded)
             {
@@ -85,6 +85,20 @@ namespace FLEXLINK.Controllers
                 }
 
                 return RedirectToAction("Index", "Home");
+            }
+
+
+            if (result.IsLockedOut)
+            {
+                var lockoutEnd = await userManager.GetLockoutEndDateAsync(user!);
+                int secondsLeft = lockoutEnd.HasValue
+                    ? Math.Max(0, (int)(lockoutEnd.Value - DateTimeOffset.Now).TotalSeconds)
+                    : 30;
+
+                ModelState.AddModelError(string.Empty,
+                $"Too many failed login attempts. Please try again in {secondsLeft} seconds.");
+                ViewBag.LockoutSeconds = secondsLeft;
+                return View(model);
             }
 
             ModelState.AddModelError(string.Empty, "Invalid Login Attempt.");

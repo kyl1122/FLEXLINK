@@ -45,6 +45,30 @@
     </div>
 </div>
 
+@if (ViewBag.LockoutSeconds != null)
+{
+    <script>
+        (function () {
+            let secondsLeft = @ViewBag.LockoutSeconds;
+            const loginBtn = document.querySelector('input[type="submit"]');
+            const errorEl = document.querySelector('.text-danger li') || document.querySelector('.text-danger');
+
+            function tick() {
+                if (secondsLeft <= 0) {
+                    if (loginBtn) loginBtn.disabled = false;
+                    if (errorEl) errorEl.textContent = "You can now try logging in again.";
+                    return;
+                }
+                if (loginBtn) loginBtn.disabled = true;
+                if (errorEl) errorEl.textContent = `Too many failed login attempts. Please try again in ${secondsLeft} seconds.`;
+                secondsLeft--;
+                setTimeout(tick, 1000);
+            }
+            tick();
+        })();
+    </script>
+}
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");

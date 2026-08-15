@@ -89,16 +89,21 @@
                     @foreach (var pay in pendingPayments)
                     {
                         <div class="d-flex align-items-center justify-content-between border rounded px-3 py-2 bg-light">
-                            <div>
-                                <p class="fw-semibold mb-0 small">
-                                    @{
-                                        var hasUser = paymentUsers.TryGetValue(pay.UserId, out var payUser);
-                                    }
-                                    @(hasUser ? (payUser!.FullName ?? payUser.Email) : "Unknown user")
-                                </p>
-                                <p class="text-muted mb-0" style="font-size:0.75rem;">
-                                    @pay.Months-month plan &nbsp;·&nbsp; @pay.StartDate.ToString("MMM dd") – @pay.ExpiryDate.ToString("MMM dd, yyyy")
-                                </p>
+                            @{
+                                var hasUser = paymentUsers.TryGetValue(pay.UserId, out var payUser);
+                                var payPic = (hasUser && !string.IsNullOrEmpty(payUser!.ProfilePicture)) ? payUser.ProfilePicture : "/uploads/DefaultProfile.png";
+                                var payName = hasUser ? (payUser!.FullName ?? payUser.Email) : "Unknown user";
+                            }
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="@payPic"
+                                     style="width:48px; height:48px; border-radius:50%; object-fit:cover; cursor:pointer;"
+                                     onclick="showProfilePreview('@payPic', '@payName')" />
+                                <div>
+                                    <p class="fw-semibold mb-0 small">@payName</p>
+                                    <p class="text-muted mb-0" style="font-size:0.75rem;">
+                                        @pay.Months-month plan &nbsp;·&nbsp; @pay.StartDate.ToString("MMM dd") – @pay.ExpiryDate.ToString("MMM dd, yyyy")
+                                    </p>
+                                </div>
                             </div>
                             <div class="d-flex gap-2 ms-3">
                                 <form asp-controller="Staff" asp-action="ApprovePayment" method="post">

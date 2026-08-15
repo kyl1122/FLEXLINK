@@ -64,9 +64,9 @@ namespace FLEXLINK.Controllers
             return View(viewModel);
         }
 
-        
+
         // ── Landing Page (Staffers Dashboard) ─────────────────────────────────
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? checkedInUserId)
         {
             int currentCount = await GetTodayAttendanceCountAsync();
             ViewBag.CurrentCount = currentCount;
@@ -82,6 +82,7 @@ namespace FLEXLINK.Controllers
             .CountAsync();
             ViewBag.PendingCount = pendingCount;
             ViewBag.PendingPaymentsCount = pendingPaymentsCount;
+            ViewBag.CheckedInUserId = checkedInUserId;
 
             return View(new LoginViewModel());
 
@@ -212,6 +213,15 @@ namespace FLEXLINK.Controllers
                 return RedirectToAction("Index");
             }
 
+            // ── Block Staff/Admin accounts from Member Check-In ──
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles.Contains("Staff") || roles.Contains("Admin"))
+            {
+                TempData["AttendanceError"] = "Staff and Admin accounts cannot be checked in as members.";
+                return RedirectToAction("Index");
+            }
+
+
             string memberName = user.FullName ?? user.Email ?? "Member";
             string profilePic = !string.IsNullOrEmpty(user.ProfilePicture) ? user.ProfilePicture : "/uploads/default-avatar.png";
 
@@ -230,7 +240,7 @@ namespace FLEXLINK.Controllers
             {
                 TempData["MemberCheckInStatus"] = "Inactive";
                 TempData["AttendanceError"] = $"{memberName} cannot check in — no active membership plan.";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { checkedInUserId = user.Id });
             }
 
             // Has active membership — allow check-in
@@ -247,7 +257,44 @@ namespace FLEXLINK.Controllers
             TempData["MemberExpiryDate"] = activeMembership.ExpiryDate.ToString("MMMM dd, yyyy");
             TempData["AttendanceSuccess"] = $"{memberName} checked in successfully.";
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { checkedInUserId = user.Id });
+        }
+
+        // ── Quick Add Membership (Staff-Initiated) ─────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddMembershipQuick(string userId, int months)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["AttendanceError"] = $"User not found. (Received userId: '{userId}')";
+                return RedirectToAction("Index");
+            }
+
+            var validMonths = new[] { 1, 2, 3 };
+            if (!validMonths.Contains(months))
+            {
+                TempData["AttendanceError"] = "Invalid plan selected.";
+                return RedirectToAction("Index");
+            }
+
+            var start = DateTime.Now;
+            var membership = new UserMembership
+            {
+                UserId = userId,
+                Months = months,
+                StartDate = start,
+                ExpiryDate = start.AddMonths(months),
+                Status = "Approved",
+                ReviewedAt = DateTime.Now
+            };
+
+            _db.UserMembership.Add(membership);
+            await _db.SaveChangesAsync();
+
+            TempData["AttendanceSuccess"] = $"{user.FullName ?? user.Email} has been given a {months}-month membership.";
+            return RedirectToAction("Index", new { checkedInUserId = user.Id });
         }
 
         // ── Guest Check-In ────────────────────────────────────────────────────
