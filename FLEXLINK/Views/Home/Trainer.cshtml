@@ -64,7 +64,10 @@
                         <div class="text-center pt-4 px-3">
                             <img src="@(trainer.ProfilePicture ?? "/uploads/DefaultProfile.png")"
                                  alt="@trainer.FullName"
-                                 style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #dee2e6;" />
+                                 class="trainer-pic-trigger"
+                                 data-img="@(trainer.ProfilePicture ?? "/uploads/DefaultProfile.png")"
+                                 data-name="@trainer.FullName"
+                                 style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #dee2e6;cursor:pointer;" />
                             <h5 class="fw-bold mt-2 mb-0">@trainer.FullName</h5>
                             <p class="text-muted small mb-0"><i class="bi bi-envelope me-1"></i>@trainer.Email</p>
                             @if (!string.IsNullOrEmpty(trainer.PhoneNumber))
@@ -192,6 +195,8 @@
                     </div>
                 </div>
 
+
+
                 @* ── Per-Trainer Booking Modal ── *@
                 @if (schedules.Any())
                 {
@@ -209,6 +214,7 @@
                                 <form asp-controller="Home" asp-action="BookSchedules" method="post" class="booking-form">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="scheduleIds" class="selected-ids-input" value="" />
+                                    <input type="hidden" name="source" value="Trainer" />
 
                                     <div class="modal-body">
                                         <p class="text-muted small mb-3">
@@ -305,6 +311,22 @@
                 }
             }
         </div>
+
+        @* ── Shared Profile Picture Preview Modal ── *@
+        <div class="modal fade" id="trainerPicModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-transparent border-0">
+                    <div class="modal-header border-0 pb-0">
+                        <h6 class="modal-title text-white" id="trainerPicModalLabel"></h6>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img id="trainerPicModalImg" src="" alt=""
+                             style="max-width:100%; max-height:80vh; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,0.4);" />
+                    </div>
+                </div>
+            </div>
+        </div>
     }
 </div>
 
@@ -366,6 +388,7 @@
                 });
             }
 
+
             // Hover
             stars.forEach(function (star) {
                 star.addEventListener('mouseenter', function () {
@@ -385,6 +408,22 @@
                     submitBtn.disabled = false;
                 });
             });
+
+
+        
+
         });
+
+        // ── Trainer profile picture zoom ─────────────────────────────────────
+                document.querySelectorAll('.trainer-pic-trigger').forEach(function (img) {
+                    img.addEventListener('click', function () {
+                        document.getElementById('trainerPicModalImg').src = this.dataset.img;
+                        document.getElementById('trainerPicModalImg').alt = this.dataset.name;
+                        document.getElementById('trainerPicModalLabel').textContent = this.dataset.name;
+                        var modal = new bootstrap.Modal(document.getElementById('trainerPicModal'));
+                        modal.show();
+                    });
+                });
+
     </script>
 }

@@ -30,7 +30,15 @@ namespace FLEXLINK.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View();
+            var model = new LoginViewModel();
+
+            if (Request.Cookies.TryGetValue("RememberedEmail", out var savedEmail) && !string.IsNullOrEmpty(savedEmail))
+            {
+                model.Email = savedEmail;
+                model.RememberMe = true;
+            }
+
+            return View(model);
         }
 
         [HttpPost]
@@ -40,7 +48,7 @@ namespace FLEXLINK.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var user = await userManager.FindByEmailAsync(model.Email);
+            var user = await userManager.FindByEmailAsync(model.Email); 
 
             if (user != null)
             {
@@ -68,7 +76,41 @@ namespace FLEXLINK.Controllers
             }
 
             var result = await signInManager.PasswordSignInAsync(
-                model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
+            model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
+
+            if (result.Succeeded)
+            {
+                if (model.RememberMe)
+                {
+                    Response.Cookies.Append("RememberedEmail", model.Email, new CookieOptions
+                    {
+                        Expires = DateTimeOffset.UtcNow.AddDays(30),
+                        HttpOnly = true,
+                        IsEssential = true,
+                        SameSite = SameSiteMode.Lax
+                    });
+                }
+                else
+                {
+                    Response.Cookies.Delete("RememberedEmail");
+                }
+
+                if (user != null)
+                {
+                    if (await userManager.IsInRoleAsync(user, "Admin"))
+                        return RedirectToAction("Index", "Admin");
+
+                    if (await userManager.IsInRoleAsync(user, "Trainer"))
+                        return RedirectToAction("Index", "Trainer");
+
+                    if (await userManager.IsInRoleAsync(user, "Staff"))
+                        return RedirectToAction("Index", "Staff");
+                }
+
+                return RedirectToAction("Index", "Home");
+            }
+
+
 
             if (result.Succeeded)
             {

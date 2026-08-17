@@ -224,19 +224,19 @@ namespace FLEXLINK.Controllers
         // ── Rate a Trainer ────────────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RateTrainer(int trainerId, int stars)
+        public async Task<IActionResult> RateTrainer(int trainerId, int stars, string? source)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
             {
                 TempData["BookingError"] = "You must be logged in to rate a trainer.";
-                return RedirectToAction("Trainer");
+                return source == "Schedule" ? RedirectToAction("Schedule") : RedirectToAction("Trainer");
             }
 
             if (stars < 1 || stars > 5)
             {
                 TempData["BookingError"] = "Invalid rating.";
-                return RedirectToAction("Trainer");
+                return source == "Schedule" ? RedirectToAction("Schedule") : RedirectToAction("Trainer");
             }
 
             var existing = _db.TrainerRating
@@ -259,8 +259,11 @@ namespace FLEXLINK.Controllers
             }
 
             await _db.SaveChangesAsync();
+
             TempData["BookingSuccess"] = "Your rating has been submitted!";
-            return RedirectToAction("Trainer");
+            TempData["RatingSuccess"] = "Your rating has been submitted!";
+
+            return source == "Schedule" ? RedirectToAction("Schedule") : RedirectToAction("Trainer");
         }
 
         // ── Book Schedules ────────────────────────────────────────────────────

@@ -1,29 +1,33 @@
 ﻿@using FLEXLINK.ViewModels
 @model LoginViewModel;
-
 @{
     ViewData["Title"] = "login";
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
-
 <div class="account-container">
     <div class="account-box">
         <h2 class="text-center mb-4">Login</h2>
         <form asp-action="login" method="post">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="=mb-3">
+            <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="mb-3">
                 <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" />
+                <div class="position-relative">
+                    <input asp-for="Password" class="form-control" id="passwordInput" style="padding-right: 40px;" />
+                    <button type="button" id="togglePassword" tabindex="-1"
+                            class="btn position-absolute top-50 end-0 translate-middle-y bg-transparent border-0 p-0 me-2">
+                        <i class="bi bi-eye" id="toggleIcon" style="font-size: 1.3rem;"></i>
+                    </button>
+                </div>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="float-end">
-                <a asp-ocntroller="Account" asp-action="VerifyEmail" class="text-decoration-none">
+                <a asp-controller="Account" asp-action="VerifyEmail" class="text-decoration-none">
                     Forgot password?
                 </a>
             </div>
@@ -41,9 +45,24 @@
                 <a asp-controller="Home" asp-action="Index" class="text-decoration-none" mt-3>Back</a>
             </div>
         </form>
-
     </div>
 </div>
+
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const passwordInput = document.getElementById('passwordInput');
+        const icon = document.getElementById('toggleIcon');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    });
+</script>
 
 @if (ViewBag.LockoutSeconds != null)
 {
@@ -52,7 +71,6 @@
             let secondsLeft = @ViewBag.LockoutSeconds;
             const loginBtn = document.querySelector('input[type="submit"]');
             const errorEl = document.querySelector('.text-danger li') || document.querySelector('.text-danger');
-
             function tick() {
                 if (secondsLeft <= 0) {
                     if (loginBtn) loginBtn.disabled = false;
@@ -73,5 +91,4 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");
     }
-    
 }
