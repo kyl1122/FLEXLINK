@@ -48,6 +48,8 @@ namespace FLEXLINK.Controllers
             var profile = _db.ProfileTrainer
                              .FirstOrDefault(p => p.UserId == currentUser.Id);
 
+
+
             ProfileViewModel vm;
 
             if (profile == null)
@@ -86,6 +88,19 @@ namespace FLEXLINK.Controllers
             if (currentUser == null)
             {
                 return RedirectToAction("Login", "Account");
+            }
+
+            // Find the existing profile row so we know the current picture
+            var existingProfileCheck = _db.ProfileTrainer
+                                           .FirstOrDefault(p => p.UserId == currentUser.Id);
+
+            bool hasRealPicture = !string.IsNullOrEmpty(existingProfileCheck?.ProfilePicture)
+                                  && existingProfileCheck.ProfilePicture != "/uploads/DefaultProfile.png";
+
+            // Require an upload if the trainer only has the default picture
+            if (!hasRealPicture && vm.ProfileImage == null)
+            {
+                ModelState.AddModelError("ProfileImage", "Please upload a profile picture — this cannot be skipped.");
             }
 
             // FILE VALIDATION (runs before ModelState check so errors show up properly)
@@ -339,6 +354,29 @@ namespace FLEXLINK.Controllers
 
         public IActionResult MyClients() => View();
         public IActionResult WorkoutPlans() => View();
+
+        // ─── EQUIPMENT LIST PAGE ───────────────────────────────────────────────
+        public async Task<IActionResult> Equipment()
+        {
+            var equipment = await _db.Equipment
+                .Include(e => e.RepairNotes)
+                .OrderBy(e => e.Name)
+                .ToListAsync();
+
+            return View(equipment);
+        }
+
+        // ─── EQUIPMENT REPAIR REPORTS PAGE ─────────────────────────────────────
+        public async Task<IActionResult> EquipmentReports()
+        {
+            var equipment = await _db.Equipment
+                .Include(e => e.RepairNotes)
+                .Where(e => e.RepairNotes.Any())
+                .OrderBy(e => e.Name)
+                .ToListAsync();
+
+            return View(equipment);
+        }
     }
 }
 

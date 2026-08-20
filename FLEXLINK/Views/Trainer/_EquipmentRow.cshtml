@@ -1,0 +1,58 @@
+﻿@model FLEXLINK.Models.Equipment
+@{
+    var hasNote = Model.RepairNotes.Any();
+}
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+    <div class="d-flex align-items-center gap-3 flex-grow-1">
+        <div class="equipment-meta-box text-center pe-3 d-none d-sm-block">
+            <span class="d-block fw-bold fs-4 text-uppercase">
+                @(Model.Name.Length >= 3 ? Model.Name.Substring(0, 3) : Model.Name)
+            </span>
+            <small class="text-muted">EQ-ID: @Model.Id</small>
+        </div>
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-wrench-adjustable@(hasNote ? " text-danger" : " text-success") fs-5"></i>
+                <strong class="fs-5">@Model.Name</strong>
+                @if (hasNote)
+                {
+                    <span class="badge bg-danger ms-2">
+                        <i class="bi bi-exclamation-triangle me-1"></i>@Model.RepairNotes.Count report(s)
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-success ms-2">
+                        <i class="bi bi-check-circle me-1"></i>OK
+                    </span>
+                }
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="text-muted small mb-1">@Model.Description</p>
+            }
+            @if (Model.RepairNotes.Any())
+            {
+                <div class="mt-2">
+                    @foreach (var rn in Model.RepairNotes.OrderByDescending(r => r.CreatedAt))
+                    {
+                        <div class="alert alert-warning py-2 px-3 mb-1 small rounded border-0">
+                            <i class="bi bi-chat-left-text me-1"></i>
+                            <strong>@rn.TrainerName</strong> &mdash; @rn.Note
+                            <span class="text-muted ms-2">(@rn.CreatedAt.ToString("MMM dd, yyyy hh:mm tt"))</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="ms-auto flex-shrink-0">
+        <button class="btn btn-outline-danger px-3"
+                data-bs-toggle="modal"
+                data-bs-target="#repairModal"
+                data-equipment-id="@Model.Id"
+                data-equipment-name="@Model.Name">
+            <i class="bi bi-flag me-1"></i>Report Repair
+        </button>
+    </div>
+</div>

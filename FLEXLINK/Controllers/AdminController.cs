@@ -48,10 +48,12 @@ namespace FLEXLINK.Controllers
             ViewBag.EquipmentList = equipmentList;
 
             // Space capacity — counts today's check-ins (members + guests)
+            // Only count people still checked in (excludes anyone who has signed out)
             var today = DateTime.Today;
             int currentCount = await _db.Attendance
-                .Where(a => a.CheckedInAt.Date == today)
+                .Where(a => a.CheckedInAt.Date == today && a.CheckedOutAt == null)
                 .CountAsync();
+
             ViewBag.CurrentCount = currentCount;
             ViewBag.MaxCapacity = 50;
 
@@ -315,7 +317,7 @@ namespace FLEXLINK.Controllers
             if (string.IsNullOrWhiteSpace(name))
             {
                 TempData["AdminError"] = "Equipment name is required.";
-                return RedirectToAction("Index");
+                return RedirectToAction("Equipment");
             }
 
             _db.Equipment.Add(new Equipment
@@ -327,7 +329,7 @@ namespace FLEXLINK.Controllers
             await _db.SaveChangesAsync();
 
             TempData["AdminSuccess"] = $"Equipment '{name.Trim()}' added successfully.";
-            return RedirectToAction("Index");
+            return RedirectToAction("Equipment");
         }
 
         [HttpPost]

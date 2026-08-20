@@ -1,13 +1,10 @@
-﻿@using FLEXLINK.Models
+﻿@model List<FLEXLINK.Models.Equipment>
 @{
-    ViewData["Title"] = "Trainer Dashboard";
+    ViewData["Title"] = "Equipment Repair Reports";
     Layout = "~/Views/Shared/_Layout.cshtml";
-
-    var equipment = ViewBag.Equipment as List<Equipment> ?? new List<Equipment>();
 }
 
 <style>
-    /* Modern Dark Theme Styling to match reference design */
     body {
         background-color: #1a1d21;
         color: #ffffff;
@@ -16,7 +13,7 @@
     .dashboard-header {
         background-color: #121518;
         padding: 2.5rem 2rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
     .dashboard-title {
@@ -32,20 +29,8 @@
         color: #212529;
         border-radius: 12px;
         border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         margin-bottom: 1.25rem;
-        transition: transform 0.2s ease-in-out;
-    }
-
-    .dashboard-card:hover {
-        transform: translateY(-2px);
-    }
-
-    .section-title {
-        color: #e0e0e0;
-        font-weight: 600;
-        letter-spacing: 1px;
-        margin-bottom: 1.5rem;
     }
 
     .equipment-meta-box {
@@ -53,40 +38,35 @@
         min-width: 130px;
     }
 
-    .dark-card-header {
-        background-color: #212529;
-        color: #ffffff;
-        border-radius: 12px 12px 0 0;
-    }
-
     .modal-content {
         background-color: #212529;
         color: #ffffff;
     }
 
-    .modal-content .form-control {
-        background-color: #2b3035;
-        border-color: #495057;
-        color: #ffffff;
-    }
+        .modal-content .form-control {
+            background-color: #2b3035;
+            border-color: #495057;
+            color: #ffffff;
+        }
 
-    .modal-content .form-control:focus {
-        background-color: #2b3035;
-        color: #ffffff;
-    }
+            .modal-content .form-control:focus {
+                background-color: #2b3035;
+                color: #ffffff;
+            }
 </style>
 
-<!-- Top Banner Section -->
 <div class="dashboard-header mb-4">
     <div class="container-fluid">
-        <h1 class="dashboard-title m-0">Welcome</h1>
-        <p class="text-decoration-none mb-2 d-inline-block" style="color: #f8f9fa">Trainer Portal &mdash; Manage clients, update workout programs, and track progress.</p>
+        <a asp-controller="Trainer" asp-action="Index" class="text-decoration-none mb-2 d-inline-block" style="color: #f8f9fa;">
+            <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+        </a>
+        <h1 class="dashboard-title m-0">Repair Reports</h1>
+        <p class="text-decoration-none mb-2 d-inline-block" style="color: #f8f9fa">Equipment currently flagged as needing repair.</p>
     </div>
 </div>
 
 <div class="container-fluid px-4">
 
-    @* Alerts *@
     @if (TempData["EquipmentSuccess"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
@@ -102,55 +82,26 @@
         </div>
     }
 
-    <!-- Main Section Header -->
-    <h4 class="section-title">Equipment Status</h4>
-
-    @* Equipment Summary Cards *@
-    @{
-        int reportCount = equipment.Count(e => e.RepairNotes.Any());
+    @if (!Model.Any())
+    {
+        <div class="dashboard-card p-4 text-center text-muted">
+            <i class="bi bi-check-circle fs-2 d-block mb-2 text-success"></i>
+            <span>No equipment currently needs repair.</span>
+        </div>
     }
-    <div class="row g-3 mb-4">
-        <!-- Equipment Total Card -->
-        <div class="col-md-6">
-            <div class="dark-card-header p-3 rounded-3 shadow-sm h-100 d-flex flex-column justify-content-between">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-tools me-2 fs-5 text-warning"></i>
-                        <span class="fw-semibold">Gym Equipment</span>
-                    </div>
-                    <a asp-controller="Trainer" asp-action="Equipment" class="btn btn-sm btn-outline-light rounded-pill px-3">
-                        View <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
+    else
+    {
+        <div class="d-flex flex-column gap-2">
+            @foreach (var item in Model)
+            {
+                <div class="dashboard-card p-3">
+                    @await Html.PartialAsync("_EquipmentRow", item)
                 </div>
-                <div class="d-flex align-items-baseline">
-                    <span class="display-6 fw-bold text-warning me-2">@equipment.Count</span>
-                    <span class="text-warning fw-semibold">Total</span>
-                </div>
-            </div>
+            }
         </div>
-
-        <!-- Repair Reports Card -->
-        <div class="col-md-6">
-            <div class="dark-card-header p-3 rounded-3 shadow-sm h-100 d-flex flex-column justify-content-between">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-exclamation-triangle me-2 fs-5 text-danger"></i>
-                        <span class="fw-semibold">Repair Reports</span>
-                    </div>
-                    <a asp-controller="Trainer" asp-action="EquipmentReports" class="btn btn-sm btn-outline-light rounded-pill px-3">
-                        View <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
-                </div>
-                <div class="d-flex align-items-baseline">
-                    <span class="display-6 fw-bold text-danger me-2">@reportCount</span>
-                    <span class="text-danger fw-semibold">Pending</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    }
 
 </div>
-
 
 @* ── Repair Note Modal ── *@
 <div class="modal fade" id="repairModal" tabindex="-1" aria-labelledby="repairModalLabel" aria-hidden="true">

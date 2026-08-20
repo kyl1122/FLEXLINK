@@ -1,60 +1,60 @@
-using FLEXLINK.Data;
-using FLEXLINK.Models;
-using FLEXLINK.Services;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+    using FLEXLINK.Data;
+    using FLEXLINK.Models;
+    using FLEXLINK.Services;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+    var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+    // Add services to the container.
+    builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
-builder.Services.AddIdentity<Users, IdentityRole>(options =>
-{
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequiredLength = 6;
-    options.User.RequireUniqueEmail = true;
-    options.SignIn.RequireConfirmedAccount = false;
-    options.SignIn.RequireConfirmedEmail = false;
-    options.SignIn.RequireConfirmedPhoneNumber = false;
+    builder.Services.AddIdentity<Users, IdentityRole>(options =>
+    {
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequiredLength = 6;
+        options.User.RequireUniqueEmail = true;
+        options.SignIn.RequireConfirmedAccount = false;
+        options.SignIn.RequireConfirmedEmail = false;
+        options.SignIn.RequireConfirmedPhoneNumber = false;
         
-    options.Lockout.MaxFailedAccessAttempts = 3;
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromSeconds(30);
-    options.Lockout.AllowedForNewUsers = true;
-})
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+        options.Lockout.MaxFailedAccessAttempts = 3;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromSeconds(30);
+        options.Lockout.AllowedForNewUsers = true;
+    })
+        .AddEntityFrameworkStores<AppDbContext>()
+        .AddDefaultTokenProviders();
 
-var app = builder.Build();
+    var app = builder.Build();
 
-await SeedService.SeedDatabase(app.Services);
+    await SeedService.SeedDatabase(app.Services);
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
+    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Home/Error");
+        app.UseHsts();
+    }
 
-app.UseHttpsRedirection();
+    app.UseHttpsRedirection();
 
 
-app.UseStaticFiles();
+    app.UseStaticFiles();
 
-app.UseRouting();
+    app.UseRouting();
 
-app.UseAuthentication();
-app.UseAuthorization();
+    app.UseAuthentication();
+    app.UseAuthorization();
 
-app.MapStaticAssets();
+    app.MapStaticAssets();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}")
+        .WithStaticAssets();
 
-app.Run();
+    app.Run();

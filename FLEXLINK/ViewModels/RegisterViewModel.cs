@@ -20,7 +20,7 @@ namespace FLEXLINK.ViewModels
         public string Address { get; set; }
 
         [Required(ErrorMessage = "Phone number is required.")]
-        [RegularExpression(@"^\d{11}$", ErrorMessage = "Phone number must be exactly 11 digits.")]
+        [RegularExpression(@"^\d{11}$", ErrorMessage = "Phone number must be exactly 11 digits and contain only numbers.")]
         public string PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "Password is required.")]

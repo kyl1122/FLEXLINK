@@ -1,65 +1,384 @@
 ﻿@using FLEXLINK.ViewModels
-@model RegisterViewModel;
+@model RegisterViewModel
 @{
     ViewData["Title"] = "Register";
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
-<div class="account-container">
-    <div class="account-box">
-        <h2 class="text-center mb-4">Register</h2>
-        <form asp-action="Register" method="post" enctype="multipart/form-data">
+
+<!-- Google Font import for exact typography match -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    /* Full screen split layout setup */
+    .split-layout-container {
+        display: flex;
+        min-height: 100vh;
+        width: 100%;
+        background-color: #ff2a2a; /* Brand Red Background */
+        font-family: 'Poppins', sans-serif;
+        overflow-x: hidden;
+    }
+
+    /* Left Side Branding Area - Centering setup */
+    .left-brand-panel {
+        flex: 1;
+        display: flex;
+        align-items: center; /* Vertically center logo */
+        justify-content: center; /* Horizontally center logo */
+        padding: 40px;
+        background-color: #ff2a2a;
+    }
+
+    /* Logo Wrapper Styling - Scaled up size */
+    .brand-logo-container {
+        width: 420px;
+        height: 420px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .brand-logo-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    /* SVG Fallback matching exact design of reference image */
+    .white-f-svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Right Side Registration Form Card */
+    .right-form-panel {
+        flex: 1.3;
+        background-color: #1e2228;
+        border-top-left-radius: 40px;
+        border-bottom-left-radius: 40px;
+        padding: 40px 50px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: -15px 0 35px rgba(0, 0, 0, 0.35);
+        position: relative; /* Enabled for absolute placement of Go back link */
+    }
+
+    /* Full height form to push action row to bottom */
+    .register-form {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        justify-content: space-between;
+    }
+
+    /* Top Right "Go back" Navigation Link */
+    .top-goback-link {
+        position: absolute;
+        top: 35px;
+        right: 50px;
+        color: #a0a6b1;
+        font-size: 0.85rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: color 0.2s ease;
+    }
+
+        .top-goback-link:hover {
+            color: #ffffff;
+        }
+
+    /* Top Indicator Bar */
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 25px;
+    }
+
+    .indicator-capsule {
+        width: 45px;
+        height: 10px;
+        background-color: #383d46;
+        border-radius: 20px;
+    }
+
+    .indicator-dot {
+        width: 10px;
+        height: 10px;
+        background-color: #383d46;
+        border-radius: 50%;
+    }
+
+        .indicator-dot.active {
+            background-color: #0d0f12;
+        }
+
+    /* Registration Heading */
+    .form-heading {
+        color: #ffffff;
+        font-size: 1.8rem;
+        font-weight: 400;
+        margin-bottom: 25px;
+        letter-spacing: 0.5px;
+    }
+
+    /* Form Fields Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+
+        .form-grid .full-width {
+            grid-column: span 3;
+        }
+
+    .custom-input {
+        background-color: transparent !important;
+        border: 1px solid #4a515d !important;
+        border-radius: 8px !important;
+        color: #ffffff !important;
+        padding: 10px 14px !important;
+        font-size: 0.88rem !important;
+        font-weight: 300;
+    }
+
+        .custom-input:focus {
+            border-color: #ffffff !important;
+            box-shadow: none !important;
+        }
+
+        .custom-input::placeholder {
+            color: #a0a6b1;
+        }
+
+        /* Custom file input styling for dark theme */
+        .custom-input[type="file"] {
+            color: #a0a6b1 !important;
+        }
+
+            .custom-input[type="file"]::file-selector-button {
+                background-color: #2b3038;
+                color: #ffffff;
+                border: none;
+                border-radius: 4px;
+                padding: 4px 10px;
+                margin-right: 10px;
+                font-size: 0.8rem;
+            }
+
+    /* Bottom Action Row - Side by Side at bottom of panel */
+    .bottom-action-row {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        margin-top: 40px;
+        padding-top: 10px;
+    }
+
+    .btn-continue {
+        background-color: #111317;
+        color: #ffffff;
+        border: 1px solid #2b3038;
+        border-radius: 30px;
+        padding: 10px 32px;
+        font-size: 0.88rem;
+        font-weight: 400;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+        .btn-continue:hover {
+            background-color: #000000;
+            border-color: #4a515d;
+            color: #ffffff;
+        }
+
+    .login-inline-text {
+        color: #a0a6b1;
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+        .login-inline-text a {
+            color: #ffffff;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+
+    .form-text-muted {
+        color: #a0a6b1;
+        font-size: 0.8rem;
+    }
+
+    /* Responsive adjustments for mobile */
+    @@media (max-width: 992px) {
+        .split-layout-container {
+            flex-direction: column;
+        }
+
+        .brand-logo-container {
+            width: 260px;
+            height: 260px;
+        }
+
+        .right-form-panel {
+            border-top-left-radius: 30px;
+            border-bottom-left-radius: 0;
+            border-top-right-radius: 30px;
+            padding: 30px 20px;
+        }
+
+        .top-goback-link {
+            top: 20px;
+            right: 25px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+            .form-grid .full-width {
+                grid-column: span 1;
+            }
+
+        .bottom-action-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+    }
+</style>
+
+<div class="split-layout-container">
+
+    <!-- Left Side: Center-Aligned White Logo -->
+    <div class="left-brand-panel">
+        <div class="brand-logo-container">
+            <!-- 1. Primary Image Tag with logo_f.png -->
+            <img src="@Url.Content("~/images/logo_f.png")"
+                 alt="Brand Logo"
+                 class="brand-logo-image"
+                 onerror="this.style.display='none'; document.getElementById('logo-fallback-svg').style.display='block';" />
+
+            <!-- 2. Recreated Vector SVG (Shows automatically if logo_f.png fails to load) -->
+            <svg id="logo-fallback-svg" class="white-f-svg" style="display: none;" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Circular arc framing -->
+                <path d="M 70 180 A 105 105 0 1 1 210 100" stroke="#ffffff" stroke-width="11" stroke-linecap="round" />
+                <path d="M 120 220 A 105 105 0 0 0 250 170" stroke="#ffffff" stroke-width="11" stroke-linecap="round" />
+
+                <!-- Stylized 'F' Lightning Bolt Symbol -->
+                <g fill="#ffffff">
+                    <!-- Top horizontal bar -->
+                    <polygon points="125,120 160,85 240,85 185,120" />
+                    <!-- Middle horizontal bar -->
+                    <polygon points="145,150 170,125 210,125 185,150" />
+                    <!-- Diagonal lightning spine -->
+                    <polygon points="270,45 140,175 140,205 75,270 120,200 120,175" />
+                    <!-- Connecting left geometric piece -->
+                    <polygon points="115,130 135,110 135,150" />
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Right Side: Side Fill-Up Form Section -->
+    <div class="right-form-panel">
+        <!-- Top Right Navigation Link -->
+        <a asp-controller="Home" asp-action="Index" class="top-goback-link">
+            &larr; Go back
+        </a>
+
+        <!-- Top Status Indicator Pill Bar -->
+        <div class="step-indicator">
+            <div class="indicator-capsule"></div>
+            <div class="indicator-dot"></div>
+            <div class="indicator-dot"></div>
+            <div class="indicator-dot active"></div>
+        </div>
+
+        <h2 class="form-heading">Registration</h2>
+
+        <form asp-action="Register" method="post" enctype="multipart/form-data" class="register-form">
             @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="mb-3">
-                <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Age" class="form-label"></label>
-                <input asp-for="Age" class="form-control" />
-                <span asp-validation-for="Age" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Address" class="form-label"></label>
-                <input asp-for="Address" class="form-control" />
-                <span asp-validation-for="Address" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="PhoneNumber" class="form-label"></label>
-                <input asp-for="PhoneNumber" class="form-control" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-grid">
+                <!-- Row 1: Name, Email, Age -->
+                <div>
+                    <input asp-for="Name" class="form-control custom-input" placeholder="Name" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div>
+                    <input asp-for="Email" class="form-control custom-input" placeholder="Email" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div>
+                    <input asp-for="Age" class="form-control custom-input" placeholder="Age" />
+                    <span asp-validation-for="Age" class="text-danger small"></span>
+                </div>
+
+                <!--  Phone Number -->
+                <input asp-for="PhoneNumber" class="form-control"
+                       type="text"
+                       inputmode="numeric"
+                       maxlength="11"
+                       pattern="\d{11}"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)"
+                       placeholder="09XXXXXXXXX" />
                 <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+
+                <!--   Address -->
+                <div>
+                    <input asp-for="Address" class="form-control custom-input" placeholder="Address" />
+                    <span asp-validation-for="Address" class="text-danger small"></span>
+                </div>
+
+                <!--  Password -->
+                <div>
+                    <input asp-for="Password" class="form-control custom-input" placeholder="Password" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <!--  Confirm Password -->
+                <div>
+                    <input asp-for="ConfirmPassword" class="form-control custom-input" placeholder="Confirm Password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
+
+                <!-- Full Width: Profile Image -->
+                <div class="full-width">
+                    <label class="form-label small text-light mb-1">Profile Picture <span class="text-danger">*</span></label>
+                    <input type="file" id="profileImageInput" name="ProfileImage" class="form-control custom-input" accept=".jpg,.jpeg,.png" />
+                    <div class="form-text-muted mt-1">Required. Max 2MB. JPG, JPEG, or PNG.</div>
+                </div>
             </div>
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="ConfirmPassword" class="form-label"></label>
-                <input asp-for="ConfirmPassword" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Profile Picture <span class="text-danger">*</span></label>
-                <input type="file" id="profileImageInput" name="ProfileImage" class="form-control" accept=".jpg,.jpeg,.png" />
-                <div class="form-text">Required. Max 2MB. JPG, JPEG, or PNG.</div>
-            </div>
-            <input type="submit" value="Register" class="btn btn-success w-100 p-2" />
-            <p class="text-center mt-2">
-                Already have an account? <a asp-controller="Account" asp-action="Login" class="text-decoration-none">Login</a>
-            </p>
-            <div class="text-center">
-                <a asp-controller="Home" asp-action="Index" class="text-decoration-none mt-3">Back</a>
+
+            <!-- Bottom Positioned Action Row (Button + Login Inline) -->
+            <div class="bottom-action-row">
+                <button type="submit" class="btn btn-continue">
+                    Continue &rarr;
+                </button>
+
+                <p class="login-inline-text">
+                    Already have an account? <a asp-controller="Account" asp-action="Login">Login</a>
+                </p>
             </div>
         </form>
     </div>
 </div>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");

@@ -84,7 +84,12 @@
                     <label class="form-label fw-semibold">Phone Number</label>
                     <input type="text" name="PhoneNumber" class="form-control"
                            value="@(Model.PhoneNumber ?? "")"
-                           placeholder="Enter your phone number" />
+                           placeholder="09XXXXXXXXX"
+                           inputmode="numeric"
+                           maxlength="11"
+                           pattern="\d{11}"
+                           title="Phone number must be exactly 11 digits"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)" />
                 </div>
 
                 <div class="mb-3">

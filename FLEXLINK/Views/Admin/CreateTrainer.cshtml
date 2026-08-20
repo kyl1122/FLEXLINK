@@ -28,7 +28,11 @@
 
     <div class="mb-3">
         <label asp-for="PhoneNumber" class="form-label"></label>
-        <input asp-for="PhoneNumber" class="form-control" />
+        <input asp-for="PhoneNumber" class="form-control"
+               inputmode="numeric"
+               maxlength="11"
+               oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)"
+               placeholder="09XXXXXXXXX" />
         <span asp-validation-for="PhoneNumber" class="text-danger"></span>
     </div>
 

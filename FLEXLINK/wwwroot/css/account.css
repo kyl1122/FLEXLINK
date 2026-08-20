@@ -1,20 +1,54 @@
 ﻿.account-container {
-    background-size: cover;
-    background-position: center;
-    background-repeat: repeat-y;
     display: flex;
-    justify-content:center;
+    justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 2rem 0;
+    padding: 40px 20px;
+    background-image: url('/images/BGBELLS.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .account-box {
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    max-width: 500px;
+    background-color: #212529;
+    padding: 3rem 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     width: 100%;
-    opacity: .9;
+    max-width: 420px;
+    color: #ffffff;
 }
+
+    .account-box .form-control {
+        background-color: #2c3136;
+        border-color: #495057;
+        color: #ffffff;
+    }
+
+        .account-box .form-control::placeholder {
+            color: #adb5bd;
+        }
+
+        .account-box .form-control:focus {
+            background-color: #2c3136;
+            color: #ffffff;
+        }
+
+    .account-box .form-label,
+    .account-box .form-check-label,
+    .account-box h2 {
+        color: #ffffff;
+    }
+
+    .account-box a {
+        color: #6ea8fe;
+    }
+
+    .account-box #togglePassword {
+        color: #ffffff;
+    }
+
+        .account-box #togglePassword:hover {
+            color: #adb5bd;
+        }

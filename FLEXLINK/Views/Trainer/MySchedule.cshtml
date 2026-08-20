@@ -14,7 +14,7 @@
             + Make Your Schedule
         </button>
     </div>
-    
+
     @* Success / Error alerts *@
     @if (TempData["ScheduleSuccess"] != null)
     {
@@ -31,23 +31,27 @@
         </div>
     }
 
-    @* Summary badges *@
+    @* Summary badges (now act as filters) *@
     @if (Model.Any())
     {
-        var totalSlots = Model.Count();
-        var bookedSlots = Model.Count(s => s.IsBooked);
-        var freeSlots = totalSlots - bookedSlots;
+        var historySlots = Model.Count(s => s.ScheduleDate.Add(s.EndTime) < DateTime.Now);
+        var bookedSlots = Model.Count(s => s.IsBooked && s.ScheduleDate.Add(s.EndTime) >= DateTime.Now);
+        var freeSlots = Model.Count(s => !s.IsBooked && s.ScheduleDate.Add(s.EndTime) >= DateTime.Now);
+        var upcomingSlots = bookedSlots + freeSlots;
 
         <div class="d-flex gap-2 mb-3 flex-wrap">
-            <span class="badge text-bg-primary fs-6 px-3 py-2">
-                <i class="bi bi-calendar3 me-1"></i> @totalSlots Total Slot@(totalSlots != 1 ? "s" : "")
-            </span>
-            <span class="badge text-bg-success fs-6 px-3 py-2">
+            <button type="button" class="badge filter-btn text-bg-primary fs-6 px-3 py-2 active" data-filter="all">
+                <i class="bi bi-calendar3 me-1"></i> @upcomingSlots Upcoming Slot@(upcomingSlots != 1 ? "s" : "")
+            </button>
+            <button type="button" class="badge filter-btn text-bg-success fs-6 px-3 py-2" data-filter="booked">
                 <i class="bi bi-check-circle me-1"></i> @bookedSlots Booked
-            </span>
-            <span class="badge text-bg-secondary fs-6 px-3 py-2">
+            </button>
+            <button type="button" class="badge filter-btn text-bg-secondary fs-6 px-3 py-2" data-filter="available">
                 <i class="bi bi-calendar-check me-1"></i> @freeSlots Available
-            </span>
+            </button>
+            <button type="button" class="badge filter-btn text-bg-dark fs-6 px-3 py-2" data-filter="history">
+                <i class="bi bi-clock-history me-1"></i> @historySlots History
+            </button>
         </div>
     }
 
@@ -79,13 +83,23 @@
                 <tbody>
                     @foreach (var s in Model)
                     {
-                        <tr class="@(s.IsBooked ? "table-success" : "")">
+                        bool isPast = s.ScheduleDate.Add(s.EndTime) < DateTime.Now;
+                        string filterCategory = isPast ? "history" : (s.IsBooked ? "booked" : "available");
+                        string rowClass = isPast ? "table-secondary" : (s.IsBooked ? "table-success" : "");
+
+                        <tr class="@rowClass schedule-row" data-filter="@filterCategory">
                             <td>@s.ScheduleDate.ToString("MMMM dd, yyyy")</td>
                             <td>@DateTime.Today.Add(s.StartTime).ToString("hh:mm tt")</td>
                             <td>@DateTime.Today.Add(s.EndTime).ToString("hh:mm tt")</td>
                             <td>@(string.IsNullOrEmpty(s.Notes) ? "—" : s.Notes)</td>
                             <td class="text-center">
-                                @if (s.IsBooked)
+                                @if (isPast)
+                                {
+                                    <span class="badge text-bg-dark">
+                                        <i class="bi bi-clock-history me-1"></i> @(s.IsBooked ? "Completed" : "Expired")
+                                    </span>
+                                }
+                                else if (s.IsBooked)
                                 {
                                     <span class="badge text-bg-success">
                                         <i class="bi bi-check-circle me-1"></i> Booked
@@ -117,7 +131,7 @@
                                 }
                             </td>
                             <td class="text-center">
-                                @if (!s.IsBooked)
+                                @if (!s.IsBooked && !isPast)
                                 {
                                     <form asp-action="DeleteSchedule" method="post"
                                           onsubmit="return confirm('Remove this schedule slot?');">
@@ -128,6 +142,12 @@
                                         </button>
                                     </form>
                                 }
+                                else if (isPast)
+                                {
+                                    <span class="text-muted small" title="This slot has already passed">
+                                        <i class="bi bi-clock-history"></i> Past
+                                    </span>
+                                }
                                 else
                                 {
                                     <span class="text-muted small" title="Cannot remove a booked slot">
@@ -137,6 +157,11 @@
                             </td>
                         </tr>
                     }
+                    <tr id="noResultsRow" style="display:none;">
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No schedules match this filter.
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -208,6 +233,23 @@
     </div>
 </div>
 
+<style>
+    .filter-btn {
+        cursor: pointer;
+        border: none;
+        transition: box-shadow 0.15s ease, transform 0.1s ease;
+    }
+
+    .filter-btn:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    .filter-btn.active {
+        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.35);
+    }
+</style>
+
 @section Scripts {
     <script>
         // Existing slots for THIS trainer, sent from the server so JS can check conflicts live
@@ -234,7 +276,6 @@
             const dateVal = dateInput.value;
             const durationVal = document.getElementById('durationMinutes').value;
 
-            // Always clear any previous custom error first
             startInput.setCustomValidity('');
 
             if (!startVal || !durationVal) {
@@ -256,7 +297,6 @@
 
             const rawEndTotalMinutes = startTotalMinutes + parseInt(durationVal);
 
-            // Would this session cross midnight?
             if (rawEndTotalMinutes >= 24 * 60) {
                 startInput.setCustomValidity(
                     'This session would cross into the next day. Choose an earlier start time or a shorter duration.'
@@ -267,7 +307,6 @@
                 return;
             }
 
-            // Does this overlap an existing slot on the same date?
             if (dateVal) {
                 const conflict = existingSchedules.find(function (s) {
                     return s.date === dateVal &&
@@ -302,7 +341,6 @@
         document.getElementById('durationMinutes').addEventListener('change', updateEndTime);
         document.getElementById('scheduleDate').addEventListener('change', updateEndTime);
 
-        // Guard: block submit if end time wasn't calculated (covers midnight-crossing, conflicts, and empty fields)
         document.querySelector('#addScheduleModal form').addEventListener('submit', function (e) {
             const startInput = document.getElementById('startTime');
             if (!document.getElementById('endTime').value) {
@@ -310,5 +348,39 @@
                 startInput.reportValidity();
             }
         });
+
+        // ── Badge filter logic: All / Booked / Available / History ──
+        (function () {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const rows = document.querySelectorAll('.schedule-row');
+            const noResultsRow = document.getElementById('noResultsRow');
+
+            function applyFilter(filter) {
+                let visibleCount = 0;
+                rows.forEach(row => {
+                    // "all" now means "everything currently active" — Completed/Expired
+                    // slots only ever show up under the History filter.
+                    const match = filter === 'all'
+                        ? row.dataset.filter !== 'history'
+                        : row.dataset.filter === filter;
+                    row.style.display = match ? '' : 'none';
+                    if (match) visibleCount++;
+                });
+                if (noResultsRow) {
+                    noResultsRow.style.display = visibleCount === 0 ? '' : 'none';
+                }
+            }
+
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    applyFilter(this.dataset.filter);
+                });
+            });
+
+            // Run once on load so Completed/Expired rows are hidden until History is selected
+            applyFilter('all');
+        })();
     </script>
 }

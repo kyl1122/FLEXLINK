@@ -2,18 +2,130 @@
 @{
     ViewData["Title"] = "Admin Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
-
-
 }
 
-<div class="container mt-4">
+<style>
+    /* Dark Theme & Container Matching Reference Design */
+    body {
+        background-color: #232228 !important;
+        color: #ffffff;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
 
+    .dark-panel {
+        background-color: #272a34;
+        border-radius: 12px;
+        border: none;
+        color: #ffffff;
+    }
+
+    .text-green-accent {
+        color: #00c853 !important;
+    }
+
+    .text-red-accent {
+        color: #e53935 !important;
+    }
+
+    .pill-btn-red {
+        border: 1px solid #e53935;
+        color: #e53935;
+        background: transparent;
+        border-radius: 50rem;
+        padding: 2px 10px;
+        font-size: 0.72rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .pill-btn-red:hover {
+            background-color: #e53935;
+            color: #ffffff;
+        }
+
+    /* Custom Capacity Bar */
+    .progress-bar-bg {
+        background-color: #d8dadf;
+        border-radius: 20px;
+        height: 18px;
+    }
+
+    .progress-bar-fill {
+        background-color: #00c853;
+        border-radius: 20px;
+    }
+
+    /* Header Bar */
+    .monthly-header {
+        background-color: #1bb954;
+        color: #ffffff;
+        border-radius: 10px 10px 0 0;
+        padding: 10px 18px;
+    }
+
+    .monthly-badge {
+        background-color: #ffffff;
+        color: #000000;
+        border-radius: 50rem;
+        padding: 2px 14px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        min-width: 80px;
+        height: 22px;
+    }
+
+    /* Table & Container Styling Matching Admin_3.jpg */
+    .table-container-dark {
+        background-color: #272a34;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .custom-dark-table {
+        color: #000;
+        margin-bottom: 0;
+        background-color: transparent;
+    }
+
+        .custom-dark-table tr {
+            border-bottom: 1px solid #333846;
+        }
+
+        .custom-dark-table td {
+            border: none;
+            color: #000;
+            padding-top: 16px;
+            padding-bottom: 16px;
+            vertical-align: middle;
+        }
+
+    .badge-pill-outline {
+        border: 1px solid #e53935;
+        color: #e53935;
+        border-radius: 50rem;
+        padding: 2px 10px;
+        font-size: 0.72rem;
+        background: transparent;
+        display: inline-block;
+    }
+
+    .equipment-pending {
+        margin-left: 20px;
+    }
+</style>
+
+<div class="container-fluid px-4 mt-3">
+
+    @* ── HEADER ── *@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-0">Admin Dashboard</h2>
-            <p class="text-muted mb-0">Manage all users, trainers, and gym equipment.</p>
+            <h1 class="fw-bold mb-1 text-white fs-2">Admin Dashboard</h1>
+            <p class="text-secondary mb-0">Manage all users, trainers, and gym equipment</p>
         </div>
-        <a asp-controller="Admin" asp-action="CreateTrainer" class="btn btn-success">
+        <a asp-controller="Admin" asp-action="CreateTrainer" class="btn btn-success fw-semibold px-3 py-2" style="border-radius: 8px; background-color: #1bb954; border: none;">
             <i class="bi bi-person-plus me-1"></i> Create Trainer Account
         </a>
     </div>
@@ -21,142 +133,158 @@
     @* Alerts *@
     @if (TempData["AdminSuccess"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show">
+        <div class="alert alert-success alert-dismissible fade show bg-success text-white border-0">
             <i class="bi bi-check-circle me-1"></i> @TempData["AdminSuccess"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
         </div>
     }
     @if (TempData["AdminError"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show">
+        <div class="alert alert-danger alert-dismissible fade show bg-danger text-white border-0">
             <i class="bi bi-exclamation-circle me-1"></i> @TempData["AdminError"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
         </div>
     }
 
-    @* ── SPACE CAPACITY ── *@
+    @* ── ROW 1: CAPACITY, TRAINERS, USERS ── *@
     @{
         int currentCount = ViewBag.CurrentCount;
         int maxCapacity = ViewBag.MaxCapacity;
         bool isFull = currentCount >= maxCapacity;
         double percent = maxCapacity > 0 ? Math.Round((double)currentCount / maxCapacity * 100, 0) : 0;
     }
-    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-semibold"><i class="bi bi-people-fill me-1"></i>Space Capacity (Today)</span>
-                <span class="fw-bold @(isFull ? "text-danger" : "text-success")">
-                    @currentCount / @maxCapacity
-                </span>
+
+    <div class="row g-3 mb-3">
+        <!-- Space Capacity Card -->
+        <div class="col-lg-5">
+            <div class="card dark-panel p-3 h-100 justify-content-center">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-semibold d-flex align-items-center">
+                        <i class="bi bi-people-fill me-2 fs-5"></i>Space Capacity (Today)
+                    </span>
+                    <span class="fw-bold text-red-accent fs-5">
+                        @currentCount/@maxCapacity
+                    </span>
+                </div>
+                <div class="progress progress-bar-bg">
+                    <div class="progress-bar progress-bar-fill"
+                         role="progressbar"
+                         style="width: @percent%;"
+                         aria-valuenow="@currentCount" aria-valuemin="0" aria-valuemax="@maxCapacity">
+                    </div>
+                </div>
+                @if (isFull)
+                {
+                    <p class="text-red-accent small mt-2 mb-0">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        Gym is at full capacity. Staff cannot check in any more members or guests.
+                    </p>
+                }
             </div>
-            <div class="progress" style="height: 18px; border-radius: 10px;">
-                <div class="progress-bar @(isFull ? "bg-danger" : "bg-success")"
-                     role="progressbar"
-                     style="width: @percent%;"
-                     aria-valuenow="@currentCount" aria-valuemin="0" aria-valuemax="@maxCapacity">
+        </div>
+
+        <!-- Trainers Card -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card dark-panel p-3 h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person me-2 fs-5"></i>
+                        <span class="fw-semibold">Trainers</span>
+                    </div>
+                    <a asp-controller="Admin" asp-action="Trainers" class="pill-btn-red">
+                        View Trainer <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="mt-auto d-flex align-items-baseline">
+                    <span class="display-5 fw-bold text-red-accent me-2">@ViewBag.TrainerCount</span>
+                    <span class="text-red-accent fw-semibold">Total</span>
                 </div>
             </div>
-            @if (isFull)
-            {
-                <p class="text-danger small mt-2 mb-0">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                    Gym is at full capacity. Staff cannot check in any more members or guests.
-                </p>
-            }
+        </div>
+
+        <!-- Users Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card dark-panel p-3 h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person me-2 fs-5"></i>
+                        <span class="fw-semibold">Users</span>
+                    </div>
+                    <a asp-controller="Admin" asp-action="Users" class="pill-btn-red">
+                        View User <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="mt-auto d-flex align-items-baseline">
+                    <span class="display-5 fw-bold text-red-accent me-2">@ViewBag.UserCount</span>
+                    <span class="text-red-accent fw-semibold">Total</span>
+                </div>
+            </div>
         </div>
     </div>
 
-@* ── TRAINERS, USERS & EQUIPMENT SUMMARY ── *@
+    @* ── ROW 2: ALL-TIME INCOME & EQUIPMENT ── *@
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="card border-start border-4 border-primary shadow-sm h-100" style="border-radius:12px;">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="badge bg-primary mb-1">
-                            <i class="bi bi-person-badge me-1"></i>@ViewBag.TrainerCount Total
-                        </span>
-                        <div class="fw-semibold">Trainers</div>
-                    </div>
-                    <a asp-controller="Admin" asp-action="Trainers" class="btn btn-outline-primary btn-sm">
-                        View Trainers <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
+        <!-- All-Time Income Card -->
+        <div class="col-lg-5">
+            <div class="card dark-panel p-3 h-100 justify-content-center">
+                <div class="d-flex align-items-center mb-1">
+                    <i class="bi bi-credit-card-2-front me-2 fs-5"></i>
+                    <span class="fw-semibold">All - Time Income</span>
+                </div>
+                <div class="display-5 fw-bold text-green-accent ms-1 mt-1">
+                    ₱ @(((decimal)ViewBag.TotalIncome).ToString("N0"))
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-start border-4 border-secondary shadow-sm h-100" style="border-radius:12px;">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="badge bg-secondary mb-1">
-                            <i class="bi bi-people me-1"></i>@ViewBag.UserCount Total
-                        </span>
-                        <div class="fw-semibold">Users</div>
+
+        <!-- Equipment Card -->
+        <div class="col-lg-7">
+            <div class="card dark-panel p-3 h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person me-2 fs-5"></i>
+                        <span class="fw-semibold">Equipment</span>
                     </div>
-                    <a asp-controller="Admin" asp-action="Users" class="btn btn-outline-secondary btn-sm">
-                        View Users <i class="bi bi-arrow-right ms-1"></i>
+                    <a asp-controller="Admin" asp-action="Equipment" class="pill-btn-red">
+                        View Trainer <i class="bi bi-arrow-right ms-1"></i>
                     </a>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card border-start border-4 border-warning shadow-sm h-100" style="border-radius:12px;">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="badge bg-warning text-dark mb-1">
-                            <i class="bi bi-tools me-1"></i>@ViewBag.EquipmentCount Total
-                        </span>
-                        <div class="fw-semibold">
-                            Equipment
-                            @if ((int)ViewBag.PendingRepairCount > 0)
-                            {
-                                <span class="badge bg-danger ms-1">@ViewBag.PendingRepairCount pending</span>
-                            }
+                <div class="mt-auto d-flex align-items-baseline">
+                    <span class="display-5 fw-bold text-red-accent me-2">@ViewBag.EquipmentCount</span>
+                    <span class="text-red-accent fw-semibold me-4">Total</span>
+                    @if ((int)ViewBag.PendingRepairCount > 0)
+                    {
+                        <div class="equipment-pending d-inline-flex align-items-baseline">
+                            <span class="text-red-accent fw-bold fs-3 me-1">@ViewBag.PendingRepairCount</span>
+                            <span class="text-red-accent fw-semibold">- Pending</span>
                         </div>
-                    </div>
-                    <a asp-controller="Admin" asp-action="Equipment" class="btn btn-outline-warning btn-sm">
-                        View Equipment <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
+                    }
                 </div>
             </div>
         </div>
     </div>
 
-@* ── INCOME REPORTS ── *@
-@{
-    var monthlyIncome = ViewBag.MonthlyIncome as List<FLEXLINK.ViewModels.MonthlyIncomeViewModel> ?? new();
-}
-    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;">
-        <div class="card-body d-flex justify-content-between align-items-center">
-            <span class="fw-semibold"><i class="bi bi-cash-stack me-1"></i>All-Time Income</span>
-            <span class="fw-bold text-success fs-4">₱@(((decimal)ViewBag.TotalIncome).ToString("N0"))</span>
-        </div>
-    </div>
-
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center"
-             style="border-radius:12px 12px 0 0;">
-            <span class="fw-bold fs-6">
-                <i class="bi bi-graph-up me-2"></i>Monthly Income Breakdown
+    @* ── INCOME REPORTS TABLE ── *@
+    @{
+        var monthlyIncome = ViewBag.MonthlyIncome as List<FLEXLINK.ViewModels.MonthlyIncomeViewModel> ?? new();
+    }
+    <div class="table-container-dark mb-4">
+        <div class="monthly-header d-flex justify-content-between align-items-center">
+            <span class="fw-bold fs-5 d-flex align-items-center">
+                <i class="bi bi-graph-up me-2"></i> Monthly Income Breakdown
             </span>
-            <span class="badge bg-white text-success">@monthlyIncome.Count month@(monthlyIncome.Count != 1 ? "s" : "")</span>
+            <span class="monthly-badge"></span>
         </div>
-        <div class="card-body p-0">
+        <div class="p-0">
             @if (!monthlyIncome.Any())
             {
-                <p class="text-muted text-center py-4 mb-0">
+                <p class="text-secondary text-center py-4 mb-0">
                     <i class="bi bi-inbox me-1"></i>No approved memberships yet.
                 </p>
             }
             else
             {
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Month</th>
-                            <th class="text-center">Memberships Sold</th>
-                            <th class="text-end">Income</th>
-                        </tr>
-                    </thead>
+                <table class="table custom-dark-table align-middle mb-0">
                     <tbody>
                         @{
                             int rowIndex = 0;
@@ -166,35 +294,37 @@
                             rowIndex++;
                             string collapseId = $"monthDetail{rowIndex}";
                             <tr style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#@collapseId">
-                                <td>
-                                    <i class="bi bi-chevron-right me-2 text-muted"></i>
-                                    <i class="bi bi-calendar3 me-2 text-success"></i>@row.MonthLabel
+                                <td class="ps-4" style="width: 35%;">
+                                    <i class="bi bi-calendar3 me-3 text-white fs-5"></i>
+                                    <span class="fs-6">@row.MonthLabel</span>
                                 </td>
-                                <td class="text-center">
-                                    @row.MembershipCount
-                                    <div class="mt-1">
-                                        @if (row.OneMonthCount > 0)
-                                        {
-                                            <span class="badge bg-light text-dark border me-1">1mo × @row.OneMonthCount</span>
-                                        }
-                                        @if (row.TwoMonthCount > 0)
-                                        {
-                                            <span class="badge bg-light text-dark border me-1">2mo × @row.TwoMonthCount</span>
-                                        }
-                                        @if (row.ThreeMonthCount > 0)
-                                        {
-                                            <span class="badge bg-light text-dark border">3mo × @row.ThreeMonthCount</span>
-                                        }
-                                    </div>
+                                <td class="text-center" style="width: 15%;">
+                                    <span>@row.MembershipCount</span>
                                 </td>
-                                <td class="text-end fw-semibold">₱@row.Total.ToString("N0")</td>
+                                <td class="text-center" style="width: 25%;">
+                                    @if (row.OneMonthCount > 0)
+                                    {
+                                        <span class="badge-pill-outline me-1">1mo × @row.OneMonthCount</span>
+                                    }
+                                    @if (row.TwoMonthCount > 0)
+                                    {
+                                        <span class="badge-pill-outline me-1">2mo × @row.TwoMonthCount</span>
+                                    }
+                                    @if (row.ThreeMonthCount > 0)
+                                    {
+                                        <span class="badge-pill-outline">3mo × @row.ThreeMonthCount</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4 fw-bold text-green-accent fs-5" style="width: 25%;">
+                                    ₱ @row.Total.ToString("N0")
+                                </td>
                             </tr>
                             <tr class="collapse" id="@collapseId">
-                                <td colspan="3" class="bg-light p-0">
-                                    <table class="table table-sm mb-0">
+                                <td colspan="4" class="p-0" style="background-color: #1f222b;">
+                                    <table class="table table-sm custom-dark-table mb-0">
                                         <thead>
-                                            <tr class="small text-muted">
-                                                <th class="ps-4">Member</th>
+                                            <tr class="small text-secondary">
+                                                <th class="ps-5">Member</th>
                                                 <th>Plan</th>
                                                 <th>Start Date</th>
                                                 <th>Expiry Date</th>
@@ -205,11 +335,11 @@
                                             @foreach (var detail in row.Details)
                                             {
                                                 <tr>
-                                                    <td class="ps-4">@detail.UserName</td>
+                                                    <td class="ps-5">@detail.UserName</td>
                                                     <td>@detail.PlanLabel</td>
                                                     <td>@detail.StartDate.ToString("MMM dd, yyyy")</td>
                                                     <td>@detail.ExpiryDate.ToString("MMM dd, yyyy")</td>
-                                                    <td class="text-end pe-4">₱@detail.Price.ToString("N0")</td>
+                                                    <td class="text-end pe-4 text-green-accent">₱ @detail.Price.ToString("N0")</td>
                                                 </tr>
                                             }
                                         </tbody>
@@ -223,16 +353,13 @@
         </div>
     </div>
 
-
-    
-
-
+</div>
 
 @* ── Delete User Confirmation Modal ── *@
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
+        <div class="modal-content dark-panel">
+            <div class="modal-header bg-danger text-white border-0">
                 <h5 class="modal-title" id="deleteModalLabel">
                     <i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete
                 </h5>
@@ -242,9 +369,9 @@
                 Are you sure you want to delete the account for
                 <strong id="deleteUserEmail"></strong>?
                 <br />
-                <span class="text-danger small">This action cannot be undone. All their data will be removed.</span>
+                <span class="text-red-accent small">This action cannot be undone. All their data will be removed.</span>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer border-0">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form asp-controller="Admin" asp-action="DeleteUser" method="post" id="deleteForm">
                     @Html.AntiForgeryToken()

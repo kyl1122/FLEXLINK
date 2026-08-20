@@ -19,8 +19,25 @@ namespace FLEXLINK.Controllers
             _userManager = userManager;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser != null)
+                {
+                    var roles = await _userManager.GetRolesAsync(currentUser);
+
+                    if (roles.Contains("Admin"))
+                        return RedirectToAction("Index", "Admin");
+                    if (roles.Contains("Trainer"))
+                        return RedirectToAction("Index", "Trainer"); // change to your actual Trainer controller/action
+                    if (roles.Contains("Staff"))
+                        return RedirectToAction("Index", "Staff");
+                    // otherwise fall through to regular User landing page
+                }
+            }
+
             return View();
         }
 

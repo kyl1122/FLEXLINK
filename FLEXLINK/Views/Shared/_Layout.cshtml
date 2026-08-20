@@ -1,10 +1,9 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" /> 
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - FLEXLINK</title>
-    <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/Membership.css" asp-append-version="true" />
@@ -12,7 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
     <style>
-        /* CSS for the Sidebar Layout when logged in */
+        /* CSS for Sidebar Layout when logged in */
         .app-container {
             display: flex;
             min-height: 100vh;
@@ -52,6 +51,149 @@
             flex-grow: 1;
             padding: 2rem;
         }
+
+        /* Hero Design CSS */
+        .flexlink-guest-wrapper {
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* Left Navigation links */
+        .guest-nav .nav-link {
+            color: #ffffff !important;
+            font-size: 0.78rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 0.5rem 0.9rem !important;
+        }
+
+            .guest-nav .nav-link:hover {
+                color: #ff2a2a !important;
+            }
+
+        /* Red Side Login Partial Styling */
+        .red-side-auth .nav-link,
+        .red-side-auth a {
+            color: #ffffff !important;
+            font-size: 0.78rem;
+            letter-spacing: 2px;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 0.5rem 0.9rem;
+            transition: opacity 0.2s;
+        }
+
+            .red-side-auth .nav-link:hover,
+            .red-side-auth a:hover {
+                opacity: 0.8;
+                color: #ffffff !important;
+            }
+
+        /* Typography */
+        .hero-title-solid {
+            font-size: 3.8rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            line-height: 1.1;
+        }
+
+        .hero-title-outline {
+            font-size: 3.8rem;
+            font-weight: 900;
+            line-height: 1.1;
+            color: transparent;
+            -webkit-text-stroke: 1.8px #ff2a2a;
+            letter-spacing: 16px;
+            margin-left: 2px;
+        }
+
+        .hero-description {
+            color: #a0a0a0;
+            max-width: 360px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        /* Action Button */
+        .btn-join-now {
+            background-color: #ff2a2a;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.85rem;
+            padding: 0.65rem 1.6rem;
+            border-radius: 2px;
+            border: none;
+            letter-spacing: 1px;
+            display: inline-block;
+            text-decoration: none;
+            transition: background 0.2s ease-in-out;
+        }
+
+            .btn-join-now:hover {
+                background-color: #d61f1f;
+                color: #ffffff;
+            }
+
+        /* Stat Counters */
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.6rem;
+            color: #777777;
+            letter-spacing: 1px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        /* Right Red Panel */
+        .red-banner-section {
+            background-color: #ff2525;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .guest-nav-logo {
+            max-height: 52px;
+            width: auto;
+        }
+
+        .sidebar-logo {
+            max-height: 42px;
+            width: auto;
+        }
+
+        .red-banner-logo {
+            max-width: 380px;
+            width: 85%;
+            height: auto;
+        }
+
+        .sub-logo-text {
+            letter-spacing: 3.5px;
+            font-size: 0.72rem;
+            color: #ffffff;
+            font-weight: 700;
+            opacity: 0.95;
+        }
+
+        .sub-logo-divider {
+            display: inline-block;
+            width: 45px;
+            height: 1px;
+            background-color: #ffffff;
+            vertical-align: middle;
+            margin: 0 10px;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -60,11 +202,10 @@
     {
         <!-- LOGGED IN USER: SIDEBAR LAYOUT -->
         <div class="app-container">
-            <!-- Sidebar Navigation -->
             <aside class="sidebar">
                 <div>
                     <a class="d-flex align-items-center mb-4 text-decoration-none text-white px-2" asp-area="" asp-controller="Home" asp-action="Index">
-                        <img src="~/images/logo.png" alt="FLEXLINK" style="max-height: 35px;" />
+                        <img src="~/images/logo_2.png" alt="FLEXLINK" class="sidebar-logo img-fluid" />
                     </a>
 
                     <ul class="nav nav-pills flex-column mb-auto">
@@ -110,6 +251,9 @@
                         else
                         {
                             <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-person-badge me-2"></i>Home</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" asp-controller="Home" asp-action="Trainer"><i class="bi bi-person-badge me-2"></i>Trainer</a>
                             </li>
                             <li class="nav-item">
@@ -125,7 +269,6 @@
                     </ul>
                 </div>
 
-                <!-- Logout Bottom Section -->
                 <div class="border-top border-secondary pt-3 px-2">
                     <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline w-100">
                         @Html.AntiForgeryToken()
@@ -136,67 +279,121 @@
                 </div>
             </aside>
 
-            <!-- Main Content Area -->
             <div class="main-content">
                 <div class="page-body">
                     @RenderBody()
                 </div>
-                <footer class="border-top footer text-muted py-3 px-4 bg-white">
-                    <div class="container-fluid">
-                        &copy; 2026 - FLEXLINK - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                    </div>
-                </footer>
             </div>
         </div>
     }
     else
     {
-        <!-- GUEST / LANDING PAGE: TOP NAV LAYOUT -->
-        <header>
-            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3 flexlink-navbar">
-                <div class="container-fluid">
-                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                        <img src="~/images/logo.png" alt="FLEXLINK" />
-                    </a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
+        <!-- GUEST / LANDING PAGE SPLIT DESIGN -->
+        <div class="container-fluid p-0 flexlink-guest-wrapper overflow-hidden">
+            <div class="row g-0 min-vh-100">
 
-                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                        <ul class="navbar-nav flex-grow-1">
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="About">About Us</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
-                            </li>
-                        </ul>
-                        <partial name="_LoginPartial" />
+                <!-- LEFT SECTION (Dark Hero Content) -->
+                <div class="col-lg-7 d-flex flex-column justify-content-between p-4 p-md-5">
+
+                    <!-- Header Navigation -->
+                    <header>
+                        <nav class="navbar navbar-expand-lg navbar-dark bg-transparent p-0 guest-nav">
+                            <div class="container-fluid p-0">
+                                <a class="navbar-brand me-4" asp-area="" asp-controller="Home" asp-action="Index">
+                                    <img src="~/images/logo.png" alt="FLEXLINK" class="guest-nav-logo img-fluid" style="max-height: `90px; width: auto;" />
+                                </a>
+                                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#guestNavbar">
+                                    <span class="navbar-toggler-icon"></span>
+                                </button>
+
+                                <div class="collapse navbar-collapse" id="guestNavbar">
+                                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                                        <li class="nav-item">
+                                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">HOME</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="About">ABOUT</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Programs">PROGRAMS</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Trainer">TRAINERS</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Membership">PRICING</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Schedule">SCHEDULE</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </nav>
+                    </header>
+
+                    <!-- Hero Main Section -->
+                    <div class="my-auto py-5 px-md-4">
+                        <h1 class="hero-title-solid text-white text-uppercase mb-0">FORGE YOUR</h1>
+                        <h1 class="hero-title-outline text-uppercase mb-4">B O D Y</h1>
+
+                        <p class="hero-description mb-4">
+                            Transform your physique with science-backed training programs, expert coaches, and state-of-the-art facilities
+                        </p>
+
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-join-now text-uppercase mb-5">
+                            JOIN NOW !
+                        </a>
+
+                        <div class="w-100 mb-4">
+                            @RenderBody()
+                        </div>
+
+                        <div class="row pt-2 text-start" style="max-width: 440px;">
+                            <div class="col-4">
+                                <div class="stat-number">12K+</div>
+                                <div class="stat-label text-uppercase">ACTIVE MEMBERS</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-number">80%</div>
+                                <div class="stat-label text-uppercase">SUCCESS RATE</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-number">48+</div>
+                                <div class="stat-label text-uppercase">ELITE MEMBERS</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Info -->
+                    <div class="px-md-4 text-muted small">
+                        &copy; @DateTime.Now.Year - FLEXLINK. All rights reserved.
                     </div>
                 </div>
-            </nav>
-        </header>
 
-        <div class="container">
-            <main role="main" class="pb-3">
-                @RenderBody()
-            </main>
-        </div>
+                <!-- RIGHT SECTION (Red Branding Panel) -->
+                <div class="col-lg-5 red-banner-section d-none d-lg-flex flex-column align-items-center justify-content-between p-4 p-md-5">
 
-        <footer class="border-top footer text-muted">
-            <div class="container">
-                &copy; 2026 - FLEXLINK - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    <!-- Top Navigation for Auth Links on Red Side -->
+                    <div class="w-100 d-flex justify-content-end red-side-auth">
+                        <partial name="_LoginPartial" />
+                    </div>
+
+                    <!-- Centered Branding Logo & Subtext -->
+                    <div class="my-auto text-center">
+                        <img src="~/images/logo_2.png" alt="FLEXLINK" class="red-banner-logo img-fluid mb-2" />
+                        
+                    </div>
+
+                    <!-- Spacer to balance vertical alignment -->
+                    <div></div>
+                </div>
+
             </div>
-        </footer>
+        </div>
     }
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
