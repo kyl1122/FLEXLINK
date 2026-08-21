@@ -316,7 +316,7 @@ namespace FLEXLINK.Controllers
         {
             var equipmentList = await _db.Equipment
                 .Include(e => e.RepairNotes)
-                .OrderBy(e => e.Name)
+                .OrderBy(e => e.Name)   // ─── BY NAME ARRANGEMENT ────────────────────────────────────────────────────────────
                 .ToListAsync();
 
             var repairNotes = await _db.EquipmentRepairNote

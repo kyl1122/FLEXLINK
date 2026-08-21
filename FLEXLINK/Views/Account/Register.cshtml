@@ -5,6 +5,13 @@
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
 
+<!-- IF NAAY ERRORS DILI MO BALIK SA PAGE 1 -->
+@{
+    bool step1HasErrors = new[] { "Name", "Email", "Age", "PhoneNumber", "Address" }
+        .Any(k => ViewData.ModelState.ContainsKey(k) && ViewData.ModelState[k].Errors.Count > 0);
+    bool startOnStep2 = !ViewData.ModelState.IsValid && !step1HasErrors;
+}
+
 <!-- Google Font import for exact typography match -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -308,29 +315,29 @@
 
         <h2 class="form-heading">Registration</h2>
 
-        <form asp-action="Register" method="post" enctype="multipart/form-data" class="register-form">
+        <form asp-action="Register" method="post" enctype="multipart/form-data" class="register-form" id="registerForm">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-            <div class="form-grid">
+            <div class="form-grid" id="step1Fields" style="display:@(startOnStep2 ? "none" : "grid");">
                 <!-- Row 1: Name, Email, Age -->
                 <div>
-                    <input asp-for="Name" class="form-control custom-input" placeholder="Name" />
+                    <input asp-for="Name" class="form-control custom-input" placeholder="Name" required />
                     <span asp-validation-for="Name" class="text-danger small"></span>
                 </div>
 
                 <div>
-                    <input asp-for="Email" class="form-control custom-input" placeholder="Email" />
+                    <input asp-for="Email" class="form-control custom-input" placeholder="Email" required />
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
 
                 <div>
-                    <input asp-for="Age" class="form-control custom-input" placeholder="Age" />
+                    <input asp-for="Age" class="form-control custom-input" placeholder="Age" required />
                     <span asp-validation-for="Age" class="text-danger small"></span>
                 </div>
 
                 <!--  Phone Number -->
-                <input asp-for="PhoneNumber" class="form-control"
+                <input asp-for="PhoneNumber" class="form-control" required
                        type="text"
                        inputmode="numeric"
                        maxlength="11"
@@ -341,45 +348,175 @@
 
                 <!--   Address -->
                 <div>
-                    <input asp-for="Address" class="form-control custom-input" placeholder="Address" />
+                    <input asp-for="Address" class="form-control custom-input" placeholder="Address" required />
                     <span asp-validation-for="Address" class="text-danger small"></span>
                 </div>
+            </div>
 
+            <div class="form-grid" id="step2Fields" style="display:@(startOnStep2 ? "grid" : "none");">
                 <!--  Password -->
                 <div>
-                    <input asp-for="Password" class="form-control custom-input" placeholder="Password" />
+                    <input asp-for="Password" class="form-control custom-input" placeholder="Password" required />
                     <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>
 
                 <!--  Confirm Password -->
                 <div>
-                    <input asp-for="ConfirmPassword" class="form-control custom-input" placeholder="Confirm Password" />
+                    <input asp-for="ConfirmPassword" class="form-control custom-input" placeholder="Confirm Password" required />
                     <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                 </div>
 
                 <!-- Full Width: Profile Image -->
                 <div class="full-width">
                     <label class="form-label small text-light mb-1">Profile Picture <span class="text-danger">*</span></label>
-                    <input type="file" id="profileImageInput" name="ProfileImage" class="form-control custom-input" accept=".jpg,.jpeg,.png" />
+                    <input type="file" id="profileImageInput" name="ProfileImage" class="form-control custom-input" accept=".jpg,.jpeg,.png" required />
                     <div class="form-text-muted mt-1">Required. Max 2MB. JPG, JPEG, or PNG.</div>
                 </div>
             </div>
 
-            <!-- Bottom Positioned Action Row (Button + Login Inline) -->
-            <div class="bottom-action-row">
-                <button type="submit" class="btn btn-continue">
-                    Continue &rarr;
-                </button>
+            <div id="step3Fields" style="display:none;">
+                <label class="form-label small text-light mb-2 fw-bold">Membership Waiver <span class="text-danger">*</span></label>
+                <div style="max-height: 260px; overflow-y: auto; background-color: rgba(255,255,255,0.05); border: 1px solid #4a515d; border-radius: 8px; padding: 16px; font-size: 0.82rem; color: #d0d3d8; line-height: 1.6;">
+                    <p><strong>MEMBERSHIP WAIVER AND RELEASE OF LIABILITY</strong></p>
+                    <p>
+                        I hereby declare that all information provided during registration is true and correct.
+                        By creating this account, I acknowledge and AGREE to ABIDE by the RULES & REGULATIONS
+                        set by FLEXLINK.
+                    </p>
+                    <p>
+                        I understand that participation in gym activities, use of equipment, and enrollment in
+                        training sessions carry inherent risks of physical injury. I voluntarily assume all such
+                        risks and hereby RELEASE and forever DISCHARGE FLEXLINK, its owners, agents, trainers,
+                        staff, and employees from any and all claims, demands, or liability for injury, loss, or
+                        damage arising from my use of the facility, equipment, or participation in any program,
+                        whether occurring from any cause, acting officially or otherwise.
+                    </p>
+                    <p>I understand that:</p>
+                    <ul>
+                        <li>Membership fees are non-refundable once approved and activated.</li>
+                        <li>I am responsible for disclosing any pre-existing medical conditions that may affect my ability to safely participate in physical activity.</li>
+                        <li>FLEXLINK reserves the right to suspend or terminate my membership for violation of gym rules and regulations, without refund.</li>
+                        <li>This waiver remains valid for the entire duration of my active membership and any renewals thereof.</li>
+                    </ul>
+                    <p>By checking the box below, I confirm that I have read, understood, and voluntarily accept the terms of this waiver.</p>
+                </div>
 
-                <p class="login-inline-text">
-                    Already have an account? <a asp-controller="Account" asp-action="Login">Login</a>
-                </p>
+                <div class="form-check mt-3">
+                    <input type="checkbox" class="form-check-input" id="waiverAgreeCheckbox" onchange="toggleSubmitButton()" />
+                    <label class="form-check-label small text-light" for="waiverAgreeCheckbox">
+                        I have read and agree to the Membership Waiver and Release of Liability.
+                    </label>
+                </div>
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="bottom-action-row">
+                <!-- Step 1 buttons -->
+                <div id="step1Actions" style="display:@(startOnStep2 ? "none" : "flex"); align-items:center; gap:1.5rem;">
+                    <button type="button" class="btn-continue" onclick="goToStep2()">
+                        Continue &rarr;
+                    </button>
+                    <p class="login-inline-text">
+                        Already have an account? <a asp-controller="Account" asp-action="Login">Login</a>
+                    </p>
+                </div>
+
+                <!-- Step 2 buttons (hidden until step 2) -->
+                <div id="step2Actions" style="display:@(startOnStep2 ? "flex" : "none"); align-items:center; gap:1.5rem;">
+                    <button type="button" class="btn-continue" style="background-color:transparent;" onclick="goToStep1()">
+                        &larr; Back
+                    </button>
+                    <button type="button" class="btn-continue" onclick="goToStep3()">
+                        Continue &rarr;
+                    </button>
+                </div>
+
+                <!-- Step 3 buttons (waiver) -->
+                <div id="step3Actions" style="display:none; align-items:center; gap:1.5rem;">
+                    <button type="button" class="btn-continue" style="background-color:transparent;" onclick="goToStep2From3()">
+                        &larr; Back
+                    </button>
+                    <button type="submit" class="btn-continue" id="finalSubmitBtn" disabled style="opacity:0.5; cursor:not-allowed;">
+                        Submit
+                    </button>
+                </div>
+
             </div>
         </form>
     </div>
 </div>
 
 @section Scripts {
+    <script>
+          function goToStep2() {
+            const form = document.getElementById('registerForm');
+
+            setStep2Required(false);
+
+            if (!form.reportValidity()) {
+                setStep2Required(true);
+                return;
+            }
+
+            document.getElementById('step1Fields').style.display = 'none';
+            document.getElementById('step1Actions').style.display = 'none';
+            document.getElementById('step2Fields').style.display = 'grid';
+            document.getElementById('step2Actions').style.display = 'flex';
+
+            setStep2Required(true);
+
+            document.querySelectorAll('.indicator-dot')[1]?.classList.add('active');
+        }
+
+        function goToStep1() {
+            document.getElementById('step2Fields').style.display = 'none';
+            document.getElementById('step2Actions').style.display = 'none';
+            document.getElementById('step1Fields').style.display = 'grid';
+            document.getElementById('step1Actions').style.display = 'flex';
+
+            document.querySelectorAll('.indicator-dot')[1]?.classList.remove('active');
+        }
+
+        function goToStep3() {
+            const form = document.getElementById('registerForm');
+
+            // step2 fields ARE visible right now, so this correctly validates Password/ConfirmPassword/ProfileImage
+            if (!form.reportValidity()) {
+                return;
+            }
+
+            document.getElementById('step2Fields').style.display = 'none';
+            document.getElementById('step2Actions').style.display = 'none';
+            document.getElementById('step3Fields').style.display = 'block';
+            document.getElementById('step3Actions').style.display = 'flex';
+
+            document.querySelectorAll('.indicator-dot')[2]?.classList.add('active');
+        }
+
+        function goToStep2From3() {
+            document.getElementById('step3Fields').style.display = 'none';
+            document.getElementById('step3Actions').style.display = 'none';
+            document.getElementById('step2Fields').style.display = 'grid';
+            document.getElementById('step2Actions').style.display = 'flex';
+
+            document.querySelectorAll('.indicator-dot')[2]?.classList.remove('active');
+        }
+
+        function setStep2Required(isRequired) {
+            document.getElementById('Password').required = isRequired;
+            document.getElementById('ConfirmPassword').required = isRequired;
+            document.getElementById('profileImageInput').required = isRequired;
+        }
+
+        function toggleSubmitButton() {
+            const checkbox = document.getElementById('waiverAgreeCheckbox');
+            const submitBtn = document.getElementById('finalSubmitBtn');
+
+            submitBtn.disabled = !checkbox.checked;
+            submitBtn.style.opacity = checkbox.checked ? '1' : '0.5';
+            submitBtn.style.cursor = checkbox.checked ? 'pointer' : 'not-allowed';
+        }
+    </script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");
     }
