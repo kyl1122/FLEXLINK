@@ -233,7 +233,9 @@ namespace FLEXLINK.Controllers
                     CurrentUserRating = myRating?.Stars,
                     CurrentUserHasBooked = hasBooked
                 };
-            }).ToList();
+            })
+                .Where(vm => vm.AvailableSchedules.Any())
+                .ToList();
 
             return View(viewModel);
         }

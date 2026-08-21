@@ -183,6 +183,23 @@ namespace FLEXLINK.Controllers
                 }
             }
 
+            // Pull each trainer's actual uploaded picture from ProfileTrainer
+            var trainerIds = trainers.Select(t => t.Id).ToList();
+            var profilePics = await _db.ProfileTrainer
+                .Where(p => trainerIds.Contains(p.UserId))
+                .ToDictionaryAsync(p => p.UserId, p => p.ProfilePicture);
+
+            foreach (var trainer in trainers)
+            {
+                if (profilePics.TryGetValue(trainer.Id, out var pic) && !string.IsNullOrEmpty(pic))
+                {
+                    trainer.ProfilePicture = pic; // override with the real uploaded picture
+                }
+            }
+
+            // Sort newest first
+            trainers = trainers.OrderByDescending(t => t.CreatedAt).ToList();
+
             // Passes the List<Users> directly as a Strongly-Typed Model to Views/Admin/Trainers.cshtml
             return View(trainers);
         }
@@ -205,6 +222,9 @@ namespace FLEXLINK.Controllers
                     regularUsers.Add(user);
                 }
             }
+
+            // Sort newest first
+            regularUsers = regularUsers.OrderByDescending(u => u.CreatedAt).ToList();
 
             // Passes the List<Users> directly as a Strongly-Typed Model to Views/Admin/Users.cshtml
             return View(regularUsers);

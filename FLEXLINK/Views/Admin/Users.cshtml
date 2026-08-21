@@ -37,6 +37,13 @@
             </div>
             <span class="badge bg-white text-dark rounded-pill fw-bold">@Model.Count()</span>
         </div>
+        <div class="p-3 border-bottom bg-light">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                <input type="text" id="userSearchInput" class="form-control border-start-0"
+                       placeholder="Search by name, email, or username..." onkeyup="filterUsers()" />
+            </div>
+        </div>
         <div class="card-body p-0">
             @if (!Model.Any())
             {
@@ -46,8 +53,11 @@
             }
             else
             {
+                <div id="noUserResults" class="text-center py-5 text-muted" style="display:none;">
+                    <i class="bi bi-search me-1"></i> No users match your search.
+                </div>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0" id="usersTable">
                         <thead class="table-light text-muted small text-uppercase">
                             <tr>
                                 <th class="ps-3">Full Name</th>
@@ -115,6 +125,22 @@
 
     @section Scripts {
         <script>
+            @* ── User Profile SEARCH BAR ── *@
+            function filterUsers() {
+                const query = document.getElementById('userSearchInput').value.toLowerCase();
+                const rows = document.querySelectorAll('#usersTable tbody tr');
+                let visibleCount = 0;
+
+                rows.forEach(function (row) {
+                    const text = row.innerText.toLowerCase();
+                    const match = text.includes(query);
+                    row.style.display = match ? '' : 'none';
+                    if (match) visibleCount++;
+                });
+
+                document.getElementById('noUserResults').style.display = visibleCount === 0 ? '' : 'none';
+            }
+
             function showUserProfile(name, email, phone, address, age, pic, created) {
                 document.getElementById('userProfileName').textContent = name;
                 document.getElementById('userProfileEmail').textContent = email || '—';

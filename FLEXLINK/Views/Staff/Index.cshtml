@@ -155,11 +155,14 @@
     <!-- Backdrop overlay -->
     <div class="floating-card-backdrop" id="cardBackdrop" onclick="closeProfileModal()"></div>
 
+
+
     <div id="checkInFloatingCard" class="card border-0 floating-status-card p-3"
          style="background: #ffffff; border-top: 10px solid @(isActive ? "#10b981" : "#ef4444") !important;">
 
         <div class="card-body p-4 p-md-5">
             <button type="button" class="btn-close" onclick="closeProfileModal()" aria-label="Close" style="font-size: 1.2rem; position: absolute; top: 24px; right: 24px; z-index: 10;"></button>
+
 
             <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-start text-center text-sm-start">
 
@@ -264,9 +267,7 @@
             }
         });
 
-        autoCloseTimer = setTimeout(function () {
-            closeProfileModal();
-        }, 8000);
+      
     </script>
 }
 
@@ -276,6 +277,9 @@
         <h2 class="fw-bold mb-0">Staff Check-In</h2>
         <p class="text-muted">Check in members or guests as they arrive at the gym.</p>
     </div>
+    <a asp-controller="Staff" asp-action="CreateUser" class="btn btn-success btn-sm mt-2">
+        <i class="bi bi-person-plus me-1"></i> Create User Account
+    </a>
 
     @* ── Standard Alerts ── *@
     @if (TempData["AttendanceSuccess"] != null && string.IsNullOrEmpty(memberName))

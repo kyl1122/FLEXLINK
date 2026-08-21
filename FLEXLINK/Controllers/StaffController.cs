@@ -395,5 +395,82 @@ namespace FLEXLINK.Controllers
         }
 
 
+
+        // ── Add/Create user account ──────────────────────────────────────────
+
+        [HttpGet]
+        public IActionResult CreateUser() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateUser(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            // ── PROFILE PICTURE IS REQUIRED ────────────────────────────────────────
+            if (model.ProfileImage == null || model.ProfileImage.Length == 0)
+            {
+                ModelState.AddModelError(string.Empty, "Profile picture is required.");
+                return View(model);
+            }
+
+            if (model.ProfileImage.Length > 2 * 1024 * 1024)
+            {
+                ModelState.AddModelError(string.Empty, "File size must not exceed 2MB.");
+                return View(model);
+            }
+
+            string[] allowedExtensions = { ".jpg", ".jpeg", ".png" };
+            string extension = Path.GetExtension(model.ProfileImage.FileName).ToLower();
+            if (!allowedExtensions.Contains(extension))
+            {
+                ModelState.AddModelError(string.Empty, "Only JPG, JPEG, and PNG files are allowed.");
+                return View(model);
+            }
+
+            string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
+
+            string fileName = Guid.NewGuid().ToString() + extension;
+            string filePath = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+                await model.ProfileImage.CopyToAsync(stream);
+
+            string profilePicturePath = "/uploads/" + fileName;
+
+            var user = new Users
+            {
+                FullName = model.Name,
+                UserName = model.Email,
+                Age = model.Age,
+                Address = model.Address,
+                PhoneNumber = model.PhoneNumber,
+                NormalizedUserName = model.Email.ToUpper(),
+                Email = model.Email,
+                NormalizedEmail = model.Email.ToUpper(),
+                ProfilePicture = profilePicturePath
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user, "User");
+                // No RegistrationRequest created — staff-created accounts skip approval
+                TempData["AttendanceSuccess"] = $"User account '{model.Email}' created successfully and can log in immediately.";
+                return RedirectToAction("Index");
+            }
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError("", error.Description);
+
+            return View(model);
+        }
+
+
     }
+
 }
