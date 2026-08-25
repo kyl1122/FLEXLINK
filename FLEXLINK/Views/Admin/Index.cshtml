@@ -3,130 +3,23 @@
     ViewData["Title"] = "Admin Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-<style>
-    /* Dark Theme & Container Matching Reference Design */
-    body {
-        background-color: #232228 !important;
-        color: #ffffff;
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    }
-
-    .dark-panel {
-        background-color: #272a34;
-        border-radius: 12px;
-        border: none;
-        color: #ffffff;
-    }
-
-    .text-green-accent {
-        color: #00c853 !important;
-    }
-
-    .text-red-accent {
-        color: #e53935 !important;
-    }
-
-    .pill-btn-red {
-        border: 1px solid #e53935;
-        color: #e53935;
-        background: transparent;
-        border-radius: 50rem;
-        padding: 2px 10px;
-        font-size: 0.72rem;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        transition: all 0.2s ease-in-out;
-    }
-
-        .pill-btn-red:hover {
-            background-color: #e53935;
-            color: #ffffff;
-        }
-
-    /* Custom Capacity Bar */
-    .progress-bar-bg {
-        background-color: #d8dadf;
-        border-radius: 20px;
-        height: 18px;
-    }
-
-    .progress-bar-fill {
-        background-color: #00c853;
-        border-radius: 20px;
-    }
-
-    /* Header Bar */
-    .monthly-header {
-        background-color: #1bb954;
-        color: #ffffff;
-        border-radius: 10px 10px 0 0;
-        padding: 10px 18px;
-    }
-
-    .monthly-badge {
-        background-color: #ffffff;
-        color: #000000;
-        border-radius: 50rem;
-        padding: 2px 14px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        display: inline-block;
-        min-width: 80px;
-        height: 22px;
-    }
-
-    /* Table & Container Styling Matching Admin_3.jpg */
-    .table-container-dark {
-        background-color: #272a34;
-        border-radius: 12px;
-        overflow: hidden;
-    }
-
-    .custom-dark-table {
-        color: #000;
-        margin-bottom: 0;
-        background-color: transparent;
-    }
-
-        .custom-dark-table tr {
-            border-bottom: 1px solid #333846;
-        }
-
-        .custom-dark-table td {
-            border: none;
-            color: #000;
-            padding-top: 16px;
-            padding-bottom: 16px;
-            vertical-align: middle;
-        }
-
-    .badge-pill-outline {
-        border: 1px solid #e53935;
-        color: #e53935;
-        border-radius: 50rem;
-        padding: 2px 10px;
-        font-size: 0.72rem;
-        background: transparent;
-        display: inline-block;
-    }
-
-    .equipment-pending {
-        margin-left: 20px;
-    }
-</style>
+<head>
+    <link rel="stylesheet" href="~/css/Admin_Index.css" />
+</head>
 
 <div class="container-fluid px-4 mt-3">
 
     @* ── HEADER ── *@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="fw-bold mb-1 text-black fs-2">Admin Dashboard</h1>
-            <p class="text-black mb-0">Manage all users, trainers, and gym equipment</p>
+            <h1 class="fw-bold mb-1 text-white fs-2">Admin Dashboard</h1>
+            <p class="text-secondary mb-0">Manage all users, trainers, and gym equipment</p>
         </div>
-        <a asp-controller="Admin" asp-action="CreateTrainer" class="btn btn-success fw-semibold px-3 py-2" style="border-radius: 8px; background-color: #1bb954; border: none;">
-            <i class="bi bi-person-plus me-1"></i> Create Trainer Account
+        <a asp-controller="Admin" asp-action="CreateTrainer" class="btn-create-trainer text-decoration-none">
+            <span class="btn-plus-icon">
+                <i class="bi bi-plus-lg"></i>
+            </span>
+            <span>Create Trainer Account</span>
         </a>
     </div>
 
@@ -159,7 +52,7 @@
         <div class="col-lg-5">
             <div class="card dark-panel p-3 h-100 justify-content-center">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="fw-semibold d-flex align-items-center">
+                    <span class="fw-semibold d-flex align-items-center text-white">
                         <i class="bi bi-people-fill me-2 fs-5"></i>Space Capacity (Today)
                     </span>
                     <span class="fw-bold text-red-accent fs-5">
@@ -187,7 +80,7 @@
         <div class="col-lg-3 col-md-6">
             <div class="card dark-panel p-3 h-100">
                 <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center text-white">
                         <i class="bi bi-person me-2 fs-5"></i>
                         <span class="fw-semibold">Trainers</span>
                     </div>
@@ -206,7 +99,7 @@
         <div class="col-lg-4 col-md-6">
             <div class="card dark-panel p-3 h-100">
                 <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center text-white">
                         <i class="bi bi-person me-2 fs-5"></i>
                         <span class="fw-semibold">Users</span>
                     </div>
@@ -227,7 +120,7 @@
         <!-- All-Time Income Card -->
         <div class="col-lg-5">
             <div class="card dark-panel p-3 h-100 justify-content-center">
-                <div class="d-flex align-items-center mb-1">
+                <div class="d-flex align-items-center mb-1 text-white">
                     <i class="bi bi-credit-card-2-front me-2 fs-5"></i>
                     <span class="fw-semibold">All - Time Income</span>
                 </div>
@@ -241,12 +134,12 @@
         <div class="col-lg-7">
             <div class="card dark-panel p-3 h-100">
                 <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center text-white">
                         <i class="bi bi-person me-2 fs-5"></i>
                         <span class="fw-semibold">Equipment</span>
                     </div>
                     <a asp-controller="Admin" asp-action="Equipment" class="pill-btn-red">
-                        View Trainer <i class="bi bi-arrow-right ms-1"></i>
+                        View Equipment <i class="bi bi-arrow-right ms-1"></i>
                     </a>
                 </div>
                 <div class="mt-auto d-flex align-items-baseline">
@@ -268,12 +161,12 @@
     @{
         var monthlyIncome = ViewBag.MonthlyIncome as List<FLEXLINK.ViewModels.MonthlyIncomeViewModel> ?? new();
     }
-    <div class="table-container-dark mb-4">
+    <div class="table-container-dark mb-4 shadow-sm">
         <div class="monthly-header d-flex justify-content-between align-items-center">
             <span class="fw-bold fs-5 d-flex align-items-center">
                 <i class="bi bi-graph-up me-2"></i> Monthly Income Breakdown
             </span>
-            <span class="monthly-badge">This Month: ₱ @(((decimal)ViewBag.CurrentMonthIncome).ToString("N0"))</span>
+            <span class="monthly-badge">@monthlyIncome.Count months</span>
         </div>
         <div class="p-0">
             @if (!monthlyIncome.Any())
@@ -285,6 +178,13 @@
             else
             {
                 <table class="table custom-dark-table align-middle mb-0">
+                    <thead>
+                        <tr class="table-header-row">
+                            <th class="ps-4" style="width: 40%;">Month</th>
+                            <th class="text-center" style="width: 30%;">Memberships Sold</th>
+                            <th class="text-end pe-4" style="width: 30%;">Income</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         @{
                             int rowIndex = 0;
@@ -294,36 +194,37 @@
                             rowIndex++;
                             string collapseId = $"monthDetail{rowIndex}";
                             <tr style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#@collapseId">
-                                <td class="ps-4" style="width: 35%;">
-                                    <i class="bi bi-calendar3 me-3 text-white fs-5"></i>
-                                    <span class="fs-6">@row.MonthLabel</span>
+                                <td class="ps-4" style="width: 40%;">
+                                    <i class="bi bi-chevron-right me-2 text-secondary align-middle"></i>
+                                    <i class="bi bi-calendar3 me-2 text-white fs-6 align-middle"></i>
+                                    <span class="fs-6 text-white fw-bold align-middle">@row.MonthLabel</span>
                                 </td>
-                                <td class="text-center" style="width: 15%;">
-                                    <span>@row.MembershipCount</span>
+                                <td class="text-center" style="width: 30%;">
+                                    <div class="fw-bold fs-6 text-white mb-1">@row.MembershipCount</div>
+                                    <div class="d-flex justify-content-center gap-1">
+                                        @if (row.OneMonthCount > 0)
+                                        {
+                                            <span class="badge-pill-outline">1mo × @row.OneMonthCount</span>
+                                        }
+                                        @if (row.TwoMonthCount > 0)
+                                        {
+                                            <span class="badge-pill-outline">2mo × @row.TwoMonthCount</span>
+                                        }
+                                        @if (row.ThreeMonthCount > 0)
+                                        {
+                                            <span class="badge-pill-outline">3mo × @row.ThreeMonthCount</span>
+                                        }
+                                    </div>
                                 </td>
-                                <td class="text-center" style="width: 25%;">
-                                    @if (row.OneMonthCount > 0)
-                                    {
-                                        <span class="badge-pill-outline me-1">1mo × @row.OneMonthCount</span>
-                                    }
-                                    @if (row.TwoMonthCount > 0)
-                                    {
-                                        <span class="badge-pill-outline me-1">2mo × @row.TwoMonthCount</span>
-                                    }
-                                    @if (row.ThreeMonthCount > 0)
-                                    {
-                                        <span class="badge-pill-outline">3mo × @row.ThreeMonthCount</span>
-                                    }
-                                </td>
-                                <td class="text-end pe-4 fw-bold text-green-accent fs-5" style="width: 25%;">
+                                <td class="text-end pe-4 fw-bold text-green-accent fs-5" style="width: 30%;">
                                     ₱ @row.Total.ToString("N0")
                                 </td>
                             </tr>
                             <tr class="collapse" id="@collapseId">
-                                <td colspan="4" class="p-0" style="background-color: #1f222b;">
-                                    <table class="table table-sm custom-dark-table mb-0">
+                                <td colspan="3" class="p-0 nested-table-cell">
+                                    <table class="table table-sm custom-dark-table nested-dark-table mb-0">
                                         <thead>
-                                            <tr class="small text-secondary">
+                                            <tr class="sub-header-row">
                                                 <th class="ps-5">Member</th>
                                                 <th>Plan</th>
                                                 <th>Start Date</th>
@@ -335,11 +236,11 @@
                                             @foreach (var detail in row.Details)
                                             {
                                                 <tr>
-                                                    <td class="ps-5">@detail.UserName</td>
-                                                    <td>@detail.PlanLabel</td>
-                                                    <td>@detail.StartDate.ToString("MMM dd, yyyy")</td>
-                                                    <td>@detail.ExpiryDate.ToString("MMM dd, yyyy")</td>
-                                                    <td class="text-end pe-4 text-green-accent">₱ @detail.Price.ToString("N0")</td>
+                                                    <td class="ps-5 text-white fw-bold">@detail.UserName</td>
+                                                    <td class="text-white fw-bold">@detail.PlanLabel</td>
+                                                    <td class="text-secondary">@detail.StartDate.ToString("MMM dd, yyyy")</td>
+                                                    <td class="text-secondary">@detail.ExpiryDate.ToString("MMM dd, yyyy")</td>
+                                                    <td class="text-end pe-4 text-green-accent fw-bold">₱ @detail.Price.ToString("N0")</td>
                                                 </tr>
                                             }
                                         </tbody>

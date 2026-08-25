@@ -1,0 +1,317 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* Sidebar Load Keyframes */
+@keyframes slideInSidebar {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInNavItem {
+    from {
+        opacity: 0;
+        transform: translateX(-12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Global Font Definition */
+body, .sidebar, .btn-sidebar-logout, .nav-link {
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* Sidebar Layout Core Structure */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 260px;
+    background-color: #0c0c0c;
+    color: #ffffff;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3rem 1.75rem 2.5rem 1.75rem;
+    box-sizing: border-box;
+    border-right: 1px solid #181818;
+    animation: slideInSidebar 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Sidebar Top Container */
+.sidebar-top {
+    width: 100%;
+}
+
+.sidebar-logo {
+    max-height: 75px;
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-brand-container:hover .sidebar-logo {
+    transform: scale(1.04);
+}
+
+/* Sidebar Navigation Elements */
+.sidebar .nav {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.sidebar .nav-item {
+    margin-bottom: 1.5rem;
+    animation: fadeInNavItem 0.4s ease-out forwards;
+    opacity: 0;
+}
+
+    .sidebar .nav-item:nth-child(1) {
+        animation-delay: 0.08s;
+    }
+
+    .sidebar .nav-item:nth-child(2) {
+        animation-delay: 0.14s;
+    }
+
+    .sidebar .nav-item:nth-child(3) {
+        animation-delay: 0.20s;
+    }
+
+    .sidebar .nav-item:nth-child(4) {
+        animation-delay: 0.26s;
+    }
+
+    .sidebar .nav-item:nth-child(5) {
+        animation-delay: 0.32s;
+    }
+
+.sidebar .nav-link {
+    color: #ffffff !important;
+    padding: 0.4rem 0.2rem;
+    border-radius: 0;
+    font-size: 1.25rem;
+    font-weight: 400;
+    letter-spacing: 0.2px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    opacity: 0.75;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+    .sidebar .nav-link i {
+        font-size: 1.45rem;
+        margin-right: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        transition: transform 0.2s ease;
+    }
+
+    /* Clean Active & Hover States (No Background Box) */
+    .sidebar .nav-link.active {
+        opacity: 1 !important;
+        font-weight: 600;
+        background-color: transparent !important;
+    }
+
+    .sidebar .nav-link:hover {
+        opacity: 1 !important;
+        background-color: transparent !important;
+        transform: translateX(4px);
+    }
+
+        .sidebar .nav-link:hover i,
+        .sidebar .nav-link.active i {
+            transform: scale(1.08);
+        }
+
+/* Bottom Logout Section & Separator */
+.sidebar-bottom {
+    border-top: 1px solid #222222;
+    padding-top: 1.75rem;
+    animation: fadeInNavItem 0.4s ease-out 0.35s forwards;
+    opacity: 0;
+}
+
+.btn-sidebar-logout {
+    color: #ffffff !important;
+    background-color: transparent !important;
+    border: none;
+    border-radius: 0;
+    padding: 0.4rem 0.2rem;
+    font-size: 1.25rem;
+    font-weight: 400;
+    letter-spacing: 0.2px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    opacity: 0.75;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+    .btn-sidebar-logout i {
+        font-size: 1.45rem;
+        margin-right: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        transition: transform 0.2s ease;
+    }
+
+    .btn-sidebar-logout:hover {
+        background-color: transparent !important;
+        color: #ffffff !important;
+        opacity: 1 !important;
+        transform: translateX(4px);
+    }
+
+        .btn-sidebar-logout:hover i {
+            transform: translateX(2px) scale(1.08);
+        }
+
+/* Main Workspace Content Area */
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+}
+
+.page-body {
+    flex-grow: 1;
+    padding: 2rem;
+}
+
+/* Guest / Landing Page Layout */
+.flexlink-guest-wrapper {
+    background-color: #000000;
+    color: #ffffff;
+    min-height: 100vh;
+    font-family: 'Outfit', sans-serif;
+}
+
+.guest-nav .nav-link {
+    color: #ffffff !important;
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 0.5rem 0.9rem !important;
+    transition: color 0.2s ease;
+}
+
+    .guest-nav .nav-link:hover {
+        color: #ff2a2a !important;
+    }
+
+.red-side-auth .nav-link,
+.red-side-auth a {
+    color: #ffffff !important;
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 0.5rem 0.9rem;
+    transition: opacity 0.2s;
+}
+
+    .red-side-auth .nav-link:hover,
+    .red-side-auth a:hover {
+        opacity: 0.8;
+        color: #ffffff !important;
+    }
+
+.hero-title-solid {
+    font-size: 3.8rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    line-height: 1.1;
+}
+
+.hero-title-outline {
+    font-size: 3.8rem;
+    font-weight: 900;
+    line-height: 1.1;
+    color: transparent;
+    -webkit-text-stroke: 1.8px #ff2a2a;
+    letter-spacing: 16px;
+    margin-left: 2px;
+}
+
+.hero-description {
+    color: #a0a0a0;
+    max-width: 360px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+
+.btn-join-now {
+    background-color: #ff2a2a;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.85rem;
+    padding: 0.65rem 1.6rem;
+    border-radius: 2px;
+    border: none;
+    letter-spacing: 1px;
+    display: inline-block;
+    text-decoration: none;
+    transition: background 0.2s ease-in-out;
+}
+
+    .btn-join-now:hover {
+        background-color: #d61f1f;
+        color: #ffffff;
+    }
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.6rem;
+    color: #777777;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-top: 6px;
+}
+
+.red-banner-section {
+    background-color: #ff2525;
+    min-height: 100vh;
+    position: relative;
+}
+
+.guest-nav-logo {
+    max-height: 52px;
+    width: auto;
+}
+
+.red-banner-logo {
+    max-width: 380px;
+    width: 85%;
+    height: auto;
+}

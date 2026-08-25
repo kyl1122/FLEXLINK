@@ -3,92 +3,94 @@
 @{
     ViewData["Title"] = "Trainers";
 }
+<head>
+    <link rel="stylesheet" href="~/css/Admin_Trainer.css" />
+</head>
 
-<div class="container mt-4">
-    <!-- Header Section with Create Button -->
+<div class="container-fluid py-4 dashboard-container">
+    <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Trainers Management</h2>
-            <p class="text-muted mb-0">Manage registered gym trainers and account access.</p>
+            <h2 class="fw-bold mb-1 dashboard-title">Trainers Management</h2>
+            <p class="mb-0 dashboard-subtitle">Manage registered gym trainers and account access.</p>
         </div>
-        <a asp-controller="Admin" asp-action="CreateTrainer" class="btn btn-success fw-bold px-3">
-            <i class="bi bi-person-plus-fill me-1"></i> Create Trainer Account
+        <a asp-controller="Admin" asp-action="CreateTrainer" class="btn-black-pill">
+            <i class="bi bi-plus-circle-fill"></i> Create Trainer Account
         </a>
     </div>
 
     <!-- Alert Messages -->
     @if (TempData["AdminSuccess"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success bg-dark text-success border-success alert-dismissible fade show mb-4" role="alert">
             @TempData["AdminSuccess"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
     @if (TempData["AdminError"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="alert alert-danger bg-dark text-danger border-danger alert-dismissible fade show mb-4" role="alert">
             @TempData["AdminError"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <!-- Trainers Card Table (Original Dashboard Blue Card) -->
-    <div class="card border-0 shadow-sm rounded-3 mb-4 overflow-hidden">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2 px-3">
-            <div class="fw-bold">
-                <i class="bi bi-person-vcard-fill me-2"></i> Trainers
-            </div>
-            <span class="badge bg-white text-primary rounded-pill fw-bold">@Model.Count()</span>
+    <!-- External Light Gray Search Bar -->
+    <div class="mb-4">
+        <div class="input-group search-input-group py-1 px-2">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" id="trainerSearchInput" class="form-control"
+                   placeholder="Search by name, email, or username..." onkeyup="filterTrainers()" />
         </div>
-        <div class="p-3 border-bottom bg-light">
-            <div class="input-group">
-                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                <input type="text" id="trainerSearchInput" class="form-control border-start-0"
-                       placeholder="Search by name, email, or username..." onkeyup="filterTrainers()" />
-            </div>
+    </div>
+
+    <!-- Main Container Card -->
+    <div class="card dark-table-card shadow-sm mb-4 overflow-hidden">
+        <div class="table-card-topbar">
+            <span class="card-topbar-title">Trainers</span>
+            <span class="badge-count">@Model.Count()</span>
         </div>
+
         <div class="card-body p-0">
             @if (!Model.Any())
             {
-                <div class="text-center py-5 text-muted">
-                    No trainers registered yet.
+                <div class="text-center py-5 text-secondary">
+                    <i class="bi bi-inbox me-1"></i> No trainers registered yet.
                 </div>
             }
             else
             {
-                <div id="noTrainerResults" class="text-center py-5 text-muted" style="display:none;">
+                <div id="noTrainerResults" class="text-center py-5 text-secondary" style="display:none;">
                     <i class="bi bi-search me-1"></i> No trainers match your search.
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" id="trainersTable">
-                        <thead class="table-light text-muted small text-uppercase">
+                    <table class="table table-custom table-hover align-middle" id="trainersTable">
+                        <thead>
                             <tr>
-                                <th class="ps-3">Full Name</th>
+                                <th class="ps-4">Full Name</th>
                                 <th>Email</th>
                                 <th>Username</th>
                                 <th>Date Created</th>
-                                <th>Action</th>
+                                <th class="text-end pe-4">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var trainer in Model)
                             {
                                 <tr>
-                                    <td class="ps-3 fw-bold text-dark">
-                                        <i class="bi bi-person-circle me-2 text-primary"></i>@trainer.FullName
-                                    </td>
-                                    <td class="text-primary">@trainer.Email</td>
-                                    <td>@trainer.UserName</td>
-                                    <td class="text-muted small">@trainer.CreatedAt.ToString("MMM dd, yyyy")</td>
-                                    <td>
-                                        <div class="d-flex gap-2">
-                                            <button type="button" class="btn btn-outline-primary btn-sm px-3"
-                                                    onclick="showTrainerProfile('@trainer.FullName', '@trainer.Email', '@trainer.PhoneNumber', '@trainer.Address', '@trainer.Age', '@(string.IsNullOrEmpty(trainer.ProfilePicture) ? "/uploads/DefaultProfile.png" : trainer.ProfilePicture)', '@trainer.CreatedAt.ToString("MMM dd, yyyy")')">
+                                    <td class="ps-4 text-white">@trainer.FullName</td>
+                                    <td class="text-white">@trainer.Email</td>
+                                    <td class="text-white">@trainer.UserName</td>
+                                    <td class="text-white">@trainer.CreatedAt.ToString("MMMM dd, yyyy")</td>
+                                    <td class="text-end pe-4">
+                                        <div class="d-inline-flex gap-2">
+                                            <button type="button" class="btn btn-action-view"
+                                                    onclick="showTrainerProfile('@trainer.FullName', '@trainer.Email', '@trainer.PhoneNumber', '@trainer.Address', '@trainer.Age', '@(string.IsNullOrEmpty(trainer.ProfilePicture) ? "/uploads/DefaultProfile.png" : trainer.ProfilePicture)', '@trainer.CreatedAt.ToString("MMMM dd, yyyy")')">
                                                 <i class="bi bi-eye-fill me-1"></i> View
                                             </button>
-                                            <form asp-action="DeleteUser" method="post" onsubmit="return confirm('Are you sure you want to delete this trainer?');">
+                                            <form asp-action="DeleteUser" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this trainer?');">
                                                 <input type="hidden" name="userId" value="@trainer.Id" />
-                                                <button type="submit" class="btn btn-danger btn-sm px-3">
+                                                <button type="submit" class="btn btn-action-delete">
                                                     <i class="bi bi-trash-fill me-1"></i> Delete
                                                 </button>
                                             </form>
@@ -103,23 +105,23 @@
         </div>
     </div>
 
-    @* ── Trainer Profile View Modal ── *@
+    <!-- Modal -->
     <div class="modal fade" id="trainerProfileModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border-radius:16px; overflow:hidden;">
+            <div class="modal-content dark-modal overflow-hidden">
                 <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold" id="trainerProfileName"></h5>
+                    <h5 class="modal-title fw-bold text-white" id="trainerProfileName"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center pt-2 pb-4">
                     <img id="trainerProfileImage" src="" alt="Profile Picture"
-                         style="width:140px; height:140px; object-fit:cover; border-radius:50%; margin-bottom:16px;" />
-                    <div class="text-start">
-                        <p class="mb-2"><i class="bi bi-envelope-fill me-2 text-primary"></i><strong>Email:</strong> <span id="trainerProfileEmail"></span></p>
-                        <p class="mb-2"><i class="bi bi-telephone-fill me-2 text-primary"></i><strong>Phone:</strong> <span id="trainerProfilePhone"></span></p>
-                        <p class="mb-2"><i class="bi bi-geo-alt-fill me-2 text-primary"></i><strong>Address:</strong> <span id="trainerProfileAddress"></span></p>
-                        <p class="mb-2"><i class="bi bi-person-fill me-2 text-primary"></i><strong>Age:</strong> <span id="trainerProfileAge"></span></p>
-                        <p class="mb-0"><i class="bi bi-calendar-check-fill me-2 text-primary"></i><strong>Joined:</strong> <span id="trainerProfileCreated"></span></p>
+                         style="width:120px; height:120px; object-fit:cover; border-radius:50%; margin-bottom:16px;" />
+                    <div class="text-start px-4">
+                        <p class="mb-2"><strong class="text-white">Email:</strong> <span id="trainerProfileEmail" class="text-secondary"></span></p>
+                        <p class="mb-2"><strong class="text-white">Phone:</strong> <span id="trainerProfilePhone" class="text-secondary"></span></p>
+                        <p class="mb-2"><strong class="text-white">Address:</strong> <span id="trainerProfileAddress" class="text-secondary"></span></p>
+                        <p class="mb-2"><strong class="text-white">Age:</strong> <span id="trainerProfileAge" class="text-secondary"></span></p>
+                        <p class="mb-0"><strong class="text-white">Joined:</strong> <span id="trainerProfileCreated" class="text-secondary"></span></p>
                     </div>
                 </div>
             </div>
@@ -128,7 +130,6 @@
 
     @section Scripts {
         <script>
-             @* ── Trainer SEARCH BAR ── *@
             function filterTrainers() {
                 const query = document.getElementById('trainerSearchInput').value.toLowerCase();
                 const rows = document.querySelectorAll('#trainersTable tbody tr');
@@ -158,5 +159,4 @@
             }
         </script>
     }
-
 </div>

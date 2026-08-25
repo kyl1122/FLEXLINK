@@ -4,276 +4,98 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - FLEXLINK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/Membership.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/FLEXLINK.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-
-    <style>
-        /* CSS for Sidebar Layout when logged in */
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 250px;
-            background-color: #000;
-            color: #fff;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 1.5rem 1rem;
-        }
-
-            .sidebar .nav-link {
-                color: #ccc !important;
-                padding: 0.6rem 1rem;
-                border-radius: 6px;
-                margin-bottom: 0.25rem;
-            }
-
-                .sidebar .nav-link:hover, .sidebar .nav-link.active {
-                    color: #fff !important;
-                    background-color: rgba(255, 255, 255, 0.1);
-                }
-
-        .main-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: #f8f9fa;
-        }
-
-        .page-body {
-            flex-grow: 1;
-            padding: 2rem;
-        }
-
-        /* Hero Design CSS */
-        .flexlink-guest-wrapper {
-            background-color: #000000;
-            color: #ffffff;
-            min-height: 100vh;
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-        }
-
-        /* Left Navigation links */
-        .guest-nav .nav-link {
-            color: #ffffff !important;
-            font-size: 0.78rem;
-            letter-spacing: 2px;
-            font-weight: 600;
-            text-transform: uppercase;
-            padding: 0.5rem 0.9rem !important;
-        }
-
-            .guest-nav .nav-link:hover {
-                color: #ff2a2a !important;
-            }
-
-        /* Red Side Login Partial Styling */
-        .red-side-auth .nav-link,
-        .red-side-auth a {
-            color: #ffffff !important;
-            font-size: 0.78rem;
-            letter-spacing: 2px;
-            font-weight: 700;
-            text-transform: uppercase;
-            text-decoration: none;
-            padding: 0.5rem 0.9rem;
-            transition: opacity 0.2s;
-        }
-
-            .red-side-auth .nav-link:hover,
-            .red-side-auth a:hover {
-                opacity: 0.8;
-                color: #ffffff !important;
-            }
-
-        /* Typography */
-        .hero-title-solid {
-            font-size: 3.8rem;
-            font-weight: 900;
-            letter-spacing: 2px;
-            line-height: 1.1;
-        }
-
-        .hero-title-outline {
-            font-size: 3.8rem;
-            font-weight: 900;
-            line-height: 1.1;
-            color: transparent;
-            -webkit-text-stroke: 1.8px #ff2a2a;
-            letter-spacing: 16px;
-            margin-left: 2px;
-        }
-
-        .hero-description {
-            color: #a0a0a0;
-            max-width: 360px;
-            font-size: 0.88rem;
-            line-height: 1.6;
-        }
-
-        /* Action Button */
-        .btn-join-now {
-            background-color: #ff2a2a;
-            color: #ffffff;
-            font-weight: 800;
-            font-size: 0.85rem;
-            padding: 0.65rem 1.6rem;
-            border-radius: 2px;
-            border: none;
-            letter-spacing: 1px;
-            display: inline-block;
-            text-decoration: none;
-            transition: background 0.2s ease-in-out;
-        }
-
-            .btn-join-now:hover {
-                background-color: #d61f1f;
-                color: #ffffff;
-            }
-
-        /* Stat Counters */
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #ffffff;
-            line-height: 1;
-        }
-
-        .stat-label {
-            font-size: 0.6rem;
-            color: #777777;
-            letter-spacing: 1px;
-            font-weight: 700;
-            margin-top: 6px;
-        }
-
-        /* Right Red Panel */
-        .red-banner-section {
-            background-color: #ff2525;
-            min-height: 100vh;
-            position: relative;
-        }
-
-        .guest-nav-logo {
-            max-height: 52px;
-            width: auto;
-        }
-
-        .sidebar-logo {
-            max-height: 42px;
-            width: auto;
-        }
-
-        .red-banner-logo {
-            max-width: 380px;
-            width: 85%;
-            height: auto;
-        }
-
-        .sub-logo-text {
-            letter-spacing: 3.5px;
-            font-size: 0.72rem;
-            color: #ffffff;
-            font-weight: 700;
-            opacity: 0.95;
-        }
-
-        .sub-logo-divider {
-            display: inline-block;
-            width: 45px;
-            height: 1px;
-            background-color: #ffffff;
-            vertical-align: middle;
-            margin: 0 10px;
-            opacity: 0.8;
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/SideBar.css" />
 </head>
 <body>
 
     @if (User.Identity.IsAuthenticated)
     {
+        /* Dynamic Route Matching Variables */
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
         <!-- LOGGED IN USER: SIDEBAR LAYOUT -->
         <div class="app-container">
             <aside class="sidebar">
-                <div>
-                    <a class="d-flex align-items-center mb-4 text-decoration-none text-white px-2" asp-area="" asp-controller="Home" asp-action="Index">
-                        <img src="~/images/logo_2.png" alt="FLEXLINK" class="sidebar-logo img-fluid" />
+                <div class="sidebar-top">
+                    <a class="sidebar-brand-container text-decoration-none mb-5 d-block text-center" asp-area="" asp-controller="Home" asp-action="Index">
+                        <img src="~/images/logo_f.png" alt="FLEXLINK" class="sidebar-logo img-fluid" />
                     </a>
 
-                    <ul class="nav nav-pills flex-column mb-auto">
+                    <ul class="nav flex-column mb-auto">
                         @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Admin" asp-action="Index"><i class="bi bi-speedometer2 me-2"></i>Admin Panel</a>
+                                <a class="nav-link @(currentController == "Admin" && currentAction == "Index" ? "active" : "")" asp-controller="Admin" asp-action="Index"><i class="bi bi-grid-fill"></i><span>Dashboard</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Admin" asp-action="Trainers"><i class="bi bi-person-badge me-2"></i>Trainers</a>
+                                <a class="nav-link @(currentController == "Admin" && currentAction == "Users" ? "active" : "")" asp-controller="Admin" asp-action="Users"><i class="bi bi-people-fill"></i><span>User</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Admin" asp-action="Users"><i class="bi bi-people me-2"></i>Users</a>
+                                <a class="nav-link @(currentController == "Admin" && currentAction == "Trainers" ? "active" : "")" asp-controller="Admin" asp-action="Trainers"><i class="bi bi-person-badge"></i><span>Trainer</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Admin" asp-action="Equipment"><i class="bi bi-wrench me-2"></i>Equipment</a>
+                                <a class="nav-link @(currentController == "Admin" && currentAction == "Equipment" ? "active" : "")" asp-controller="Admin" asp-action="Equipment"><i class="bi bi-wrench"></i><span>Equipment</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Admin" asp-action="Income"><i class="bi bi-cash-stack me-2"></i>Income</a>
+                                <a class="nav-link @(currentController == "Admin" && currentAction == "Income" ? "active" : "")" asp-controller="Admin" asp-action="Income"><i class="bi bi-cash-stack"></i><span>Income</span></a>
                             </li>
                         }
                         else if (User.IsInRole("Trainer"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Trainer" asp-action="EditProfile"><i class="bi bi-person-circle me-2"></i>Profile</a>
+                                <a class="nav-link @(currentController == "Trainer" && currentAction == "Index" ? "active" : "")" asp-controller="Trainer" asp-action="Index"><i class="bi bi-grid-fill"></i><span>Dashboard</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Trainer" asp-action="Index"><i class="bi bi-speedometer2 me-2"></i>Trainer Dashboard</a>
+                                <a class="nav-link @(currentController == "Trainer" && currentAction == "EditProfile" ? "active" : "")" asp-controller="Trainer" asp-action="EditProfile"><i class="bi bi-person-fill"></i><span>Profile</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Trainer" asp-action="MySchedule"><i class="bi bi-calendar-event me-2"></i>Schedule</a>
+                                <a class="nav-link @(currentController == "Trainer" && currentAction == "MySchedule" ? "active" : "")" asp-controller="Trainer" asp-action="MySchedule"><i class="bi bi-calendar4-week"></i><span>Schedule</span></a>
                             </li>
                         }
                         else if (User.IsInRole("Staff"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Staff" asp-action="Index"><i class="bi bi-people me-2"></i>Staffers</a>
+                                <a class="nav-link @(currentController == "Staff" && currentAction == "Index" ? "active" : "")" asp-controller="Staff" asp-action="Index"><i class="bi bi-grid-fill"></i><span>Dashboard</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Staff" asp-action="SpaceCapacity"><i class="bi bi-check-square me-2"></i>Registration Approval</a>
+                                <a class="nav-link @(currentController == "Staff" && currentAction == "SpaceCapacity" ? "active" : "")" asp-controller="Staff" asp-action="SpaceCapacity"><i class="bi bi-check-square"></i><span>Registration Approval</span></a>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-person-badge me-2"></i>Home</a>
+                                <a class="nav-link @(currentController == "Home" && currentAction == "Index" ? "active" : "")" asp-controller="Home" asp-action="Index"><i class="bi bi-grid-fill"></i><span>Dashboard</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="Trainer"><i class="bi bi-person-badge me-2"></i>Trainer</a>
+                                <a class="nav-link @(currentController == "Home" && currentAction == "UserProfile" ? "active" : "")" asp-controller="Home" asp-action="UserProfile"><i class="bi bi-person-fill"></i><span>Profile</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="Membership"><i class="bi bi-card-heading me-2"></i>Membership</a>
+                                <a class="nav-link @(currentController == "Home" && currentAction == "Schedule" ? "active" : "")" asp-controller="Home" asp-action="Schedule"><i class="bi bi-calendar4-week"></i><span>Schedule</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="Schedule"><i class="bi bi-calendar-event me-2"></i>Schedule</a>
+                                <a class="nav-link @(currentController == "Home" && currentAction == "Trainer" ? "active" : "")" asp-controller="Home" asp-action="Trainer"><i class="bi bi-person-badge"></i><span>Trainer</span></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="UserProfile"><i class="bi bi-person-circle me-2"></i>Profile</a>
+                                <a class="nav-link @(currentController == "Home" && currentAction == "Membership" ? "active" : "")" asp-controller="Home" asp-action="Membership"><i class="bi bi-card-heading"></i><span>Membership</span></a>
                             </li>
                         }
                     </ul>
                 </div>
 
-                <div class="border-top border-secondary pt-3 px-2">
+                <div class="sidebar-bottom">
                     <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline w-100">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-outline-light w-100 text-start">
-                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                        <button type="submit" class="btn btn-sidebar-logout text-start">
+                            <i class="bi bi-box-arrow-right"></i><span>Signout</span>
                         </button>
                     </form>
                 </div>
@@ -300,7 +122,7 @@
                         <nav class="navbar navbar-expand-lg navbar-dark bg-transparent p-0 guest-nav">
                             <div class="container-fluid p-0">
                                 <a class="navbar-brand me-4" asp-area="" asp-controller="Home" asp-action="Index">
-                                    <img src="~/images/logo.png" alt="FLEXLINK" class="guest-nav-logo img-fluid" style="max-height: `90px; width: auto;" />
+                                    <img src="~/images/logo_f.png" alt="FLEXLINK" class="guest-nav-logo img-fluid" style="max-height: 90px; width: auto;" />
                                 </a>
                                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#guestNavbar">
                                     <span class="navbar-toggler-icon"></span>
@@ -381,8 +203,7 @@
 
                     <!-- Centered Branding Logo & Subtext -->
                     <div class="my-auto text-center">
-                        <img src="~/images/logo_2.png" alt="FLEXLINK" class="red-banner-logo img-fluid mb-2" />
-                        
+                        <img src="~/images/logo_f.png" alt="FLEXLINK" class="red-banner-logo img-fluid mb-2" />
                     </div>
 
                     <!-- Spacer to balance vertical alignment -->
@@ -393,7 +214,7 @@
         </div>
     }
 
-    <script src="~/lib/jquery/dist/jquery.min.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

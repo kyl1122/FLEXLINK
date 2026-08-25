@@ -1,21 +1,83 @@
 @{
     ViewData["Title"] = "Registration Pending";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
 
-<div class="container mt-5" style="max-width: 500px;">
-    <div class="card border-0 shadow-sm text-center p-5" style="border-radius: 16px;">
-        <div class="mb-3">
-            <i class="bi bi-hourglass-split text-warning" style="font-size: 3rem;"></i>
+<!-- Google Font import for Outfit -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="~/css/Account_PendingApproval.css" />
+
+<!-- Formal Top-Center Status Popup Banner -->
+<div id="toastNotification" class="toast-notification toast-warning show">
+    <div class="toast-content-wrapper">
+        <span class="toast-icon">&#9888;</span>
+        <div class="toast-message-body">
+            <div class="toast-list-title">Account Awaiting Approval</div>
+            <span>Your registration has been submitted successfully and is currently restricted until verified by staff.</span>
         </div>
-        <h4 class="fw-bold mb-2">Awaiting Approval</h4>
-        <p class="text-muted mb-4">
-            Your registration has been submitted successfully.<br />
-            A staff member will review and verify your account shortly.<br />
-            You will be able to log in once your account is approved.
-        </p>
-        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary w-100">
-            <i class="bi bi-arrow-left me-1"></i> Back to Login
-        </a>
     </div>
+    <button type="button" class="toast-close" onclick="hideToast()">&times;</button>
 </div>
+
+<div class="split-layout-container">
+
+    <!-- Left Side: Center-Aligned White Logo -->
+    <div class="left-brand-panel">
+        <div class="brand-logo-container">
+            <img src="@Url.Content("~/images/logo_f.png")"
+                 alt="Brand Logo"
+                 class="brand-logo-image"
+                 onerror="this.style.display='none'; document.getElementById('logo-fallback-svg').style.display='block';" />
+
+            <svg id="logo-fallback-svg" class="white-f-svg" style="display: none;" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 70 180 A 105 105 0 1 1 210 100" stroke="#ffffff" stroke-width="11" stroke-linecap="round" />
+                <path d="M 120 220 A 105 105 0 0 0 250 170" stroke="#ffffff" stroke-width="11" stroke-linecap="round" />
+
+                <g fill="#ffffff">
+                    <polygon points="125,120 160,85 240,85 185,120" />
+                    <polygon points="145,150 170,125 210,125 185,150" />
+                    <polygon points="270,45 140,175 140,205 75,270 120,200 120,175" />
+                    <polygon points="115,130 135,110 135,150" />
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Right Side: Side Pending Card Section -->
+    <div class="right-form-panel">
+        <div class="pending-card">
+            <div class="hourglass-icon-wrapper">
+                <i class="bi bi-hourglass-split hourglass-icon"></i>
+            </div>
+
+            <h2 class="form-heading text-center">Awaiting Approval</h2>
+
+            <p class="pending-description">
+                Your registration has been submitted successfully.<br />
+                A staff member will review and verify your account shortly.<br />
+                You will be able to log in once your account is approved.
+            </p>
+
+            <a asp-controller="Account" asp-action="Login" class="btn-continue btn-back">
+                &larr; Back to Login
+            </a>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        function hideToast() {
+            const toast = document.getElementById('toastNotification');
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 300);
+            }
+        }
+    </script>
+}

@@ -6,24 +6,69 @@
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
 
-<div class="account-container">
-    <div class="account-box">
-        <h2 class="text-center mb-4">Verify Email</h2>
-        <form asp-action="VerifyEmail" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <input type="submit" value="Verify" class="btn btn-success w-100 p-2" />
-            <div class="text-center mt-2">
-                <a asp-controller="Account" asp-action="Login" class="text-decoration-none mt-3">Back</a>
-            </div>
-        </form>
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/Account_Verify.css" />
+</head>
+
+<div class="login-wrapper">
+    <!-- Left Dark Panel -->
+    <div class="login-card">
+        <div class="back-link">
+            <a asp-controller="Account" asp-action="Login">
+                <i class="bi bi-arrow-left"></i> Go back
+            </a>
+        </div>
+
+        <div class="login-form-container">
+            <h1 class="login-title">Verify Email</h1>
+
+            <form asp-action="VerifyEmail" method="post" id="verifyForm">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                <div class="form-group">
+                    <label asp-for="Email" class="form-label">Email Address</label>
+                    <input asp-for="Email" class="form-control custom-input" placeholder="enter your email..." autocomplete="off" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-login mt-3" id="verifyBtn">
+                    <span class="btn-text">Verify</span>
+                    <span class="btn-spinner"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Red Graphic Side -->
+    <div class="login-graphic">
+        <img src="~/images/shadow.png" alt="Shadow Overlay" class="shadow-overlay" />
+
+        <div class="logo-container">
+            <img src="~/images/logo_f.png" alt="Logo" class="hero-logo" />
+        </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("verifyForm");
+        const btn = document.getElementById("verifyBtn");
+
+        if (form && btn) {
+            form.addEventListener("submit", function () {
+                if (window.jQuery && !$(form).valid()) {
+                    return;
+                }
+                btn.classList.add("loading");
+                btn.disabled = true;
+            });
+        }
+    });
+</script>
 
 @section Scripts {
     @{

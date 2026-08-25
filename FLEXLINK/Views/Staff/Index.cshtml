@@ -11,7 +11,6 @@
     int pendingPaymentsCount = ViewBag.PendingPaymentsCount ?? 0;
     double percent = maxCapacity > 0 ? Math.Round((double)currentCount / maxCapacity * 100, 0) : 0;
 
-    // Retrieve Member Check-In details from TempData
     string? memberName = TempData["MemberCheckInName"] as string;
     string? memberEmail = TempData["MemberCheckInEmail"] as string;
     string? memberPic = TempData["MemberCheckInPic"] as string;
@@ -19,201 +18,100 @@
     string? expiryDate = TempData["MemberExpiryDate"] as string;
     string? memberId = ViewBag.CheckedInUserId as string;
 
-
-    // Ensure a safe fallback avatar URL
     string displayPic = !string.IsNullOrWhiteSpace(memberPic) ? memberPic : "/uploads/default-avatar.png";
 }
 
-<!-- Custom Styles for Prominent Staff Check-In Modal & Profile Lightbox -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+x<link rel="stylesheet" href="~/css/Staff_Index.css" />
+
+<!-- Force dark background on parent body tag directly from view -->
 <style>
-    /* Dark semi-transparent backdrop */
-    .floating-card-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.45);
-        backdrop-filter: blur(5px);
-        z-index: 1080;
-    }
-
-    /* Modal dialog container centered on screen */
-    .floating-status-card {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 1090;
-        width: 92%;
-        max-width: 720px;
-        animation: modalPop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35) !important;
-        border-radius: 24px !important;
-        overflow: hidden;
-    }
-
-    @@keyframes modalPop {
-        0% {
-            opacity: 0;
-            transform: translate(-50%, -45%) scale(0.9);
-        }
-
-        100% {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-    }
-
-    /* Extra large avatar profile image container */
-    .avatar-wrapper-xl {
-        position: relative;
-        width: 130px;
-        height: 130px;
-        border-radius: 50%;
-        background-color: #f3f4f6;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-        .avatar-wrapper-xl:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2) !important;
-        }
-
-        .avatar-wrapper-xl img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-    /* Interactive Lightbox Overlay for Enlarged Profile Picture */
-    .profile-lightbox-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.75);
-        backdrop-filter: blur(8px);
-        z-index: 1150;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        animation: fadeIn 0.2s ease-out;
-    }
-
-    .profile-lightbox-card {
-        position: relative;
-        background: #ffffff;
-        padding: 16px;
-        border-radius: 50%;
-        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-        animation: zoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .profile-lightbox-img {
-        width: 320px;
-        height: 320px;
-        border-radius: 50%;
-        object-fit: cover;
-        display: block;
-    }
-
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-
-        to {
-            opacity: 1;
-        }
-    }
-
-    @@keyframes zoomIn {
-        from {
-            opacity: 0;
-            transform: scale(0.7);
-        }
-
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
+    html, body, main, .container, .container-fluid, .content-wrapper, .pb-3 {
+        background-color: #2B2929 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        min-height: 100vh !important;
     }
 </style>
 
-@* ── PROMINENT CENTERED PROFILE POPUP OVERLAY ── *@
+<!-- Floating Top-Center System Notifications -->
+@if (TempData["AttendanceSuccess"] != null && string.IsNullOrEmpty(memberName))
+{
+    <div class="alert alert-success alert-dismissible fade show border-0 toast-notification" role="alert" style="background: #10b981; color: #fff; border-radius: 12px;">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["AttendanceSuccess"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["AttendanceError"] != null && string.IsNullOrEmpty(memberName))
+{
+    <div class="alert alert-danger alert-dismissible fade show border-0 toast-notification" role="alert" style="background: #FF3333; color: #fff; border-radius: 12px;">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["AttendanceError"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 @if (!string.IsNullOrEmpty(memberName))
 {
     bool isActive = memberStatus == "Active";
 
-    <!-- Backdrop overlay -->
     <div class="floating-card-backdrop" id="cardBackdrop" onclick="closeProfileModal()"></div>
 
-
-
     <div id="checkInFloatingCard" class="card border-0 floating-status-card p-3"
-         style="background: #ffffff; border-top: 10px solid @(isActive ? "#10b981" : "#ef4444") !important;">
+         style="background: #222020; border-top: 8px solid @(isActive ? "#10b981" : "#FF3333") !important; color: #ffffff;">
 
         <div class="card-body p-4 p-md-5">
-            <button type="button" class="btn-close" onclick="closeProfileModal()" aria-label="Close" style="font-size: 1.2rem; position: absolute; top: 24px; right: 24px; z-index: 10;"></button>
-
+            <button type="button" class="btn-close btn-close-white" onclick="closeProfileModal()" aria-label="Close" style="font-size: 1.2rem; position: absolute; top: 24px; right: 24px; z-index: 10;"></button>
 
             <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-start text-center text-sm-start">
-
-                <!-- Clickable Profile Image with Hover Tooltip -->
                 <div class="avatar-wrapper-xl me-0 me-sm-4 mb-3 mb-sm-0 flex-shrink-0 shadow-lg"
-                     style="border: 4px solid @(isActive ? "#10b981" : "#ef4444");"
+                     style="border: 4px solid @(isActive ? "#10b981" : "#FF3333");"
                      onclick="openProfileLightbox('@displayPic')"
                      title="Click to view full image">
                     <img src="@displayPic"
                          alt="@memberName"
                          onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                    <div style="display: none;" class="w-100 h-100 align-items-center justify-content-center bg-light text-secondary">
+                    <div style="display: none;" class="w-100 h-100 align-items-center justify-content-center bg-dark text-secondary">
                         <i class="bi bi-person-fill" style="font-size: 4rem;"></i>
                     </div>
                 </div>
 
-                <!-- Member Info -->
                 <div class="flex-grow-1 w-100">
                     <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between mb-2">
-                        <h2 class="fw-bolder mb-1 text-dark" style="font-size: 2rem;">@memberName</h2>
+                        <h2 class="fw-bolder mb-1 text-white" style="font-size: 2rem;">@memberName</h2>
                         <span class="badge @(isActive ? "bg-success" : "bg-danger") px-3 py-2 fs-6" style="letter-spacing: 0.5px; border-radius: 10px;">
                             @(isActive ? "ACTIVE MEMBERSHIP" : "NO ACTIVE PLAN")
                         </span>
                     </div>
 
-                    <p class="text-muted mb-3 fs-5">@memberEmail</p>
+                    <p class="text-secondary mb-3 fs-5">@memberEmail</p>
 
                     @if (isActive)
                     {
-                        <div class="p-3 text-success fw-bold d-flex align-items-center justify-content-center justify-content-sm-start fs-5" style="background-color: #ecfdf5; border-radius: 12px;">
+                        <div class="p-3 text-success fw-bold d-flex align-items-center justify-content-center justify-content-sm-start fs-5" style="background-color: rgba(16, 185, 129, 0.1); border-radius: 12px;">
                             <i class="bi bi-check-circle-fill me-2 fs-4"></i> Valid until @expiryDate
                         </div>
                     }
                     else
                     {
-                        <div class="p-3 text-danger fw-bold d-flex align-items-center justify-content-center justify-content-sm-start fs-5" style="background-color: #fef2f2; border-radius: 12px;">
+                        <div class="p-3 text-danger fw-bold d-flex align-items-center justify-content-center justify-content-sm-start fs-5 mb-3" style="background-color: rgba(255, 51, 51, 0.1); border-radius: 12px;">
                             <i class="bi bi-x-circle-fill me-2 fs-4"></i> Check-in restricted (No active membership)
                         </div>
 
                         <form asp-controller="Staff" asp-action="AddMembershipQuick" method="post"
                               class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 p-3"
-                              style="background-color: #f8fafc; border-radius: 12px;">
+                              style="background-color: #1a1818; border-radius: 12px;">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="userId" value="@memberId" />
-                            <label class="fw-semibold text-nowrap me-sm-2 mb-0">Add Membership:</label>
-                            <select name="months" class="form-select form-select-sm" style="max-width: 160px;">
+                            <label class="fw-semibold text-nowrap me-sm-2 mb-0 text-white">Add Membership:</label>
+                            <select name="months" class="form-select form-select-sm dark-input-pill" style="max-width: 160px;">
                                 <option value="1">1 Month</option>
                                 <option value="2">2 Months</option>
                                 <option value="3">3 Months</option>
                             </select>
-                            <button type="submit" class="btn btn-success btn-sm">
+                            <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3" style="background-color: #FF3333; border: none;">
                                 <i class="bi bi-plus-circle me-1"></i> Grant Membership
                             </button>
                         </form>
@@ -222,185 +120,176 @@
             </div>
         </div>
     </div>
-
-    <script>
-        var autoCloseTimer;
-
-        function closeProfileModal() {
-            var card = document.getElementById('checkInFloatingCard');
-            var backdrop = document.getElementById('cardBackdrop');
-
-            if (card) card.remove();
-            if (backdrop) backdrop.remove();
-
-            closeProfileLightbox();
-
-            if (autoCloseTimer) clearTimeout(autoCloseTimer);
-        }
-
-        function openProfileLightbox(imageSrc) {
-            if (document.getElementById('profileLightbox')) return;
-
-            var lightbox = document.createElement('div');
-            lightbox.id = 'profileLightbox';
-            lightbox.className = 'profile-lightbox-backdrop';
-            lightbox.onclick = closeProfileLightbox;
-
-            lightbox.innerHTML = `
-                <div class="profile-lightbox-card" onclick="event.stopPropagation();">
-                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" onclick="closeProfileLightbox()" aria-label="Close"></button>
-                    <img src="${imageSrc}" class="profile-lightbox-img" alt="Profile Picture Preview" />
-                </div>
-            `;
-
-            document.body.appendChild(lightbox);
-        }
-
-        function closeProfileLightbox() {
-            var lightbox = document.getElementById('profileLightbox');
-            if (lightbox) lightbox.remove();
-        }
-
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-                closeProfileLightbox();
-            }
-        });
-
-      
-    </script>
 }
 
-<div class="container mt-4" style="max-width: 600px;">
-
-    <div class="mb-4 text-center">
-        <h2 class="fw-bold mb-0">Staff Check-In</h2>
-        <p class="text-muted">Check in members or guests as they arrive at the gym.</p>
+<div class="staff-dashboard-wrapper" style="background-color: #2B2929; min-height: 100vh; padding: 2.5rem 3.5rem;">
+    <!-- Header Section -->
+    <div class="mb-4">
+        <h1 class="page-title mb-1">Staff Check - In</h1>
+        <p class="page-subtitle mb-0">Check in members or guest as they arrive at the gym.</p>
     </div>
-    <a asp-controller="Staff" asp-action="CreateUser" class="btn btn-success btn-sm mt-2">
-        <i class="bi bi-person-plus me-1"></i> Create User Account
-    </a>
 
-    @* ── Standard Alerts ── *@
-    @if (TempData["AttendanceSuccess"] != null && string.IsNullOrEmpty(memberName))
-    {
-        <div class="alert alert-success alert-dismissible fade show shadow-sm" style="border-radius: 12px;">
-            <i class="bi bi-check-circle-fill me-1"></i> @TempData["AttendanceSuccess"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-    @if (TempData["AttendanceError"] != null && string.IsNullOrEmpty(memberName))
-    {
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm" style="border-radius: 12px;">
-            <i class="bi bi-exclamation-triangle-fill me-1"></i> @TempData["AttendanceError"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    @* ── Pending Registration Count Indicator ── *@
-    @if (pendingCount > 0)
-    {
-        <div class="card border-0 shadow-sm mb-3" style="border-radius:14px; border-left: 4px solid #f5a623 !important;">
-            <div class="card-body d-flex justify-content-between align-items-center py-3">
-                <div class="d-flex align-items-center">
-                    <span class="badge bg-warning text-dark me-2" style="font-size:0.85rem;">
-                        <i class="bi bi-bell-fill me-1"></i> @pendingCount Pending
-                    </span>
-                    <span class="fw-bold mb-0">Registration Requests</span>
+    <!-- Top Cards Grid -->
+    <div class="row g-3 mb-3">
+        <!-- Registration Requests Card -->
+        <div class="col-md-6">
+            <div class="card dark-panel-card h-100 p-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-bell-fill text-white fs-6"></i>
+                        <span class="card-label-text">Registration Requests</span>
+                    </div>
+                    <a asp-controller="Staff" asp-action="SpaceCapacity" class="pill-badge-btn">
+                        View Trainer <i class="bi bi-arrow-right"></i>
+                    </a>
                 </div>
-                <a asp-controller="Staff" asp-action="SpaceCapacity" class="btn btn-outline-warning btn-sm text-dark fw-semibold">
-                    View Requests <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-        </div>
-    }
-
-    @* ── Pending Membership Payment Indicator ── *@
-    @if (pendingPaymentsCount > 0)
-    {
-        <div class="card border-0 shadow-sm mb-4" style="border-radius:14px; border-left: 4px solid #3b82f6 !important;">
-            <div class="card-body d-flex justify-content-between align-items-center py-3">
-                <div class="d-flex align-items-center">
-                    <span class="badge bg-primary text-white me-2" style="font-size:0.85rem;">
-                        <i class="bi bi-credit-card-fill me-1"></i> @pendingPaymentsCount Pending
-                    </span>
-                    <span class="fw-bold mb-0">Membership Payment Requests</span>
-                </div>
-                <a asp-controller="Staff" asp-action="SpaceCapacity" class="btn btn-outline-primary btn-sm fw-semibold">
-                    View Payments <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-        </div>
-    }
-
-    @* ── Space Capacity Summary ── *@
-    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-semibold"><i class="bi bi-people-fill me-1"></i>Space Capacity</span>
-                <span class="fw-bold @(isFull ? "text-danger" : "text-success")">
-                    @currentCount / @maxCapacity
-                </span>
-            </div>
-            <div class="progress" style="height: 18px; border-radius: 10px;">
-                <div class="progress-bar @(isFull ? "bg-danger" : "bg-success")"
-                     role="progressbar"
-                     style="width: @percent%;"
-                     aria-valuenow="@currentCount" aria-valuemin="0" aria-valuemax="@maxCapacity">
+                <div class="d-flex align-items-baseline gap-2 mt-1">
+                    <span class="stat-number-red">@pendingCount</span>
+                    <span class="stat-label-red">Pending</span>
                 </div>
             </div>
-            @if (isFull)
-            {
-                <p class="text-danger small mt-2 mb-0">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                    Gym is at full capacity. No further check-ins are allowed until space frees up.
-                </p>
-            }
+        </div>
+
+        <!-- Membership Payment Request Card -->
+        <div class="col-md-6">
+            <div class="card dark-panel-card h-100 p-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-credit-card-fill text-white fs-6"></i>
+                        <span class="card-label-text">Membership Payment Request</span>
+                    </div>
+                    <a asp-controller="Staff" asp-action="SpaceCapacity" class="pill-badge-btn">
+                        View Trainer <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="d-flex align-items-baseline gap-2 mt-1">
+                    <span class="stat-number-red">@pendingPaymentsCount</span>
+                    <span class="stat-label-red">Pending</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    @* ── Member Check-In (Email Only) ── *@
-    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;">
-        <div class="card-body">
-            <h5 class="fw-bold mb-3"><i class="bi bi-person-check me-1"></i>Member Check-In</h5>
-            <form asp-controller="Staff" asp-action="MemberLogin" method="post">
-                @Html.AntiForgeryToken()
-                <div class="mb-3">
-                    <label asp-for="Email" class="form-label">Member Email</label>
-                    <input asp-for="Email" class="form-control" placeholder="member@email.com" required />
-                </div>
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-grow-1" @(isFull ? "disabled" : "")>
-                        <i class="bi bi-door-open me-1"></i> Check In Member
+    <!-- Space Capacity Bar Card -->
+    <div class="card dark-panel-card p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-people-fill text-white fs-6"></i>
+                <span class="card-label-text">Space Capacity (Today)</span>
+            </div>
+            <span class="stat-number-red fs-5 fw-bold">
+                @currentCount/@maxCapacity
+            </span>
+        </div>
+        <div class="capacity-progress-track">
+            <div class="capacity-progress-fill" style="width: @percent%;"></div>
+        </div>
+        @if (isFull)
+        {
+            <p class="stat-label-red small mt-2 mb-0">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> Gym is at full capacity. Check-ins temporarily restricted.
+            </p>
+        }
+    </div>
+
+    <!-- Member Check-In Main Form Card -->
+    <div class="card dark-panel-card p-4 mb-3">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <h5 class="section-title-red mb-0">Member Check - In</h5>
+            <i class="bi bi-people-fill icon-red fs-3"></i>
+        </div>
+
+        <form asp-controller="Staff" asp-action="MemberLogin" method="post">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label field-label mb-2">Member Email</label>
+                <input asp-for="Email" class="form-control dark-input-pill" placeholder="Member@Gmail.com" required />
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-dark-action w-100" @(isFull ? "disabled" : "")>
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Check In Member
                     </button>
-                    <button type="submit" asp-action="CheckOutMember" class="btn btn-outline-danger flex-fill">
+                </div>
+                <div class="col-md-6">
+                    <button type="submit" asp-action="CheckOutMember" class="btn btn-red-outline w-100">
                         <i class="bi bi-box-arrow-right me-1"></i> Sign Out
                     </button>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 
-    @* ── Guest Check-In (Attendance) ── *@
-    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;">
-        <div class="card-body text-center">
-            <h5 class="fw-bold mb-2"><i class="bi bi-person-badge me-1"></i>No Account?</h5>
-            <p class="text-muted small mb-3">Walk-in guests can check in without registering.</p>
-            <div class="d-flex flex-column gap-2">
-                <form asp-controller="Staff" asp-action="GuestLogin" method="post" class="w-100">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-outline-secondary w-100" @(isFull ? "disabled" : "")>
-                        <i class="bi bi-person-plus me-1"></i> Login as Guest
-                    </button>
-                </form>
-                <form asp-controller="Staff" asp-action="CheckOutGuest" method="post" class="w-100">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-outline-danger w-100">
-                        <i class="bi bi-person-dash me-1"></i> Sign Out Guest
-                    </button>
-                </form>
+    <!-- Guest Access Section Card -->
+    <div class="card dark-panel-card p-4">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-6">
+                <h5 class="section-title-red mb-1">No Account ?</h5>
+                <p class="field-label mb-0">Walk-In guest can check in without registering.</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="d-flex flex-column gap-2 ms-auto" style="max-width: 380px;">
+                    <form asp-controller="Staff" asp-action="GuestLogin" method="post" class="w-100">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-dark-action w-100" @(isFull ? "disabled" : "")>
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Login as Guest
+                        </button>
+                    </form>
+                    <form asp-controller="Staff" asp-action="CheckOutGuest" method="post" class="w-100">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-red-outline w-100">
+                            <i class="bi bi-box-arrow-right me-1"></i> Sign Out Guest
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-
 </div>
+
+<script>
+    function closeProfileModal() {
+        var card = document.getElementById('checkInFloatingCard');
+        var backdrop = document.getElementById('cardBackdrop');
+        if (card) card.remove();
+        if (backdrop) backdrop.remove();
+        closeProfileLightbox();
+    }
+
+    function openProfileLightbox(imageSrc) {
+        if (document.getElementById('profileLightbox')) return;
+        var lightbox = document.createElement('div');
+        lightbox.id = 'profileLightbox';
+        lightbox.className = 'profile-lightbox-backdrop';
+        lightbox.onclick = closeProfileLightbox;
+        lightbox.innerHTML = `
+            <div class="profile-lightbox-card" onclick="event.stopPropagation();">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" onclick="closeProfileLightbox()" aria-label="Close"></button>
+                <img src="${imageSrc}" class="profile-lightbox-img" alt="Profile Picture Preview" />
+            </div>
+        `;
+        document.body.appendChild(lightbox);
+    }
+
+    function closeProfileLightbox() {
+        var lightbox = document.getElementById('profileLightbox');
+        if (lightbox) lightbox.remove();
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeProfileLightbox();
+    });
+
+    // Auto-dismiss floating toast notification after 4 seconds
+    document.addEventListener('DOMContentLoaded', function () {
+        const toasts = document.querySelectorAll('.toast-notification');
+        toasts.forEach(toast => {
+            setTimeout(() => {
+                toast.classList.add('toast-hide');
+                toast.addEventListener('animationend', () => {
+                    toast.remove();
+                });
+            }, 4000);
+        });
+    });
+</script>

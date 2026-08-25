@@ -1,0 +1,218 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
+/* =========================================================
+   1. MAIN PAGE & LAYOUT BACKGROUND (#2B2929)
+   ========================================================= */
+
+html,
+body,
+:root,
+main,
+.wrapper,
+.content,
+.main-content,
+.content-wrapper,
+.dashboard-wrapper,
+.container,
+.container-fluid,
+.bg-light,
+.bg-white {
+    background-color: #2B2929 !important;
+    color: #ffffff;
+}
+
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* =========================================================
+   2. CONTAINED & CENTERED LAYOUT WRAPPER
+   ========================================================= */
+
+.edit-profile-wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    box-sizing: border-box;
+}
+
+.edit-profile-title {
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 30px !important;
+    font-weight: 500 !important; /* Medium */
+    letter-spacing: 0.1em !important; /* 10% Letter Spacing */
+    line-height: normal !important;
+    text-transform: uppercase !important;
+    color: #ffffff !important;
+    margin-bottom: 2.5rem !important;
+    text-align: left !important;
+}
+
+/* Two-Column Grid Setup */
+.profile-grid {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+/* Left Column Styling */
+.avatar-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-avatar-wrapper {
+    width: 200px;
+    height: 200px;
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50% !important;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.upload-btn-wrapper {
+    margin-top: 1rem;
+}
+
+.btn-upload {
+    background-color: #1a1d21 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 6px !important;
+    padding: 6px 18px;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .btn-upload:hover {
+        background-color: #2b3035 !important;
+        border-color: #ffffff !important;
+    }
+
+.text-muted-hint {
+    color: #8b8f97 !important;
+    font-size: 0.78rem;
+    margin-top: 6px;
+}
+
+/* Right Column Fields Grid */
+.fields-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.field-item.full-width {
+    grid-column: span 2;
+}
+
+/* Form Inputs Styling */
+.edit-profile-wrapper .form-control,
+input[type="text"],
+input[type="email"],
+input[type="tel"] {
+    background-color: #232528 !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+    border-radius: 6px !important;
+    color: #ffffff !important;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    box-shadow: none !important;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+    .edit-profile-wrapper .form-control::placeholder,
+    input::placeholder {
+        color: #8b8f97 !important;
+    }
+
+    .edit-profile-wrapper .form-control:focus,
+    input:focus {
+        border-color: #ffffff !important;
+        background-color: #26292d !important;
+        outline: none !important;
+    }
+
+    .edit-profile-wrapper .form-control[readonly],
+    input[readonly] {
+        background-color: #1e2023 !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+        color: #a0a0a0 !important;
+    }
+
+/* Bottom Right Action Buttons */
+.profile-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 3rem;
+}
+
+.btn-update-profile {
+    background-color: #121417 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-radius: 20px !important;
+    padding: 8px 24px !important;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .btn-update-profile:hover {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+
+.btn-cancel-profile {
+    background-color: #616a75 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 8px 24px !important;
+    font-size: 0.9rem;
+    display: inline-block;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .btn-cancel-profile:hover {
+        background-color: #727c8a !important;
+        color: #ffffff !important;
+    }
+
+/* Responsive adjustment for small screens */
+@media (max-width: 768px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fields-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .field-item.full-width {
+        grid-column: span 1;
+    }
+}

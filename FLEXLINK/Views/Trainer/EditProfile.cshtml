@@ -4,97 +4,104 @@
     ViewData["Title"] = "My Profile";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<head>
+    <link rel="stylesheet" href="~/css/Trainer_EditProfile.css" />
+</head>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <h2 class="mb-4">Edit Profile</h2>
+<div class="edit-profile-wrapper">
+    <h2 class="edit-profile-title">EDIT PROFILE</h2>
 
-            @* Success message after save *@
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    @TempData["SuccessMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            }
+    @* Success message after save *@
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-            
-            <form asp-action="EditProfile" method="post" enctype="multipart/form-data">
-                @Html.AntiForgeryToken()
+    <form asp-action="EditProfile" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
 
-                <div class="text-center mb-4">
+        @{
+            bool pictureRequired = string.IsNullOrEmpty(Model.ExistingProfilePicture)
+            || Model.ExistingProfilePicture == "/uploads/DefaultProfile.png";
+        }
+
+        <div class="profile-grid">
+            <!-- Left Column: Avatar & File Upload -->
+            <div class="avatar-column">
+                <div class="profile-avatar-wrapper mb-3">
                     <img src="@(Model.ExistingProfilePicture ?? "/uploads/DefaultProfile.png")"
-                         width="150"
-                         height="150"
-                         style="border-radius:50%; object-fit:cover; border: 3px solid #dee2e6;"
+                         class="profile-avatar"
                          alt="Profile Picture" />
                 </div>
 
-                @{
-                    bool pictureRequired = string.IsNullOrEmpty(Model.ExistingProfilePicture)
-                    || Model.ExistingProfilePicture == "/uploads/DefaultProfile.png";
-                }
-                <div class="mb-3">
-                    <label class="form-label">
-                        Upload Profile Picture
-                        @if (pictureRequired)
-                        {
-                            <span class="text-danger">*</span>
-                        }
+                <div class="upload-btn-wrapper">
+                    <label for="ProfileImageInput" class="btn-upload">
+                        <i class="bi bi-camera-fill"></i> Upload Image
                     </label>
-                    <input type="file" asp-for="ProfileImage" class="form-control" accept=".jpg,.jpeg,.png"
-                           required="@(pictureRequired ? "required" : null)" />
-                    <span asp-validation-for="ProfileImage" class="text-danger"></span>
-                    <div class="form-text">
-                        Max 2MB. Accepted formats: JPG, JPEG, PNG.
-                        @if (pictureRequired)
-                        {
-                            <span class="text-danger d-block">A profile picture is required before you can save.</span>
-                        }
+                    <input type="file" id="ProfileImageInput" asp-for="ProfileImage" class="d-none" accept=".jpg,.jpeg,.png"
+                           required="@(pictureRequired ? "required" : null)" onchange="this.nextElementSibling.innerText = this.files[0]?.name || ''" />
+                    <span class="file-name-display text-light d-block small mt-1"></span>
+                    <span asp-validation-for="ProfileImage" class="text-danger d-block"></span>
+                </div>
+
+                <div class="form-text text-muted-hint text-center">
+                    Max 2MB. Accepted formats: JPG, JPEG, PNG.
+                    @if (pictureRequired)
+                    {
+                        <span class="text-danger d-block">A profile picture is required before you can save.</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Right Column: Form Fields Grid -->
+            <div class="fields-column">
+                <div class="fields-grid">
+                    <!-- Full Name -->
+                    <div class="field-item">
+                        <input asp-for="FullName" class="form-control" placeholder="Full Name" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="field-item">
+                        <input asp-for="Email" class="form-control" readonly placeholder="Trainer@gmail.com" />
+                        <div class="form-text text-muted-hint">Email cannot be changed here.</div>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="field-item">
+                        <input asp-for="PhoneNumber" class="form-control"
+                               inputmode="numeric"
+                               maxlength="11"
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)"
+                               placeholder="Phone Number" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="field-item">
+                        <input asp-for="Address" class="form-control" placeholder="Address" />
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+
+                    <!-- Expertise (Full Width) -->
+                    <div class="field-item full-width">
+                        <input asp-for="Expertise" class="form-control" placeholder="Expertise" />
+                        <span asp-validation-for="Expertise" class="text-danger"></span>
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label asp-for="FullName" class="form-label">Full Name</label>
-                    <input asp-for="FullName" class="form-control" />
-                    <span asp-validation-for="FullName" class="text-danger"></span>
+                <!-- Action Buttons Bottom Right -->
+                <div class="profile-actions">
+                    <button type="submit" class="btn-update-profile">Update Profile</button>
+                    <a asp-action="Index" class="btn-cancel-profile text-decoration-none">Cancel</a>
                 </div>
-
-                <div class="mb-3">
-                    <label asp-for="Email" class="form-label">Email</label>
-                    <input asp-for="Email" class="form-control" readonly />
-                    <div class="form-text">Email cannot be changed here.</div>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
-                    <input asp-for="PhoneNumber" class="form-control"
-                           inputmode="numeric"
-                           maxlength="11"
-                           oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)"
-                           placeholder="09XXXXXXXXX" />
-                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Address" class="form-label">Address</label>
-                    <input asp-for="Address" class="form-control" />
-                    <span asp-validation-for="Address" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Expertise" class="form-label">Expertise</label>
-                    <input asp-for="Expertise" class="form-control" />
-                    <span asp-validation-for="Expertise" class="text-danger"></span>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Update Profile</button>
-                <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
-
-            </form>
+            </div>
         </div>
-    </div>
+    </form>
 </div>
 
 @section Scripts {

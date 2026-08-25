@@ -1,0 +1,86 @@
+﻿/* Import Outfit Font */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* Global Font & Page Background Override */
+body, html, .main-content, .content-wrapper, main, div, span, h2, p, table, th, td, button {
+    font-family: 'Outfit', sans-serif !important;
+}
+
+body, html, .main-content, .content-wrapper, main {
+    background-color: #2B2929 !important;
+    color: #ffffff !important;
+}
+
+/* Base Wrapper Background */
+.admin-dashboard-container {
+    background-color: #2B2929;
+    min-height: 100vh;
+}
+
+/* Headers and Descriptions */
+.dashboard-title {
+    color: #ffffff !important;
+    font-size: 1.75rem;
+}
+
+.dashboard-subtitle {
+    color: #b0b3b8 !important;
+    font-size: 0.95rem;
+}
+
+/* Card Styling */
+.dark-card {
+    background-color: #22252e !important;
+    border: none !important;
+    border-radius: 14px !important;
+}
+
+.card-breakdown-wrapper {
+    overflow: hidden;
+}
+
+.card-header-green {
+    background-color: #00c853 !important;
+    color: #ffffff !important;
+    border-radius: 14px 14px 0 0 !important;
+}
+
+/* Accent Colors */
+.accent-green-text {
+    color: #00c853 !important;
+}
+
+/* Badge Pill */
+.badge-pill-outline {
+    border: 1px solid #ff4242;
+    color: #ff4242;
+    background: transparent;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Dark Table Custom Styles */
+.table-dark-custom {
+    --bs-table-bg: transparent;
+    --bs-table-color: #ffffff;
+    --bs-table-hover-bg: #2d313e;
+    border-color: #2e323d;
+}
+
+    .table-dark-custom th {
+        border-bottom: 2px solid #2e323d !important;
+        color: #a0a5b5;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+
+    .table-dark-custom td {
+        border-bottom: 1px solid #2e323d !important;
+    }
+
+/* Expanded Detail Row Background */
+.detail-collapse-row {
+    background-color: #1a1c23;
+}

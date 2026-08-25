@@ -1,0 +1,162 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* Forces background on main canvas and content wrappers while leaving sidebars alone */
+html,
+body,
+:root,
+main,
+.content-wrapper,
+.main-content,
+#main-content {
+    background-color: #2B2929 !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
+    min-height: 100vh;
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Main Section Headers */
+.mock-title {
+    font-weight: 800;
+    font-size: 1.8rem;
+    letter-spacing: 0.5px;
+    color: #ffffff !important;
+    text-transform: uppercase;
+}
+
+.mock-subtitle {
+    color: #b0b5c0 !important;
+    font-size: 0.95rem;
+    font-weight: 400;
+}
+
+/* Card Box Container */
+.mock-card {
+    background-color: #1a1c22 !important;
+    border-radius: 12px;
+    border: 1px solid #282b34;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Search Area */
+.mock-search-container {
+    background-color: #111216 !important;
+    padding: 16px;
+}
+
+.mock-search-addon {
+    background-color: #dcdcdc !important;
+    border: none !important;
+    color: #555555 !important;
+    padding-left: 14px;
+    padding-right: 8px;
+}
+
+.mock-search-input {
+    background-color: #dcdcdc !important;
+    border: none !important;
+    color: #222222 !important;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+    .mock-search-input::placeholder {
+        color: #777777 !important;
+    }
+
+/* Card Header Bar (USERS count bar) */
+.mock-card-header {
+    background-color: #111216 !important;
+    color: #8a8f9d !important;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    padding: 10px 20px;
+    border-top: 1px solid #1a1c22;
+}
+
+.mock-badge {
+    background-color: #e5e7eb !important;
+    color: #1a1c22 !important;
+    font-weight: 800;
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 0.85rem;
+}
+
+/* Table Dark Background Overrides */
+.mock-table {
+    --bs-table-bg: #1a1c22 !important;
+    --bs-table-color: #ffffff !important;
+    background-color: #1a1c22 !important;
+    color: #ffffff !important;
+    margin-bottom: 0;
+}
+
+    .mock-table thead th {
+        background-color: #111216 !important;
+        color: #8a8f9d !important;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-bottom: 1px solid #282b34 !important;
+        padding: 14px 20px;
+    }
+
+    .mock-table tbody tr {
+        background-color: #1a1c22 !important;
+        border-bottom: 1px solid #282b34 !important;
+        transition: background-color 0.15s ease-in-out;
+    }
+
+        .mock-table tbody tr:hover {
+            background-color: #252831 !important;
+        }
+
+    .mock-table tbody td {
+        background-color: transparent !important;
+        color: #e0e4ec !important;
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+
+/* User Text Colors */
+.user-name-text {
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+.user-info-text {
+    color: #cccccc !important;
+}
+
+/* Buttons Styling */
+.btn-mock-view {
+    background-color: #5a6270 !important;
+    color: #ffffff !important;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+    .btn-mock-view:hover {
+        background-color: #484f5b !important;
+        color: #ffffff !important;
+    }
+
+.btn-mock-delete {
+    background-color: #cc0000 !important;
+    color: #ffffff !important;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+    .btn-mock-delete:hover {
+        background-color: #a30000 !important;
+        color: #ffffff !important;
+    }

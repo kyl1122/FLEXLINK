@@ -1,0 +1,188 @@
+﻿/* =========================================================
+   1. MAIN PAGE & LAYOUT BACKGROUND (#2B2929)
+   ========================================================= */
+
+html,
+body,
+:root,
+main,
+.wrapper,
+.content,
+.main-content,
+.content-wrapper,
+.dashboard-wrapper,
+.container,
+.container-fluid,
+.bg-light,
+.bg-white {
+    background-color: #2B2929 !important;
+    color: #ffffff;
+}
+
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* =========================================================
+   2. DASHBOARD HEADER & BANNER
+   ========================================================= */
+
+.dashboard-header {
+    background-color: #121518 !important;
+    padding: 2.5rem 2rem;
+    border-radius: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+    /* Ensures nested containers inside header stay transparent */
+    .dashboard-header *,
+    .dashboard-header div,
+    .dashboard-header .container,
+    .dashboard-header .row,
+    .dashboard-header .col {
+        background-color: transparent !important;
+    }
+
+.dashboard-title {
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-size: 2.2rem;
+    color: #ffffff;
+}
+
+.dashboard-header a {
+    color: #d1d5db !important;
+    text-decoration: none;
+}
+
+    .dashboard-header a:hover {
+        color: #ffffff !important;
+    }
+
+/* =========================================================
+   3. EQUIPMENT CARDS & DETAILS
+   ========================================================= */
+
+.dashboard-card,
+.card {
+    background-color: #16181a !important;
+    color: #ffffff !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    margin-bottom: 1.25rem;
+}
+
+/* EQ-ID & Left Column Meta Divider */
+.equipment-meta-box {
+    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+    min-width: 130px;
+    color: #ffffff !important;
+}
+
+    .equipment-meta-box h3,
+    .equipment-meta-box h4,
+    .dashboard-card h4,
+    .dashboard-card h5,
+    .dashboard-card strong {
+        color: #ffffff !important;
+    }
+
+    .equipment-meta-box .text-muted,
+    .dashboard-card .text-muted,
+    .dashboard-card p {
+        color: #d1d5db !important;
+    }
+
+/* =========================================================
+   4. COMMENT / REPORT CALLOUT BOXES
+   ========================================================= */
+
+/* Dark box for comment bubbles */
+.dashboard-card .p-2,
+.dashboard-card .p-3,
+.dashboard-card .rounded,
+.dashboard-card [class*="bg-warning"],
+.dashboard-card [style*="background-color"] {
+    background-color: #21252b !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    padding: 8px 14px !important;
+    margin-top: 6px !important;
+}
+
+    /* Author / Email Highlight */
+    .dashboard-card [class*="bg-warning"] strong,
+    .dashboard-card [class*="bg-warning"] b,
+    .dashboard-card [style*="background-color"] strong,
+    .dashboard-card [style*="background-color"] b,
+    .dashboard-card .rounded strong,
+    .dashboard-card .rounded b {
+        color: #ffca28 !important;
+        font-weight: 700 !important;
+    }
+
+    /* Timestamp Text */
+    .dashboard-card .small,
+    .dashboard-card small,
+    .dashboard-card .text-secondary,
+    .dashboard-card [class*="bg-warning"] span,
+    .dashboard-card [style*="background-color"] span {
+        color: #c0c0c0 !important;
+    }
+
+/* Icons inside callouts */
+.dashboard-card i,
+.dashboard-card svg {
+    color: #ffca28 !important;
+}
+
+/* =========================================================
+   5. REPORT REPAIR BUTTON
+   ========================================================= */
+
+.btn-outline-danger,
+.dashboard-card .btn-danger,
+.dashboard-card .btn-outline-danger {
+    color: #ff5252 !important;
+    border: 1px solid #ff5252 !important;
+    background-color: transparent !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+    .btn-outline-danger:hover,
+    .dashboard-card .btn-danger:hover,
+    .dashboard-card .btn-outline-danger:hover {
+        background-color: #ff5252 !important;
+        color: #ffffff !important;
+    }
+
+/* =========================================================
+   6. MODAL & INPUT STYLING
+   ========================================================= */
+
+.modal-content {
+    background-color: #212529 !important;
+    color: #ffffff !important;
+    border-radius: 12px;
+}
+
+    .modal-content .form-control {
+        background-color: #2b3035 !important;
+        border-color: #495057 !important;
+        color: #ffffff !important;
+    }
+
+        .modal-content .form-control:focus {
+            background-color: #2b3035 !important;
+            color: #ffffff !important;
+            border-color: #666666 !important;
+            box-shadow: none !important;
+        }

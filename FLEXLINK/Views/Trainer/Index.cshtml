@@ -6,75 +6,9 @@
     var equipment = ViewBag.Equipment as List<Equipment> ?? new List<Equipment>();
 }
 
-<style>
-    /* Modern Dark Theme Styling to match reference design */
-    body {
-        background-color: #1a1d21;
-        color: #ffffff;
-    }
-
-    .dashboard-header {
-        background-color: #121518;
-        padding: 2.5rem 2rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .dashboard-title {
-        font-weight: 800;
-        letter-spacing: 4px;
-        text-transform: uppercase;
-        font-size: 2.2rem;
-        color: #ffffff;
-    }
-
-    .dashboard-card {
-        background-color: #ffffff;
-        color: #212529;
-        border-radius: 12px;
-        border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        margin-bottom: 1.25rem;
-        transition: transform 0.2s ease-in-out;
-    }
-
-    .dashboard-card:hover {
-        transform: translateY(-2px);
-    }
-
-    .section-title {
-        color: #e0e0e0;
-        font-weight: 600;
-        letter-spacing: 1px;
-        margin-bottom: 1.5rem;
-    }
-
-    .equipment-meta-box {
-        border-right: 1px solid #dee2e6;
-        min-width: 130px;
-    }
-
-    .dark-card-header {
-        background-color: #212529;
-        color: #ffffff;
-        border-radius: 12px 12px 0 0;
-    }
-
-    .modal-content {
-        background-color: #212529;
-        color: #ffffff;
-    }
-
-    .modal-content .form-control {
-        background-color: #2b3035;
-        border-color: #495057;
-        color: #ffffff;
-    }
-
-    .modal-content .form-control:focus {
-        background-color: #2b3035;
-        color: #ffffff;
-    }
-</style>
+<head>
+    <link rel="stylesheet" href="~/css/Trainer_Index.css" />
+</head>
 
 <!-- Top Banner Section -->
 <div class="dashboard-header mb-4">

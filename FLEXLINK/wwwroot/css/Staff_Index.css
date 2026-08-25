@@ -1,0 +1,399 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* Kill browser and framework default margins/paddings */
+html,
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    width: 100% !important;
+    background-color: #2B2929 !important;
+    overscroll-behavior: none !important;
+    overflow-x: hidden;
+}
+
+    /* Catch-all: whatever direct child wrapper _Layout.cshtml uses (regardless
+   of its class name), force it full-width and dark. Excludes our own
+   fixed-position overlay elements so their intentional sizing/centering
+   isn't broken. */
+    body > *:not(.floating-card-backdrop):not(.floating-status-card):not(.toast-notification):not(.profile-lightbox-backdrop) {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        margin-bottom: 0 !important;
+        background-color: #2B2929 !important;
+    }
+
+/* Eliminate padding and margin from ASP.NET _Layout wrappers */
+main,
+header,
+nav,
+footer,
+.navbar,
+#app,
+.container,
+.container-fluid,
+.content-wrapper,
+.pb-3 {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    background-color: #2B2929 !important;
+    color: #ffffff !important;
+    font-family: 'Outfit', sans-serif !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Full viewport background backdrop */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #2B2929 !important;
+    z-index: -9999;
+}
+
+/* Match scrollbars to background */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #2B2929;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #4a4646;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-corner {
+    background-color: #2B2929;
+}
+
+html {
+    scrollbar-color: #4a4646 #2B2929;
+}
+
+/* Main Dashboard Wrapper */
+.staff-dashboard-wrapper {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 2.5rem 3.5rem;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #2B2929 !important;
+}
+
+/* Page Headers */
+.page-title {
+    font-size: 2.75rem;
+    font-weight: 800;
+    color: #ffffff !important;
+    letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+    color: #A1A5B0 !important;
+    font-size: 1.05rem;
+    font-weight: 400;
+}
+
+/* Card Containers */
+.card.dark-panel-card {
+    background-color: #1E2329 !important;
+    border: none !important;
+    border-radius: 20px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+    color: #ffffff !important;
+    padding: 2rem !important;
+}
+
+    /* Header icons inside card top rows */
+    .card.dark-panel-card .text-white.fs-6 {
+        font-size: 1.3rem !important;
+    }
+
+/* Large red icon on Member Check-In card */
+.icon-red.fs-3 {
+    font-size: 2.5rem !important;
+}
+
+/* Text & Icon Styles */
+.card-label-text {
+    color: #ffffff !important;
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.section-title-red {
+    color: #FF3333 !important;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.icon-red {
+    color: #FF3333 !important;
+}
+
+.field-label {
+    color: #C0C4CC !important;
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+/* Stat Counter Labels */
+.stat-number-red {
+    color: #FF3333 !important;
+    font-size: 2.75rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.stat-label-red {
+    color: #FF3333 !important;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* Pill Button ("View Trainer ->") */
+.pill-badge-btn {
+    color: #FF3333 !important;
+    border: 1px solid #FF3333 !important;
+    border-radius: 50px !important;
+    padding: 0.35rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.2s ease-in-out;
+}
+
+    .pill-badge-btn:hover {
+        background-color: #FF3333 !important;
+        color: #ffffff !important;
+    }
+
+/* Capacity Bar Track */
+.capacity-progress-track {
+    background-color: #0E1015 !important;
+    height: 28px;
+    border-radius: 50px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.capacity-progress-fill {
+    background-color: #E2E8F0 !important;
+    height: 100%;
+    border-radius: 50px;
+    transition: width 0.4s ease;
+}
+
+/* Form Controls */
+input.form-control.dark-input-pill,
+select.form-select.dark-input-pill {
+    background-color: #111317 !important;
+    border: 1px solid #383D48 !important;
+    color: #ffffff !important;
+    border-radius: 50px !important;
+    padding: 0.9rem 1.5rem !important;
+    font-size: 1.05rem !important;
+    font-family: 'Outfit', sans-serif !important;
+}
+
+    input.form-control.dark-input-pill:focus,
+    select.form-select.dark-input-pill:focus {
+        border-color: #FF3333 !important;
+        box-shadow: 0 0 0 0.2rem rgba(255, 51, 51, 0.2) !important;
+    }
+
+    input.form-control.dark-input-pill::placeholder {
+        color: #8C92A4 !important;
+    }
+
+/* Action Buttons */
+.btn.btn-dark-action {
+    background-color: #111317 !important;
+    color: #ffffff !important;
+    border: 1px solid #383D48 !important;
+    border-radius: 50px !important;
+    padding: 0.9rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+    .btn.btn-dark-action:hover {
+        background-color: #000000 !important;
+        border-color: #ffffff !important;
+        color: #ffffff !important;
+    }
+
+.btn.btn-red-outline {
+    background-color: transparent !important;
+    color: #FF3333 !important;
+    border: 1px solid #FF3333 !important;
+    border-radius: 50px !important;
+    padding: 0.9rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+    .btn.btn-red-outline:hover {
+        background-color: #FF3333 !important;
+        color: #ffffff !important;
+    }
+
+/* Toast Notifications */
+.toast-notification {
+    position: fixed !important;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    width: max-content;
+    max-width: min(90vw, 600px);
+    min-width: 320px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5) !important;
+    transition: none !important;
+    animation: toastSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+    .toast-notification.toast-hide {
+        animation: toastSlideUp 0.3s ease-in forwards !important;
+    }
+
+@keyframes toastSlideDown {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -40px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@keyframes toastSlideUp {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -40px);
+    }
+}
+
+/* Lightbox & Modal */
+.floating-card-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(6px);
+    z-index: 1080;
+}
+
+.floating-status-card {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1090;
+    width: 92%;
+    max-width: 680px;
+    animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9) !important;
+    border-radius: 16px !important;
+    overflow: hidden;
+}
+
+@keyframes modalPop {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -46%) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.avatar-wrapper-xl {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background-color: #111317;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+    .avatar-wrapper-xl:hover {
+        transform: scale(1.05);
+    }
+
+    .avatar-wrapper-xl img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.profile-lightbox-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(8px);
+    z-index: 1150;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-lightbox-card {
+    position: relative;
+    background: #1E2329;
+    padding: 16px;
+    border-radius: 50%;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9);
+}
+
+.profile-lightbox-img {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}

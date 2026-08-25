@@ -1,0 +1,109 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+body, html {
+    background-color: #1c1d21 !important;
+    font-family: 'Outfit', sans-serif !important;
+    color: #ffffff !important;
+    margin: 0;
+    padding: 0;
+}
+
+/* Outer Split Wrapper */
+.register-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background-color: #ff2a2a; /* Red Left Panel */
+    overflow: hidden;
+}
+
+/* Left Brand Panel */
+.brand-panel {
+    flex: 0 0 35%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ff2a2a;
+    padding: 40px;
+}
+
+.brand-logo-img {
+    max-width: 280px;
+    width: 100%;
+    height: auto;
+}
+
+/* Right Content Panel with Top-Left Border Radius */
+.form-panel {
+    flex: 1;
+    background-color: #191c21;
+    border-top-left-radius: 40px;
+    padding: 40px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+
+/* Go Back Link */
+.goback-link {
+    color: #a0a5b5;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: color 0.2s ease;
+}
+
+    .goback-link:hover {
+        color: #ffffff;
+    }
+
+/* Section Titles */
+.form-section-title {
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: #ffffff;
+    margin-bottom: 24px;
+    letter-spacing: 0.5px;
+}
+
+/* Custom Input Styling */
+.custom-input {
+    background-color: transparent !important;
+    border: 1px solid #4a4f5d !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    padding: 10px 16px !important;
+    font-size: 0.95rem !important;
+}
+
+    .custom-input::placeholder {
+        color: #8c92a4 !important;
+    }
+
+    .custom-input:focus {
+        border-color: #ffffff !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+/* Submit Button */
+.btn-register-trainer {
+    background-color: #111215 !important;
+    color: #ffffff !important;
+    border: 1px solid #2e323b !important;
+    border-radius: 24px !important;
+    padding: 12px 32px !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+    .btn-register-trainer:hover {
+        background-color: #000000 !important;
+        border-color: #4a4f5d !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+    }

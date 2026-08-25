@@ -3,40 +3,53 @@
     ViewData["Title"] = "Income Reports";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="container mt-4">
+<head>
+    <link rel="stylesheet" href="~/css/Admin_Income.css" />
+</head>
+
+<div class="container-fluid py-4 admin-dashboard-container">
+    <!-- Header Section -->
     <div class="mb-4">
-        <h2 class="fw-bold mb-0">Income Reports</h2>
-        <p class="text-muted mb-0">Monthly income from approved membership purchases.</p>
+        <h2 class="fw-bold mb-1 dashboard-title">Admin Dashboard</h2>
+        <p class="mb-0 dashboard-subtitle">Monthly income from approved membership purchases.</p>
     </div>
-    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;">
-        <div class="card-body d-flex justify-content-between align-items-center">
-            <span class="fw-semibold"><i class="bi bi-cash-stack me-1"></i>All-Time Income</span>
-            <span class="fw-bold text-success fs-4">₱@ViewBag.TotalIncome.ToString("N0")</span>
-        </div>
-    </div>
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center"
-             style="border-radius:12px 12px 0 0;">
-            <span class="fw-bold fs-6">
-                <i class="bi bi-graph-up me-2"></i>Monthly Breakdown
+
+    <!-- All-Time Income Card -->
+    <div class="card dark-card shadow-sm mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center py-3">
+            <span class="fw-medium text-white fs-5">
+                <i class="bi bi-wallet2 me-2"></i>All - Time Income
             </span>
-            <span class="badge bg-white text-success">@Model.Count month@(Model.Count != 1 ? "s" : "")</span>
+            <span class="fw-bold accent-green-text fs-2">₱ @ViewBag.TotalIncome.ToString("N0")</span>
         </div>
+    </div>
+
+    <!-- Monthly Breakdown Card -->
+    <div class="card dark-card card-breakdown-wrapper shadow-sm mb-4">
+        <div class="card-header card-header-green d-flex justify-content-between align-items-center py-3 border-0">
+            <span class="fw-bold fs-5 d-flex align-items-center">
+                <i class="bi bi-graph-up-arrow me-2"></i>Monthly Income Breakdown
+            </span>
+            <span class="badge bg-white text-dark rounded-pill px-3 py-2 fw-semibold">
+                @Model.Count month@(Model.Count != 1 ? "s" : "")
+            </span>
+        </div>
+
         <div class="card-body p-0">
             @if (!Model.Any())
             {
-                <p class="text-muted text-center py-4 mb-0">
+                <p class="text-secondary text-center py-4 mb-0">
                     <i class="bi bi-inbox me-1"></i>No approved memberships yet.
                 </p>
             }
             else
             {
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
+                <table class="table table-dark-custom table-hover align-middle mb-0">
+                    <thead>
                         <tr>
-                            <th>Month</th>
+                            <th class="ps-4">Month</th>
                             <th class="text-center">Memberships Sold</th>
-                            <th class="text-end">Income</th>
+                            <th class="text-end pe-4">Income</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -48,35 +61,36 @@
                             rowIndex++;
                             string collapseId = $"incomeDetail{rowIndex}";
                             <tr style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#@collapseId">
-                                <td>
-                                    <i class="bi bi-chevron-right me-2 text-muted"></i>
-                                    <i class="bi bi-calendar3 me-2 text-success"></i>@row.MonthLabel
+                                <td class="ps-4">
+                                    <i class="bi bi-chevron-right me-2 text-secondary small"></i>
+                                    <i class="bi bi-calendar-event me-2 text-white"></i>
+                                    <span class="fw-medium text-white">@row.MonthLabel</span>
                                 </td>
                                 <td class="text-center">
-                                    @row.MembershipCount
-                                    <div class="mt-1">
+                                    <span class="fw-semibold text-white fs-6">@row.MembershipCount</span>
+                                    <div class="mt-1 d-flex justify-content-center gap-1">
                                         @if (row.OneMonthCount > 0)
                                         {
-                                            <span class="badge bg-light text-dark border me-1">1mo × @row.OneMonthCount</span>
+                                            <span class="badge-pill-outline">1mo × @row.OneMonthCount</span>
                                         }
                                         @if (row.TwoMonthCount > 0)
                                         {
-                                            <span class="badge bg-light text-dark border me-1">2mo × @row.TwoMonthCount</span>
+                                            <span class="badge-pill-outline">2mo × @row.TwoMonthCount</span>
                                         }
                                         @if (row.ThreeMonthCount > 0)
                                         {
-                                            <span class="badge bg-light text-dark border">3mo × @row.ThreeMonthCount</span>
+                                            <span class="badge-pill-outline">3mo × @row.ThreeMonthCount</span>
                                         }
                                     </div>
                                 </td>
-                                <td class="text-end fw-semibold">₱@row.Total.ToString("N0")</td>
+                                <td class="text-end pe-4 fw-bold accent-green-text fs-5">₱ @row.Total.ToString("N0")</td>
                             </tr>
                             <tr class="collapse" id="@collapseId">
-                                <td colspan="3" class="bg-light p-0">
-                                    <table class="table table-sm mb-0">
+                                <td colspan="3" class="p-0 detail-collapse-row">
+                                    <table class="table table-sm table-dark-custom mb-0">
                                         <thead>
-                                            <tr class="small text-muted">
-                                                <th class="ps-4">Member</th>
+                                            <tr class="small text-secondary">
+                                                <th class="ps-5">Member</th>
                                                 <th>Plan</th>
                                                 <th>Start Date</th>
                                                 <th>Expiry Date</th>
@@ -87,11 +101,11 @@
                                             @foreach (var detail in row.Details)
                                             {
                                                 <tr>
-                                                    <td class="ps-4">@detail.UserName</td>
-                                                    <td>@detail.PlanLabel</td>
-                                                    <td>@detail.StartDate.ToString("MMM dd, yyyy")</td>
-                                                    <td>@detail.ExpiryDate.ToString("MMM dd, yyyy")</td>
-                                                    <td class="text-end pe-4">₱@detail.Price.ToString("N0")</td>
+                                                    <td class="ps-5 text-white">@detail.UserName</td>
+                                                    <td class="text-white">@detail.PlanLabel</td>
+                                                    <td class="text-secondary">@detail.StartDate.ToString("MMM dd, yyyy")</td>
+                                                    <td class="text-secondary">@detail.ExpiryDate.ToString("MMM dd, yyyy")</td>
+                                                    <td class="text-end pe-4 accent-green-text fw-semibold">₱ @detail.Price.ToString("N0")</td>
                                                 </tr>
                                             }
                                         </tbody>

@@ -4,198 +4,210 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0">My Schedule</h2>
-            <p class="text-muted mb-0">Manage your session availability</p>
-        </div>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
-            + Make Your Schedule
-        </button>
+<head>
+    <link rel="stylesheet" href="~/css/Trainer_Schedule.css" />
+</head>
+
+<div class="container">
+<div class="schedule-page-container">
+    <!-- Title Section -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1" style="color: #ffffff; font-size: 2rem;">My Schedule</h2>
+        <p class="mb-0" style="color: #a0a0a0; font-size: 0.95rem;">Manage your session availability</p>
     </div>
 
     @* Success / Error alerts *@
     @if (TempData["ScheduleSuccess"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show">
+        <div class="alert alert-success alert-dismissible fade show border-0 bg-success text-white">
             @TempData["ScheduleSuccess"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
         </div>
     }
     @if (TempData["ScheduleError"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show">
+        <div class="alert alert-danger alert-dismissible fade show border-0 bg-danger text-white">
             @TempData["ScheduleError"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
         </div>
     }
 
-    @* Summary badges (now act as filters) *@
-    @if (Model.Any())
-    {
-        var historySlots = Model.Count(s => s.ScheduleDate.Add(s.EndTime) < DateTime.Now);
-        var bookedSlots = Model.Count(s => s.IsBooked && s.ScheduleDate.Add(s.EndTime) >= DateTime.Now);
-        var freeSlots = Model.Count(s => !s.IsBooked && s.ScheduleDate.Add(s.EndTime) >= DateTime.Now);
-        var upcomingSlots = bookedSlots + freeSlots;
+    <!-- Header Actions Row: Filter Badges on Left, Action Button on Right -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <!-- Filter Badges -->
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+            @{
+                var historySlots = Model?.Count(s => s.ScheduleDate.Add(s.EndTime) < DateTime.Now) ?? 0;
+                var bookedSlots = Model?.Count(s => s.IsBooked && s.ScheduleDate.Add(s.EndTime) >= DateTime.Now) ?? 0;
+                var freeSlots = Model?.Count(s => !s.IsBooked && s.ScheduleDate.Add(s.EndTime) >= DateTime.Now) ?? 0;
+                var upcomingSlots = bookedSlots + freeSlots;
+            }
 
-        <div class="d-flex gap-2 mb-3 flex-wrap">
-            <button type="button" class="badge filter-btn text-bg-primary fs-6 px-3 py-2 active" data-filter="all">
+            <button type="button" class="btn custom-pill-btn filter-btn btn-light active" data-filter="all">
                 <i class="bi bi-calendar3 me-1"></i> @upcomingSlots Upcoming Slot@(upcomingSlots != 1 ? "s" : "")
             </button>
-            <button type="button" class="badge filter-btn text-bg-success fs-6 px-3 py-2" data-filter="booked">
+            <button type="button" class="btn custom-pill-btn filter-btn btn-success-custom" data-filter="booked">
                 <i class="bi bi-check-circle me-1"></i> @bookedSlots Booked
             </button>
-            <button type="button" class="badge filter-btn text-bg-secondary fs-6 px-3 py-2" data-filter="available">
+            <button type="button" class="btn custom-pill-btn filter-btn btn-dark-custom" data-filter="available">
                 <i class="bi bi-calendar-check me-1"></i> @freeSlots Available
             </button>
-            <button type="button" class="badge filter-btn text-bg-dark fs-6 px-3 py-2" data-filter="history">
+            <button type="button" class="btn custom-pill-btn filter-btn btn-dark-custom" data-filter="history">
                 <i class="bi bi-clock-history me-1"></i> @historySlots History
             </button>
         </div>
-    }
 
-    @* Schedule Table *@
-    @if (!Model.Any())
-    {
-        <div class="text-center py-5 border rounded" style="background:#f9f9f9;">
-            <p class="text-muted fs-5 mb-3">You have no scheduled sessions yet.</p>
-            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
-                Create Your First Schedule
+        <!-- Make Your Schedule Button -->
+        <div>
+            <button class="btn custom-pill-btn btn-black-custom" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+                <i class="bi bi-plus-circle me-1"></i> Make Your Schedule
             </button>
         </div>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Date</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Notes</th>
-                        <th class="text-center">Status</th>
-                        <th>Booked By</th>
-                        <th class="text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var s in Model)
-                    {
-                        bool isPast = s.ScheduleDate.Add(s.EndTime) < DateTime.Now;
-                        string filterCategory = isPast ? "history" : (s.IsBooked ? "booked" : "available");
-                        string rowClass = isPast ? "table-secondary" : (s.IsBooked ? "table-success" : "");
+    </div>
 
-                        <tr class="@rowClass schedule-row" data-filter="@filterCategory">
-                            <td>@s.ScheduleDate.ToString("MMMM dd, yyyy")</td>
-                            <td>@DateTime.Today.Add(s.StartTime).ToString("hh:mm tt")</td>
-                            <td>@DateTime.Today.Add(s.EndTime).ToString("hh:mm tt")</td>
-                            <td>@(string.IsNullOrEmpty(s.Notes) ? "—" : s.Notes)</td>
-                            <td class="text-center">
-                                @if (isPast)
-                                {
-                                    <span class="badge text-bg-dark">
-                                        <i class="bi bi-clock-history me-1"></i> @(s.IsBooked ? "Completed" : "Expired")
-                                    </span>
-                                }
-                                else if (s.IsBooked)
-                                {
-                                    <span class="badge text-bg-success">
-                                        <i class="bi bi-check-circle me-1"></i> Booked
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge text-bg-secondary">
-                                        <i class="bi bi-calendar me-1"></i> Available
-                                    </span>
-                                }
-                            </td>
-                            <td>
-                                @if (s.IsBooked && !string.IsNullOrEmpty(s.BookedByName))
-                                {
-                                    <span>
-                                        <i class="bi bi-person-check text-success me-1"></i>
-                                        @s.BookedByName
-                                    </span>
-                                    @if (s.BookedAt.HasValue)
+    <!-- Table Container Card -->
+    <div class="table-container-card">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <p class="fs-5 mb-3" style="color: #cccccc;">You have no scheduled sessions yet.</p>
+                <button class="btn custom-pill-btn btn-black-custom px-4 py-2" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+                    Create Your First Schedule
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table custom-dark-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">Date</th>
+                            <th style="width: 12%;">Start Time</th>
+                            <th style="width: 12%;">End Time</th>
+                            <th style="width: 21%;">Notes</th>
+                            <th style="width: 12%;" class="text-center">Status</th>
+                            <th style="width: 18%;">Booked By</th>
+                            <th style="width: 10%;" class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model)
+                        {
+                            bool isPast = s.ScheduleDate.Add(s.EndTime) < DateTime.Now;
+                            string filterCategory = isPast ? "history" : (s.IsBooked ? "booked" : "available");
+
+                            <tr class="schedule-row" data-filter="@filterCategory">
+                                <td class="fw-medium">@s.ScheduleDate.ToString("MMMM dd, yyyy")</td>
+                                <td>@DateTime.Today.Add(s.StartTime).ToString("hh:mm tt")</td>
+                                <td>@DateTime.Today.Add(s.EndTime).ToString("hh:mm tt")</td>
+                                <td>@(string.IsNullOrEmpty(s.Notes) ? "—" : s.Notes)</td>
+                                <td class="text-center">
+                                    @if (isPast)
                                     {
-                                        <br />
-                                        <small class="text-muted">@s.BookedAt.Value.ToString("MMM dd, yyyy hh:mm tt")</small>
+                                        <span class="badge text-bg-dark rounded-pill px-3 py-2">
+                                            <i class="bi bi-clock-history me-1"></i> @(s.IsBooked ? "Completed" : "Expired")
+                                        </span>
                                     }
-                                }
-                                else
-                                {
-                                    <span class="text-muted">—</span>
-                                }
-                            </td>
-                            <td class="text-center">
-                                @if (!s.IsBooked && !isPast)
-                                {
-                                    <form asp-action="DeleteSchedule" method="post"
-                                          onsubmit="return confirm('Remove this schedule slot?');">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id" value="@s.Id" />
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="bi bi-trash me-1"></i> Remove
-                                        </button>
-                                    </form>
-                                }
-                                else if (isPast)
-                                {
-                                    <span class="text-muted small" title="This slot has already passed">
-                                        <i class="bi bi-clock-history"></i> Past
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted small" title="Cannot remove a booked slot">
-                                        <i class="bi bi-lock"></i> Locked
-                                    </span>
-                                }
+                                    else if (s.IsBooked)
+                                    {
+                                        <span class="badge text-bg-success rounded-pill px-3 py-2">
+                                            <i class="bi bi-check-circle me-1"></i> Booked
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-bg-secondary rounded-pill px-3 py-2">
+                                            <i class="bi bi-calendar me-1"></i> Available
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (s.IsBooked && !string.IsNullOrEmpty(s.BookedByName))
+                                    {
+                                        <div>
+                                            <i class="bi bi-person-check text-success me-1"></i>
+                                            @s.BookedByName
+                                        </div>
+                                        @if (s.BookedAt.HasValue)
+                                        {
+                                            <small style="color: #888888; font-size: 0.8rem;">
+                                                @s.BookedAt.Value.ToString("MMM dd, yyyy hh:mm tt")
+                                            </small>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #777777;">—</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (!s.IsBooked && !isPast)
+                                    {
+                                        <form asp-action="DeleteSchedule" method="post"
+                                              onsubmit="return confirm('Remove this schedule slot?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@s.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger border-0">
+                                                <i class="bi bi-trash me-1"></i> Remove
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (isPast)
+                                    {
+                                        <span class="small" style="color: #777777;" title="This slot has already passed">
+                                            <i class="bi bi-clock-history"></i> Past
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="small" style="color: #777777;" title="Cannot remove a booked slot">
+                                            <i class="bi bi-lock"></i> Locked
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        <tr id="noResultsRow" style="display:none;">
+                            <td colspan="7" class="text-center py-5" style="color: #999999;">
+                                No schedules match this filter.
                             </td>
                         </tr>
-                    }
-                    <tr id="noResultsRow" style="display:none;">
-                        <td colspan="7" class="text-center text-muted py-4">
-                            No schedules match this filter.
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
 </div>
 
 @* Add Schedule Modal *@
 <div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addScheduleModalLabel">Make Your Schedule</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-content" style="background-color: #242424; color: #ffffff; border: 1px solid #3d3d3d;">
+            <div class="modal-header" style="border-bottom: 1px solid #3d3d3d;">
+                <h5 class="modal-title fw-bold" id="addScheduleModalLabel">Make Your Schedule</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form asp-action="AddSchedule" method="post">
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Date</label>
-                        <input type="date" name="scheduleDate" id="scheduleDate" class="form-control"
+                        <label class="form-label fw-semibold text-light">Date</label>
+                        <input type="date" name="scheduleDate" id="scheduleDate" class="form-control custom-dark-input"
                                min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Start Time</label>
-                        <input type="time" name="startTime" id="startTime" class="form-control"
+                        <label class="form-label fw-semibold text-light">Start Time</label>
+                        <input type="time" name="startTime" id="startTime" class="form-control custom-dark-input"
                                min="08:00" max="23:59" required />
-                        <div class="form-text text-muted">Sessions can start between 8:00 AM and 11:59 PM.</div>
+                        <div class="form-text" style="color: #a0a0a0;">Sessions can start between 8:00 AM and 11:59 PM.</div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Duration</label>
-                        <select name="durationMinutes" id="durationMinutes" class="form-select" required>
+                        <label class="form-label fw-semibold text-light">Duration</label>
+                        <select name="durationMinutes" id="durationMinutes" class="form-select custom-dark-input" required>
                             <option value="" disabled selected>Select duration</option>
                             <option value="60">1 hour</option>
                             <option value="90">1 hour 30 minutes</option>
@@ -205,50 +217,34 @@
                             <option value="210">3 hours 30 minutes</option>
                             <option value="240">4 hours</option>
                         </select>
-                        <div class="form-text text-muted">Minimum 1 hour, in 30-minute increments.</div>
+                        <div class="form-text" style="color: #a0a0a0;">Minimum 1 hour, in 30-minute increments.</div>
                     </div>
 
-                    @* Hidden end time — calculated by JS from start + duration *@
+                    @* Hidden end time *@
                     <input type="hidden" name="endTime" id="endTime" />
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">End Time <span class="text-muted fw-normal">(auto-calculated)</span></label>
-                        <input type="text" id="endTimeDisplay" class="form-control" readonly
-                               placeholder="Select start time and duration" style="background:#f8f9fa;" />
+                        <label class="form-label fw-semibold text-light">End Time <span class="fw-normal" style="color: #a0a0a0;">(auto-calculated)</span></label>
+                        <input type="text" id="endTimeDisplay" class="form-control custom-dark-input" readonly
+                               placeholder="Select start time and duration" style="background-color: #1a1a1a;" />
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Notes <span class="text-muted fw-normal">(optional)</span></label>
-                        <input type="text" name="notes" class="form-control"
+                        <label class="form-label fw-semibold text-light">Notes <span class="fw-normal" style="color: #a0a0a0;">(optional)</span></label>
+                        <input type="text" name="notes" class="form-control custom-dark-input"
                                placeholder="e.g. Strength Training, Cardio Session..." />
                     </div>
 
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Apply</button>
+                <div class="modal-footer" style="border-top: 1px solid #3d3d3d;">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Apply</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<style>
-    .filter-btn {
-        cursor: pointer;
-        border: none;
-        transition: box-shadow 0.15s ease, transform 0.1s ease;
-    }
-
-    .filter-btn:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
-    }
-
-    .filter-btn.active {
-        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.35);
-    }
-</style>
 
 @section Scripts {
     <script>
@@ -349,7 +345,7 @@
             }
         });
 
-        // ── Badge filter logic: All / Booked / Available / History ──
+        // Badge filter logic: All / Booked / Available / History
         (function () {
             const filterButtons = document.querySelectorAll('.filter-btn');
             const rows = document.querySelectorAll('.schedule-row');
@@ -358,8 +354,6 @@
             function applyFilter(filter) {
                 let visibleCount = 0;
                 rows.forEach(row => {
-                    // "all" now means "everything currently active" — Completed/Expired
-                    // slots only ever show up under the History filter.
                     const match = filter === 'all'
                         ? row.dataset.filter !== 'history'
                         : row.dataset.filter === filter;
@@ -379,7 +373,6 @@
                 });
             });
 
-            // Run once on load so Completed/Expired rows are hidden until History is selected
             applyFilter('all');
         })();
     </script>

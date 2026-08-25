@@ -17,7 +17,6 @@
         public string MonthLabel =>
             new DateTime(Year, Month, 1).ToString("MMMM yyyy");
     }
-
     public class MembershipSaleDetail
     {
         public string UserName { get; set; } = "";

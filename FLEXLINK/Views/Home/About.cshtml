@@ -1,6 +1,40 @@
-﻿@{
+﻿@page
+@{
     ViewData["Title"] = "About";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's About.</p>
+
+
+<div class="about-section">
+    <!-- Left Column: Gym Image -->
+    <div class="about-image-wrapper">
+        <img src="~/images/gym-interior.jpg" alt="Flexlink Gym Interior" class="about-image" />
+    </div>
+
+    <!-- Right Column: Content -->
+    <div class="about-content">
+        <div class="about-subtitle">
+            <span class="dash"></span>
+            <span class="subtitle-text">ABOUT FLEXLINK</span>
+        </div>
+
+        <h1 class="about-title">
+            MORE THAN<br />
+            JUST A GYM
+        </h1>
+
+        <p class="about-description">
+            We believe forging champions – not just in physique, but in mentality.
+            Since we build this, Flexlink has been premier destination for serious
+            athletes and beginners a like who refuse to settle for ordinary results.
+        </p>
+
+        <ul class="about-features">
+            <li>State-of-the-art equipment updated annually</li>
+            <li>Certified Trainers with minimum 5 years experience</li>
+            <li>Custom nutrition and recovery programs</li>
+            <li>Performance tracking with biometric technology</li>
+            <li>Private training rooms and group fitness studies</li>
+        </ul>
+    </div>
+</div>

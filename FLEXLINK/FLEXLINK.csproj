@@ -24,4 +24,10 @@
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\css\Landing_Page.css">
+      <CopyToOutputDirectory>Landing_Page</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

@@ -1,59 +1,115 @@
 ﻿@model FLEXLINK.ViewModels.RegisterViewModel
 @{
-    ViewData["Title"] = "Admin Dashboard";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Create Trainer";
+    Layout = null; // Full-screen layout matching design
 }
+<head>
+    <link rel="stylesheet" href="~/css/Admin_TrainerAdd.css" />
+</head>
 
-<form asp-controller="Admin" asp-action="CreateTrainer" method="post">
-    @Html.AntiForgeryToken()
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - FLEXLINK</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/CreateTrainer.css" />
+</head>
+<body>
 
-    <div class="mb-3">
-        <label asp-for="Name" class="form-label"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+    <div class="register-wrapper">
+        <!-- Left Red Branding Panel -->
+        <div class="brand-panel">
+            <img src="~/images/logo_f.png" alt="FLEXLINK Logo" class="brand-logo-img" />
+        </div>
+
+        <!-- Right Form Container Panel -->
+        <div class="form-panel">
+            <!-- Top Navigation -->
+            <div class="d-flex justify-content-end mb-4">
+                <a asp-controller="Admin" asp-action="Trainers" class="goback-link">
+                    <i class="bi bi-arrow-left me-1"></i> Go back
+                </a>
+            </div>
+
+            <form asp-controller="Admin" asp-action="CreateTrainer" method="post" class="w-100 pe-lg-5">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <!-- REGISTRATION SECTION -->
+                <h2 class="form-section-title">Registration</h2>
+
+                <!-- Row 1: Email (1/3) & Name (2/3) -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <input asp-for="Email" class="form-control custom-input" placeholder="Email" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-8">
+                        <input asp-for="Name" class="form-control custom-input" placeholder="Name" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Row 2: Phone Number, Age, Address -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <input asp-for="PhoneNumber" class="form-control custom-input"
+                               inputmode="numeric"
+                               maxlength="11"
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)"
+                               placeholder="Phone Number" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <input asp-for="Age" class="form-control custom-input" placeholder="Age" />
+                        <span asp-validation-for="Age" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <input asp-for="Address" class="form-control custom-input" placeholder="Address" />
+                        <span asp-validation-for="Address" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Row 3: Optional Field Placeholder (Matching Design Grid) -->
+                <div class="row g-3 mb-5">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control custom-input" placeholder="Experience" />
+                    </div>
+                </div>
+
+                <!-- PASSWORD SECTION -->
+                <h2 class="form-section-title">Password</h2>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-5">
+                        <input asp-for="Password" type="password" class="form-control custom-input" placeholder="Password" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-5">
+                    <div class="col-md-5">
+                        <input asp-for="ConfirmPassword" type="password" class="form-control custom-input" placeholder="Confirm Password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Submit Action -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-register-trainer">
+                        Register Trainer <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Spacer for alignment -->
+            <div></div>
+        </div>
     </div>
 
-    <div class="mb-3">
-        <label asp-for="Age" class="form-label"></label>
-        <input asp-for="Age" class="form-control" />
-        <span asp-validation-for="Age" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Address" class="form-label"></label>
-        <input asp-for="Address" class="form-control" />
-        <span asp-validation-for="Address" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="PhoneNumber" class="form-label"></label>
-        <input asp-for="PhoneNumber" class="form-control"
-               inputmode="numeric"
-               maxlength="11"
-               oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)"
-               placeholder="09XXXXXXXXX" />
-        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="ConfirmPassword" class="form-label"></label>
-        <input asp-for="ConfirmPassword" class="form-control" />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-success">Register Trainer</button>
-
-</form>
-
-        
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+﻿/* Import Font */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+body, html, .main-content, .content-wrapper, main, div, span, h2, p, table, th, td, button, input {
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* Updated page background to #2B2929 */
+body, html, .main-content, .content-wrapper, main {
+    background-color: #2B2929 !important;
+    color: #ffffff !important;
+}
+
+.dashboard-container {
+    background-color: #2B2929;
+    min-height: 100vh;
+}
+
+/* Titles */
+.dashboard-title {
+    color: #ffffff !important;
+    font-size: 1.8rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.dashboard-subtitle {
+    color: #a0a5b5 !important;
+    font-size: 0.95rem;
+}
+
+/* Black Pill Button with Circled Plus Icon */
+.btn-black-pill {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 10px 22px !important;
+    font-weight: 500 !important;
+    font-size: 0.95rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    text-decoration: none !important;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+    .btn-black-pill:hover {
+        background-color: #111111 !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+    }
+
+    .btn-black-pill .bi-plus-circle-fill {
+        color: #ffffff !important;
+        font-size: 1.15rem !important;
+    }
+
+/* Light Gray Search Bar Inside Container */
+.search-input-group {
+    background-color: #dcdcdc;
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 2px 8px;
+}
+
+    .search-input-group .input-group-text {
+        background-color: transparent;
+        border: none;
+        color: #555555;
+        font-size: 1.1rem;
+    }
+
+    .search-input-group .form-control {
+        background-color: transparent;
+        border: none;
+        color: #2B2929;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+        .search-input-group .form-control::placeholder {
+            color: #777777;
+        }
+
+        .search-input-group .form-control:focus {
+            box-shadow: none;
+            background-color: transparent;
+        }
+
+/* Main Dark Section Card */
+.dark-table-card {
+    background-color: #17191e !important;
+    border: none !important;
+    border-radius: 12px !important;
+}
+
+/* Top Bar inside Card */
+.table-card-topbar {
+    padding: 20px 24px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-topbar-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #a0a5b5;
+    text-transform: uppercase;
+}
+
+.badge-count {
+    background-color: #ffffff;
+    color: #17191e;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 0.85rem;
+}
+
+/* Table Styling */
+.table-custom {
+    --bs-table-bg: transparent;
+    --bs-table-color: #ffffff;
+    --bs-table-hover-bg: #1f222a;
+    margin-bottom: 0;
+}
+
+    .table-custom thead {
+        background-color: #131418;
+    }
+
+    .table-custom th {
+        border-bottom: 1px solid #232730 !important;
+        color: #a0a5b5;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+
+    .table-custom td {
+        border-bottom: 1px solid #232730 !important;
+        color: #ffffff;
+        font-size: 0.95rem;
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+
+/* Action Buttons */
+.btn-action-view {
+    background-color: #4f5666;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 6px 16px;
+    transition: background-color 0.2s ease;
+}
+
+    .btn-action-view:hover {
+        background-color: #626a7c;
+        color: #ffffff;
+    }
+
+.btn-action-delete {
+    background-color: #cc0000;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 6px 16px;
+    transition: background-color 0.2s ease;
+}
+
+    .btn-action-delete:hover {
+        background-color: #ee0000;
+        color: #ffffff;
+    }
+
+/* Dark Modal */
+.dark-modal {
+    background-color: #17191e !important;
+    color: #ffffff !important;
+    border-radius: 12px !important;
+    border: 1px solid #232730 !important;
+}
+
+    .dark-modal .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
