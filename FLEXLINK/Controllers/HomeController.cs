@@ -35,6 +35,25 @@ namespace FLEXLINK.Controllers
                     if (roles.Contains("Staff"))
                         return RedirectToAction("Index", "Staff");
                     // otherwise fall through to regular User landing page
+
+                    // ── Subscription Expiry Alert (fires within 3 days of expiry) ──────
+                    var activeMembership = _db.UserMembership
+                        .Where(m => m.UserId == currentUser.Id
+                                 && m.Status == "Approved"
+                                 && m.ExpiryDate >= DateTime.Now)
+                        .OrderBy(m => m.ExpiryDate)
+                        .FirstOrDefault();
+
+                    if (activeMembership != null)
+                    {
+                        double daysRemaining = (activeMembership.ExpiryDate - DateTime.Now).TotalDays;
+                        if (daysRemaining <= 3)
+                        {
+                            ViewBag.ShowExpiryAlert = true;
+                            ViewBag.ExpiryDate = activeMembership.ExpiryDate;
+                            ViewBag.DaysRemaining = Math.Max(0, (int)Math.Ceiling(daysRemaining));
+                        }
+                    }
                 }
             }
 
@@ -49,6 +68,11 @@ namespace FLEXLINK.Controllers
         }
 
         public IActionResult About()
+        {
+            return View();
+        }
+
+        public IActionResult Result()
         {
             return View();
         }

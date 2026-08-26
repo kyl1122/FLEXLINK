@@ -39,11 +39,16 @@ main,
 
 /* Dashboard Action Cards - Dark Container Fix */
 .dashboard-card {
+    background: #1E2329 !important;
     background-color: #1E2329 !important;
     border: 1px solid #2e343d !important;
     border-radius: 12px !important;
     transition: transform 0.2s ease-in-out, border-color 0.2s ease;
 }
+
+    .dashboard-card .card-body {
+        background-color: transparent !important;
+    }
 
     .dashboard-card:hover {
         transform: translateY(-3px);

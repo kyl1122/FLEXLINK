@@ -13,12 +13,14 @@ namespace FLEXLINK.Controllers
     {
         private readonly AppDbContext _db;
         private readonly UserManager<Users> _userManager;
+        private readonly SignInManager<Users> _signInManager;
 
         // CONSTRUCTOR
-        public TrainerController(AppDbContext db, UserManager<Users> userManager)
+        public TrainerController(AppDbContext db, UserManager<Users> userManager, SignInManager<Users> signInManager)
         {
             _db = db;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         // The Trainer's Landing Page (Dashboard)
@@ -182,7 +184,46 @@ namespace FLEXLINK.Controllers
 
             TempData["SuccessMessage"] = "Profile updated successfully!";
 
-            // FIX: Redirect to the correct action name
+            // Redirect to the correct action name
+            return RedirectToAction("EditProfile");
+        }
+
+        //CHANGE PASSWORD
+        [HttpGet]
+        public async Task<IActionResult> ChangePassword()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return RedirectToAction("Login", "Account");
+
+            return View(new TrainerChangePasswordViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(TrainerChangePasswordViewModel vm)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return RedirectToAction("Login", "Account");
+
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+
+            var result = await _userManager.ChangePasswordAsync(currentUser, vm.CurrentPassword, vm.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+                return View(vm);
+            }
+
+            await _signInManager.RefreshSignInAsync(currentUser);
+
+            TempData["SuccessMessage"] = "Password changed successfully!";
             return RedirectToAction("EditProfile");
         }
 

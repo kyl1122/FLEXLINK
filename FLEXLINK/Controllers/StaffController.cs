@@ -316,6 +316,19 @@ namespace FLEXLINK.Controllers
                 Type = "Guest",
                 CheckedInAt = DateTime.Now
             });
+
+            // Record the guest's day-pass fee as income.
+            // Sentinel values: UserId "GUEST" (no real Users row), Months 0 (day pass, not a real month plan).
+            _db.UserMembership.Add(new UserMembership
+            {
+                UserId = "GUEST",
+                Months = 0,
+                StartDate = DateTime.Now,
+                ExpiryDate = DateTime.Now.AddDays(1),
+                Status = "Approved",
+                ReviewedAt = DateTime.Now
+            });
+
             await _db.SaveChangesAsync();
 
             TempData["AttendanceSuccess"] = "Guest checked in successfully.";

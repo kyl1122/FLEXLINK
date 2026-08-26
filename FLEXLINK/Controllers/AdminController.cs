@@ -23,6 +23,7 @@ namespace FLEXLINK.Controllers
         // Maps a membership's Months to its price. Keep in sync with Subscribe()'s plans.
         private static decimal GetMembershipPrice(int months) => months switch
         {
+            0 => 50m,
             1 => 300m,
             2 => 550m,
             3 => 800m,
@@ -100,6 +101,7 @@ namespace FLEXLINK.Controllers
                     OneMonthCount = g.Count(m => m.Months == 1),
                     TwoMonthCount = g.Count(m => m.Months == 2),
                     ThreeMonthCount = g.Count(m => m.Months == 3),
+                    GuestCount = g.Count(m => m.Months == 0),
                     Details = g.Select(m => new MembershipSaleDetail
                     {
                         UserName = userLookup.TryGetValue(m.UserId, out var name) ? name : "Unknown",

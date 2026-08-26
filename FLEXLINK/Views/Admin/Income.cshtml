@@ -81,6 +81,10 @@
                                         {
                                             <span class="badge-pill-outline">3mo × @row.ThreeMonthCount</span>
                                         }
+                                        @if (row.GuestCount > 0)
+                                        {
+                                            <span class="badge-pill-outline">Guest × @row.GuestCount</span>
+                                        }
                                     </div>
                                 </td>
                                 <td class="text-end pe-4 fw-bold accent-green-text fs-5">₱ @row.Total.ToString("N0")</td>

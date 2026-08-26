@@ -1,0 +1,94 @@
+﻿/* Global Font & Background */
+html, body, main, .container-fluid, .content-wrapper, .main-content, #content {
+    background-color: #2B2929 !important;
+    color: #e5e5e5;
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif !important;
+}
+
+/* Page Level Styles for Schedule Alignment */
+.schedule-container {
+    background-color: #2B2929;
+    min-height: 100vh;
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+    padding: 2.5rem 2rem;
+}
+
+.schedule-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.5px;
+}
+
+.schedule-subtitle {
+    color: #a0a0a0;
+    font-size: 0.95rem;
+    margin-bottom: 2.5rem;
+}
+
+.schedule-date-header {
+    color: #FF2D20;
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    letter-spacing: 0.5px;
+}
+
+/* Updated Dark Session Card (#1E2329) */
+.session-card-dark {
+    background-color: #1E2329;
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .session-card-dark:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    }
+
+.trainer-name-text {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.session-info-text {
+    color: #a0aab4;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.badge-booked-green {
+    background-color: #20B26C !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.35em 0.75em;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* Rating Button */
+.btn-rate-outline {
+    border: 1px solid #f5a623 !important;
+    color: #f5a623 !important;
+    background-color: transparent !important;
+    font-weight: 600;
+    font-size: 0.825rem;
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    transition: all 0.2s ease;
+}
+
+    .btn-rate-outline:hover {
+        background-color: #f5a623 !important;
+        color: #ffffff !important;
+    }

@@ -6,14 +6,11 @@
         public int Month { get; set; }
         public int MembershipCount { get; set; }
         public decimal Total { get; set; }
-
         public int OneMonthCount { get; set; }
         public int TwoMonthCount { get; set; }
         public int ThreeMonthCount { get; set; }
-
-        // NEW — who bought what, for the expandable row
+        public int GuestCount { get; set; }
         public List<MembershipSaleDetail> Details { get; set; } = new();
-
         public string MonthLabel =>
             new DateTime(Year, Month, 1).ToString("MMMM yyyy");
     }
@@ -24,9 +21,9 @@
         public decimal Price { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime ExpiryDate { get; set; }
-
         public string PlanLabel => Months switch
         {
+            0 => "1 Day (Guest)",
             1 => "1 Month",
             2 => "2 Months",
             3 => "3 Months",

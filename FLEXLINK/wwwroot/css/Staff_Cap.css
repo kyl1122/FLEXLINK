@@ -1,1 +1,123 @@
-﻿
+﻿/* Page Wrapper Styling */
+html,
+body,
+main,
+.container-fluid,
+.content-wrapper,
+.main-content,
+#content {
+    background-color: #2B2929 !important;
+    color: #ffffff;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 1.15rem;
+}
+
+body {
+    background-color: #1a1c20;
+}
+
+.approvals-container {
+    padding: 2rem;
+}
+
+.header-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 2px;
+}
+
+.header-subtitle {
+    color: #9ca3af;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+}
+
+.approval-card {
+    background-color: #262930;
+    border-radius: 12px;
+    padding: 1.5rem;
+    height: 100%;
+    border: none;
+}
+
+.card-title-custom {
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.request-item {
+    background-color: #e5e7eb;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #111827;
+}
+
+.user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 2px;
+    color: #111827;
+}
+
+.user-meta {
+    font-size: 0.75rem;
+    color: #4b5563;
+    margin-bottom: 0;
+}
+
+.action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 80px;
+}
+
+.btn-approve {
+    background-color: #0f172a;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 14px;
+    transition: background-color 0.2s;
+}
+
+    .btn-approve:hover {
+        background-color: #1e293b;
+        color: #ffffff;
+    }
+
+.btn-reject {
+    background-color: transparent;
+    color: #ef4444;
+    border: 1px solid #fca5a5;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 2px 14px;
+    transition: background-color 0.2s;
+}
+
+    .btn-reject:hover {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }

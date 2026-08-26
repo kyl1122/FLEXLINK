@@ -1,0 +1,103 @@
+﻿/* Page Wrapper Styling */
+html, body, main, .container-fluid, .content-wrapper, .main-content, #content {
+    background-color: #2b2929 !important;
+    color: #ffffff;
+    font-family: 'Outfit', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important;
+    font-size: 1rem;
+}
+
+/* Dark Theme Styles */
+.trainer-card-dark {
+    background-color: #1a191d;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    color: #ffffff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.trainer-hero-header {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    overflow: hidden;
+}
+
+.trainer-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.75);
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+    .trainer-hero-img:hover {
+        filter: brightness(0.9);
+        transform: scale(1.02);
+    }
+
+.trainer-hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 15px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+    color: #ffffff;
+}
+
+.session-pill {
+    background-color: #d1d5db !important;
+    color: #111827 !important;
+    border-radius: 20px !important;
+    padding: 6px 14px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    border: none !important;
+}
+
+.btn-book-dark {
+    border: 1px solid #d9383a !important;
+    color: #d9383a !important;
+    background: transparent !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    padding: 8px 16px !important;
+    transition: all 0.2s ease-in-out;
+}
+
+    .btn-book-dark:hover {
+        background-color: #d9383a !important;
+        color: #ffffff !important;
+    }
+
+.rating-box-light {
+    background-color: #ffffff;
+    color: #111827;
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.btn-outline-warning-custom {
+    border: 1px solid #f2bc3f !important;
+    color: #f2bc3f !important;
+    background: transparent !important;
+    border-radius: 6px !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease-in-out;
+}
+
+    .btn-outline-warning-custom:hover {
+        background: #f2bc3f !important;
+        color: #ffffff !important;
+    }
+
+/* Modal Checkbox Card Selection Styling */
+.schedule-slot.selected {
+    background-color: #e8f4ff !important;
+    border-color: #0d6efd !important;
+}

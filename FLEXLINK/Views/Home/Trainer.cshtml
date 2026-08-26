@@ -3,13 +3,17 @@
     ViewData["Title"] = "Our Trainers";
 }
 
+<head>
+    <link rel="stylesheet" href="~/css/User_Trainer.css" />
+</head>
+
 <div class="container mt-4">
     <div class="mb-4">
-        <h2 class="fw-bold">Our Trainers</h2>
-        <p class="text-muted">Choose a professional trainer and pick your preferred session slots.</p>
+        <h2 class="fw-bold text-white">Our Trainers</h2>
+        <p class="text-secondary">Choose a professional trainer and pick your preferred session slots.</p>
     </div>
 
-    @* Global alerts *@
+    @* Alerts *@
     @if (TempData["BookingSuccess"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show">
@@ -43,7 +47,7 @@
     @if (!Model.Any())
     {
         <div class="text-center py-5">
-            <p class="text-muted fs-5">No trainers are available yet. Check back soon!</p>
+            <p class="text-secondary fs-5">No trainers are available yet. Check back soon!</p>
         </div>
     }
     else
@@ -57,60 +61,72 @@
                 var rateModalId = "rateModal_" + trainer.Id;
 
                 <div class="col-md-4 d-flex">
-                    <div class="card shadow-sm border-0 w-100"
-                         style="border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
+                    <div class="card trainer-card-dark w-100">
 
-                        @* ── Top: Profile info ── *@
-                        <div class="text-center pt-4 px-3">
+                        @* ── Top: Profile Header ── *@
+                        <div class="trainer-hero-header">
                             <img src="@(trainer.ProfilePicture ?? "/uploads/DefaultProfile.png")"
                                  alt="@trainer.FullName"
-                                 class="trainer-pic-trigger"
+                                 class="trainer-hero-img trainer-pic-trigger"
                                  data-img="@(trainer.ProfilePicture ?? "/uploads/DefaultProfile.png")"
                                  data-name="@trainer.FullName"
-                                 style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #dee2e6;cursor:pointer;" />
-                            <h5 class="fw-bold mt-2 mb-0">@trainer.FullName</h5>
-                            <p class="text-muted small mb-0"><i class="bi bi-envelope me-1"></i>@trainer.Email</p>
-                            @if (!string.IsNullOrEmpty(trainer.PhoneNumber))
-                            {
-                                <p class="text-muted small mb-0"><i class="bi bi-telephone me-1"></i>@trainer.PhoneNumber</p>
-                            }
-                            @if (!string.IsNullOrEmpty(trainer.Address))
-                            {
-                                <p class="text-muted small mb-0"><i class="bi bi-geo-alt me-1"></i>@trainer.Address</p>
-                            }
-                            @if (!string.IsNullOrEmpty(trainer.Expertise))
-                            {
-                                <p class="text-muted small mb-0"><i class="bi bi-trophy me-1"></i>@trainer.Expertise</p>
-                            }
+                                 style="cursor:pointer;" />
+
+                            <div class="trainer-hero-overlay">
+                                <h4 class="fw-bold mb-0 text-uppercase tracking-wide" style="letter-spacing: 1px;">@trainer.FullName</h4>
+
+                                @if (!string.IsNullOrEmpty(trainer.Expertise))
+                                {
+                                    <div class="small fw-semibold text-light mb-1">@trainer.Expertise</div>
+                                }
+
+                                <div class="d-flex justify-content-between align-items-end mt-1">
+                                    <div class="small text-light opacity-75">
+                                        <div><i class="bi bi-envelope me-1"></i>@trainer.Email</div>
+                                        @if (!string.IsNullOrEmpty(trainer.PhoneNumber))
+                                        {
+                                            <div><i class="bi bi-telephone me-1"></i>@trainer.PhoneNumber</div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(trainer.Address))
+                                        {
+                                            <div><i class="bi bi-geo-alt me-1"></i>@trainer.Address</div>
+                                        }
+                                    </div>
+
+                                    @if (schedules.Any())
+                                    {
+                                        <span class="badge bg-emerald text-dark fw-bold px-2 py-1" style="background-color: #34d399; font-size: 0.72rem;">
+                                            <i class="bi bi-calendar-event me-1"></i>@schedules.Count Available Session@(schedules.Count != 1 ? "s" : "")
+                                        </span>
+                                    }
+                                </div>
+                            </div>
                         </div>
 
-                        @* ── Middle: Scrollable schedule list ── *@
-                        <div class="px-3 mt-3">
+                        @* ── Middle: Schedule List ── *@
+                        <div class="px-3 mt-3 flex-grow-1">
                             @if (schedules.Any())
                             {
-                                <p class="fw-semibold small text-center mb-2">
-                                    <i class="bi bi-calendar-check text-success me-1"></i>
-                                    @schedules.Count Available Session@(schedules.Count != 1 ? "s" : "")
-                                </p>
-                                <div style="height:110px; overflow-y:auto; display:flex; flex-direction:column; gap:5px; padding-right:4px;">
+                                <div style="height:120px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:4px;">
                                     @foreach (var slot in schedules)
                                     {
-                                        <div class="border rounded px-2 py-1 bg-light flex-shrink-0"
-                                             style="font-size:0.76rem;">
-                                            <i class="bi bi-clock text-primary me-1"></i>
-                                            <strong>@slot.ScheduleDate.ToString("MMM dd")</strong>
-                                            &nbsp;@DateTime.Today.Add(slot.StartTime).ToString("hh:mm tt") – @DateTime.Today.Add(slot.EndTime).ToString("hh:mm tt")
-                                            @if (!string.IsNullOrEmpty(slot.Notes))
-                                            {
-                                                <span class="text-muted"> · @slot.Notes</span>
-                                            }
+                                        <div class="session-pill flex-shrink-0 d-flex align-items-center">
+                                            <i class="bi bi-clock-fill text-dark me-2"></i>
+                                            <span>
+                                                <strong>@slot.ScheduleDate.ToString("MMM dd")</strong>
+                                                &nbsp;@DateTime.Today.Add(slot.StartTime).ToString("hh:mm tt") – @DateTime.Today.Add(slot.EndTime).ToString("hh:mm tt")
+                                                @if (!string.IsNullOrEmpty(slot.Notes))
+                                                {
+                                                    <span class="opacity-75"> - @slot.Notes</span>
+                                                }
+                                            </span>
                                         </div>
                                     }
                                 </div>
                             }
                             else
                             {
-                                <div class="text-center my-2" style="height:110px; display:flex; align-items:center; justify-content:center;">
+                                <div class="text-center my-2" style="height:120px; display:flex; align-items:center; justify-content:center;">
                                     <span class="badge text-bg-secondary px-3 py-2">
                                         <i class="bi bi-calendar-x me-1"></i> No available sessions
                                     </span>
@@ -118,99 +134,90 @@
                             }
                         </div>
 
-                        @* ── Bottom: Book button ── *@
-                        <div class="px-3 pb-2 pt-2">
-                            @if (User.Identity?.IsAuthenticated == true && !(bool)ViewBag.HasActiveMembership)
-                            {
-                                <a asp-controller="Home" asp-action="Membership" class="btn btn-outline-warning w-100">
-                                    <i class="bi bi-lock me-1"></i> Membership Required
-                                </a>
-                            }
-                            else if (schedules.Any())
-                            {
-                                <button class="btn btn-primary w-100"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#@modalId">
-                                    <i class="bi bi-calendar-plus me-1"></i> Book a Session
-                                </button>
-                            }
-                            else
-                            {
-                                <button class="btn btn-outline-secondary w-100" disabled>
-                                    No Sessions Available
-                                </button>
-                            }
-                        </div>
-
-                        @* ── Rating Section ── *@
-                        <div class="px-3 pb-4 pt-1">
-                            <hr class="my-2" />
-
-                            @* Public rating summary — visible to everyone *@
-                            <div class="text-center mb-2">
-                                @{
-                                    var fullStars = (int)Math.Floor(vm.AverageRating);
-                                    var halfStar = (vm.AverageRating - fullStars) >= 0.5;
+                        @* ── Action Area (Pinned to Bottom) ── *@
+                        <div class="mt-auto">
+                            <div class="px-3 pb-2 pt-2">
+                                @if (User.Identity?.IsAuthenticated == true && !(bool)ViewBag.HasActiveMembership)
+                                {
+                                    <a asp-controller="Home" asp-action="Membership" class="btn btn-outline-warning w-100">
+                                        <i class="bi bi-lock me-1"></i> Membership Required
+                                    </a>
                                 }
-                                <div class="d-inline-flex align-items-center gap-1">
-                                    @for (int i = 1; i <= 5; i++)
-                                    {
-                                        if (i <= fullStars)
+                                else if (schedules.Any())
+                                {
+                                    <button class="btn btn-book-dark w-100" data-bs-toggle="modal" data-bs-target="#@modalId">
+                                        Book a Session
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-outline-secondary w-100" disabled>
+                                        No Sessions Available
+                                    </button>
+                                }
+                            </div>
+
+                            @* ── Rating Section ── *@
+                            <div class="px-3 pb-3">
+                                <div class="rating-box-light text-center">
+                                    @{
+                                        var fullStars = (int)Math.Floor(vm.AverageRating);
+                                        var halfStar = (vm.AverageRating - fullStars) >= 0.5;
+                                    }
+                                    <div class="d-inline-flex align-items-center gap-1">
+                                        @for (int i = 1; i <= 5; i++)
                                         {
-                                            <i class="bi bi-star-fill" style="color:#f5a623; font-size:1.1rem;"></i>
+                                            if (i <= fullStars)
+                                            {
+                                                <i class="bi bi-star-fill" style="color:#f5a623; font-size:1.1rem;"></i>
+                                            }
+                                            else if (i == fullStars + 1 && halfStar)
+                                            {
+                                                <i class="bi bi-star-half" style="color:#f5a623; font-size:1.1rem;"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-star" style="color:#ccc; font-size:1.1rem;"></i>
+                                            }
                                         }
-                                        else if (i == fullStars + 1 && halfStar)
+                                    </div>
+                                    <div class="text-muted small mt-1" style="font-size: 0.78rem;">
+                                        @if (vm.RatingCount == 0)
                                         {
-                                            <i class="bi bi-star-half" style="color:#f5a623; font-size:1.1rem;"></i>
+                                            <span>No ratings yet</span>
                                         }
                                         else
                                         {
-                                            <i class="bi bi-star" style="color:#ccc; font-size:1.1rem;"></i>
+                                            <span><strong>@vm.AverageRating</strong> / 5 &nbsp;·&nbsp; @vm.RatingCount user@(vm.RatingCount != 1 ? "s" : "") rated</span>
                                         }
-                                    }
-                                </div>
-                                <div class="text-muted small mt-1">
-                                    @if (vm.RatingCount == 0)
+                                    </div>
+
+                                    @if (User.Identity?.IsAuthenticated == true && vm.CurrentUserHasBooked)
                                     {
-                                        <span>No ratings yet</span>
-                                    }
-                                    else
-                                    {
-                                        <span><strong>@vm.AverageRating</strong> / 5 &nbsp;·&nbsp; @vm.RatingCount user@(vm.RatingCount != 1 ? "s" : "") rated</span>
+                                        <div class="mt-2">
+                                            <button class="btn btn-outline-warning-custom w-100 py-1" data-bs-toggle="modal" data-bs-target="#@rateModalId">
+                                                <i class="bi bi-star me-1"></i>
+                                                @(vm.CurrentUserRating.HasValue ? $"Update Your Rating ({vm.CurrentUserRating}★)" : "Rate This Trainer")
+                                            </button>
+                                        </div>
                                     }
                                 </div>
                             </div>
-
-                            @* Rate button — only for logged-in users who have booked this trainer *@
-                            @if (User.Identity?.IsAuthenticated == true && vm.CurrentUserHasBooked)
-                            {
-                                <button class="btn btn-outline-warning btn-sm w-100"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#@rateModalId">
-                                    <i class="bi bi-star me-1"></i>
-                                    @(vm.CurrentUserRating.HasValue ? $"Update Your Rating ({vm.CurrentUserRating}★)" : "Rate This Trainer")
-                                </button>
-                            }
                         </div>
+
                     </div>
                 </div>
 
-
-
-                @* ── Per-Trainer Booking Modal ── *@
+                @* ── Booking Modal ── *@
                 @if (schedules.Any())
                 {
-                    <div class="modal fade" id="@modalId" tabindex="-1"
-                         aria-labelledby="@(modalId)_label" aria-hidden="true">
+                    <div class="modal fade" id="@modalId" tabindex="-1" aria-labelledby="@(modalId)_label" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered modal-lg">
-                            <div class="modal-content">
+                            <div class="modal-content text-dark">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="@(modalId)_label">
-                                        Book a Session with @trainer.FullName
-                                    </h5>
+                                    <h5 class="modal-title fw-bold" id="@(modalId)_label">Book a Session with @trainer.FullName</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
-
                                 <form asp-controller="Home" asp-action="BookSchedules" method="post" class="booking-form">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="scheduleIds" class="selected-ids-input" value="" />
@@ -223,11 +230,8 @@
                                         <div class="d-flex flex-column gap-2">
                                             @foreach (var slot in schedules)
                                             {
-                                                <label class="schedule-slot d-flex align-items-start gap-3 border rounded p-3"
-                                                       style="cursor:pointer; transition:background 0.15s;">
-                                                    <input type="checkbox"
-                                                           class="form-check-input schedule-checkbox mt-1 flex-shrink-0"
-                                                           value="@slot.Id" />
+                                                <label class="schedule-slot d-flex align-items-start gap-3 border rounded p-3" style="cursor:pointer; transition:all 0.15s;">
+                                                    <input type="checkbox" class="form-check-input schedule-checkbox mt-1 flex-shrink-0" value="@slot.Id" />
                                                     <div class="flex-grow-1">
                                                         <div class="fw-semibold">
                                                             <i class="bi bi-calendar3 me-1 text-primary"></i>
@@ -235,8 +239,7 @@
                                                         </div>
                                                         <div class="text-muted small">
                                                             <i class="bi bi-clock me-1"></i>
-                                                            @DateTime.Today.Add(slot.StartTime).ToString("hh:mm tt") –
-                                                            @DateTime.Today.Add(slot.EndTime).ToString("hh:mm tt")
+                                                            @DateTime.Today.Add(slot.StartTime).ToString("hh:mm tt") – @DateTime.Today.Add(slot.EndTime).ToString("hh:mm tt")
                                                         </div>
                                                         @if (!string.IsNullOrEmpty(slot.Notes))
                                                         {
@@ -269,14 +272,11 @@
                 @* ── Rating Modal ── *@
                 @if (User.Identity?.IsAuthenticated == true && vm.CurrentUserHasBooked)
                 {
-                    <div class="modal fade" id="@rateModalId" tabindex="-1"
-                         aria-labelledby="@(rateModalId)_label" aria-hidden="true">
+                    <div class="modal fade" id="@rateModalId" tabindex="-1" aria-labelledby="@(rateModalId)_label" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered modal-sm">
-                            <div class="modal-content">
+                            <div class="modal-content text-dark">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="@(rateModalId)_label">
-                                        Rate @trainer.FullName
-                                    </h5>
+                                    <h5 class="modal-title fw-bold" id="@(rateModalId)_label">Rate @trainer.FullName</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <form asp-controller="Home" asp-action="RateTrainer" method="post">
@@ -312,7 +312,7 @@
             }
         </div>
 
-        @* ── Shared Profile Picture Preview Modal ── *@
+        @* ── Shared Image Preview Modal ── *@
         <div class="modal fade" id="trainerPicModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content bg-transparent border-0">
@@ -321,8 +321,7 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body text-center">
-                        <img id="trainerPicModalImg" src="" alt=""
-                             style="max-width:100%; max-height:80vh; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,0.4);" />
+                        <img id="trainerPicModalImg" src="" alt="" style="max-width:100%; max-height:80vh; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,0.4);" />
                     </div>
                 </div>
             </div>
@@ -332,98 +331,93 @@
 
 @section Scripts {
     <script>
-        // ── Booking modal logic ──────────────────────────────────────────────
-        document.querySelectorAll('.booking-form').forEach(function (form) {
-            const checkboxes = form.querySelectorAll('.schedule-checkbox');
-            const idsInput   = form.querySelector('.selected-ids-input');
-            const confirmBtn = form.querySelector('.confirm-book-btn');
-            const countLabel = form.querySelector('.selection-count');
+        document.addEventListener('DOMContentLoaded', function () {
+            // ── Booking Modal Checkbox Logic ──────────────────────────────
+            document.querySelectorAll('.booking-form').forEach(function (form) {
+                const checkboxes = form.querySelectorAll('.schedule-checkbox');
+                const idsInput = form.querySelector('.selected-ids-input');
+                const confirmBtn = form.querySelector('.confirm-book-btn');
+                const countLabel = form.querySelector('.selection-count');
 
-            function updateState() {
-                const checked = Array.from(checkboxes).filter(c => c.checked);
-                idsInput.value = checked.map(c => c.value).join(',');
-                confirmBtn.disabled = checked.length === 0;
-                countLabel.textContent = checked.length + ' session' + (checked.length !== 1 ? 's' : '') + ' selected';
-            }
+                function updateState() {
+                    const checked = Array.from(checkboxes).filter(c => c.checked);
+                    idsInput.value = checked.map(c => c.value).join(',');
+                    confirmBtn.disabled = checked.length === 0;
+                    countLabel.textContent = checked.length + ' session' + (checked.length !== 1 ? 's' : '') + ' selected';
+                }
 
-            checkboxes.forEach(function (cb) {
-                cb.addEventListener('change', function () {
-                    const label = cb.closest('.schedule-slot');
-                    label.style.background  = cb.checked ? '#e8f4ff' : '';
-                    label.style.borderColor = cb.checked ? '#0d6efd' : '';
-                    updateState();
+                checkboxes.forEach(function (cb) {
+                    cb.addEventListener('change', function () {
+                        const label = cb.closest('.schedule-slot');
+                        label.classList.toggle('selected', cb.checked);
+                        updateState();
+                    });
+
+                    cb.closest('.schedule-slot').addEventListener('click', function (e) {
+                        if (e.target !== cb) {
+                            cb.checked = !cb.checked;
+                            cb.dispatchEvent(new Event('change'));
+                        }
+                    });
                 });
 
-                cb.closest('.schedule-slot').addEventListener('click', function (e) {
-                    if (e.target !== cb) {
-                        cb.checked = !cb.checked;
-                        cb.dispatchEvent(new Event('change'));
+                form.addEventListener('submit', function (e) {
+                    const checked = Array.from(checkboxes).filter(c => c.checked);
+                    if (checked.length === 0) { e.preventDefault(); return; }
+                    const noun = checked.length === 1 ? 'session' : 'sessions';
+                    if (!confirm('Book ' + checked.length + ' ' + noun + '? This cannot be undone.')) {
+                        e.preventDefault();
                     }
                 });
             });
 
-            form.addEventListener('submit', function (e) {
-                const checked = Array.from(checkboxes).filter(c => c.checked);
-                if (checked.length === 0) { e.preventDefault(); return; }
-                const noun = checked.length === 1 ? 'session' : 'sessions';
-                if (!confirm('Book ' + checked.length + ' ' + noun + '? This cannot be undone.')) {
-                    e.preventDefault();
+            // ── Star Rating Logic ─────────────────────────────────────────
+            document.querySelectorAll('.star-rating').forEach(function (container) {
+                const trainerId = container.dataset.trainerId;
+                const stars = container.querySelectorAll('.star-btn');
+                const hiddenInput = document.querySelector('.star-value-input-' + trainerId);
+                const label = document.querySelector('.star-label-' + trainerId);
+                const submitBtn = document.querySelector('.submit-rating-btn-' + trainerId);
+                const labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+
+                function paint(upTo) {
+                    stars.forEach(function (s, idx) {
+                        s.className = 'bi ' + (idx < upTo ? 'bi-star-fill' : 'bi-star') + ' star-btn';
+                        s.style.color = idx < upTo ? '#f5a623' : '#ccc';
+                    });
                 }
-            });
-        });
 
-        // ── Star rating logic ────────────────────────────────────────────────
-        document.querySelectorAll('.star-rating').forEach(function (container) {
-            const trainerId  = container.dataset.trainerId;
-            const stars      = container.querySelectorAll('.star-btn');
-            const hiddenInput = document.querySelector('.star-value-input-' + trainerId);
-            const label      = document.querySelector('.star-label-' + trainerId);
-            const submitBtn  = document.querySelector('.submit-rating-btn-' + trainerId);
-            const labels     = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
-
-            function paint(upTo) {
-                stars.forEach(function (s, idx) {
-                    s.className = 'bi ' + (idx < upTo ? 'bi-star-fill' : 'bi-star') + ' star-btn';
-                    s.style.color = idx < upTo ? '#f5a623' : '#ccc';
-                });
-            }
-
-
-            // Hover
-            stars.forEach(function (star) {
-                star.addEventListener('mouseenter', function () {
-                    paint(parseInt(star.dataset.value));
-                    label.textContent = labels[parseInt(star.dataset.value)];
-                });
-                star.addEventListener('mouseleave', function () {
-                    const current = parseInt(hiddenInput.value) || 0;
-                    paint(current);
-                    label.textContent = current > 0 ? 'Your current rating: ' + current + '★' : 'Click a star to rate';
-                });
-                star.addEventListener('click', function () {
-                    const val = parseInt(star.dataset.value);
-                    hiddenInput.value = val;
-                    paint(val);
-                    label.textContent = labels[val] + ' (' + val + '★)';
-                    submitBtn.disabled = false;
-                });
-            });
-
-
-        
-
-        });
-
-        // ── Trainer profile picture zoom ─────────────────────────────────────
-                document.querySelectorAll('.trainer-pic-trigger').forEach(function (img) {
-                    img.addEventListener('click', function () {
-                        document.getElementById('trainerPicModalImg').src = this.dataset.img;
-                        document.getElementById('trainerPicModalImg').alt = this.dataset.name;
-                        document.getElementById('trainerPicModalLabel').textContent = this.dataset.name;
-                        var modal = new bootstrap.Modal(document.getElementById('trainerPicModal'));
-                        modal.show();
+                stars.forEach(function (star) {
+                    star.addEventListener('mouseenter', function () {
+                        const val = parseInt(star.dataset.value);
+                        paint(val);
+                        label.textContent = labels[val];
+                    });
+                    star.addEventListener('mouseleave', function () {
+                        const current = parseInt(hiddenInput.value) || 0;
+                        paint(current);
+                        label.textContent = current > 0 ? 'Your current rating: ' + current + '★' : 'Click a star to rate';
+                    });
+                    star.addEventListener('click', function () {
+                        const val = parseInt(star.dataset.value);
+                        hiddenInput.value = val;
+                        paint(val);
+                        label.textContent = labels[val] + ' (' + val + '★)';
+                        submitBtn.disabled = false;
                     });
                 });
+            });
 
+            // ── Trainer Profile Picture Zoom ──────────────────────────────
+            document.querySelectorAll('.trainer-pic-trigger').forEach(function (img) {
+                img.addEventListener('click', function () {
+                    document.getElementById('trainerPicModalImg').src = this.dataset.img;
+                    document.getElementById('trainerPicModalImg').alt = this.dataset.name;
+                    document.getElementById('trainerPicModalLabel').textContent = this.dataset.name;
+                    var modal = new bootstrap.Modal(document.getElementById('trainerPicModal'));
+                    modal.show();
+                });
+            });
+        });
     </script>
 }

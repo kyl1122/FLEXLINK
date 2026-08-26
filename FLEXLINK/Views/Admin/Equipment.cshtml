@@ -110,78 +110,169 @@
         </div>
     }
 
-    <!-- ── EQUIPMENT MANAGEMENT TABLE ── -->
-    <div class="card dark-table-card shadow-sm mb-4 overflow-hidden">
-        <div class="table-card-topbar">
-            <span class="card-topbar-title"><i class="bi bi-tools me-2"></i>Equipment List</span>
-            <span class="badge-count">@Model.Count()</span>
-        </div>
+   <!-- ── EQUIPMENT MANAGEMENT TABLE ── -->
+<div class="card dark-table-card shadow-sm mb-4 overflow-hidden">
+    <div class="table-card-topbar">
+        <span class="card-topbar-title"><i class="bi bi-tools me-2"></i>Equipment List</span>
+        <span class="badge-count">@Model.Count()</span>
+    </div>
 
-        <div class="card-body p-0">
-            @if (!Model.Any())
-            {
-                <div class="text-center py-5 text-secondary">
-                    <i class="bi bi-inbox me-1"></i> No equipment added yet. Click "Add Equipment" to get started.
-                </div>
-            }
-            else
-            {
-                <div id="noEquipmentResults" class="text-center py-5 text-secondary" style="display:none;">
-                    <i class="bi bi-search me-1"></i> No equipment matches your search.
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-custom table-hover align-middle" id="equipmentTable">
-                        <thead>
-                            <tr>
-                                <th class="ps-4">Equipment Name</th>
-                                <th>Description</th>
-                                <th>Date Added</th>
-                                <th>Status</th>
-                                <th class="text-end pe-4">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var eq in Model)
-                            {
-                                bool needsRepair = eq.RepairNotes.Any();
-                                <tr>
-                                    <td class="ps-4 text-white">
-                                        <i class="bi bi-wrench-adjustable @(needsRepair ? "text-danger" : "text-success") me-2"></i>
-                                        <strong>@eq.Name</strong>
-                                    </td>
-                                    <td class="text-secondary small">@(eq.Description ?? "—")</td>
-                                    <td class="text-white">@eq.CreatedAt.ToString("MMM dd, yyyy")</td>
-                                    <td>
-                                        @if (needsRepair)
-                                        {
-                                            <span class="badge bg-danger">
-                                                <i class="bi bi-exclamation-triangle me-1"></i>@eq.RepairNotes.Count report(s)
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-success">
-                                                <i class="bi bi-check-circle me-1"></i>OK
-                                            </span>
-                                        }
-                                    </td>
-                                    <td class="text-end pe-4">
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-secondary">
+                <i class="bi bi-inbox me-1"></i> No equipment added yet. Click "Add Equipment" to get started.
+            </div>
+        }
+        else
+        {
+            
+                // Group equipment by name, ignoring case and leading/trailing spaces.
+                // Display casing comes from whichever entry was added first.
+                var groupedEquipment = Model
+                    .GroupBy(e => e.Name.Trim().ToLowerInvariant())
+                    .Select(g =>
+                    {
+                        var items = g.OrderBy(e => e.CreatedAt).ToList();
+                        return new
+                        {
+                            DisplayName = items.First().Name,
+                            Items = items
+                        };
+                    })
+                    .OrderBy(g => g.DisplayName, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            
+
+            <div id="noEquipmentResults" class="text-center py-5 text-secondary" style="display:none;">
+                <i class="bi bi-search me-1"></i> No equipment matches your search.
+            </div>
+            <div class="table-responsive">
+                <table class="table table-custom table-hover align-middle" id="equipmentTable">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Equipment Name</th>
+                            <th>Description</th>
+                            <th>Date Added</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < groupedEquipment.Count; i++)
+                        {
+                            var group = groupedEquipment[i];
+                            bool hasMultiple = group.Items.Count > 1;
+                            int totalReports = group.Items.Sum(x => x.RepairNotes.Count);
+
+                            <tr class="equipment-group-row @(hasMultiple ? "clickable-group" : "")"
+                                data-group-id="@i"
+                                onclick="toggleGroup(@i)">
+                                <td class="ps-4 text-white">
+                                    @if (hasMultiple)
+                                    {
+                                        <i class="bi bi-caret-right-fill me-2 group-caret" id="caret-@i"></i>
+                                    }
+                                    <i class="bi bi-wrench-adjustable @(totalReports > 0 ? "text-danger" : "text-success") me-2"></i>
+                                    <strong>@group.DisplayName</strong>
+                                    @if (hasMultiple)
+                                    {
+                                        <span class="badge bg-success ms-2">x@(group.Items.Count)</span>
+                                    }
+                                </td>
+                                <td class="text-secondary small">
+                                    @if (hasMultiple)
+                                    {
+                                        <span class="fst-italic">@group.Items.Count items — click to view</span>
+                                    }
+                                    else
+                                    {
+                                        @(group.Items[0].Description ?? "—")
+                                    }
+                                </td>
+                                <td class="text-white">
+                                    @(hasMultiple ? "—" : group.Items[0].CreatedAt.ToString("MMM dd, yyyy"))
+                                </td>
+                                <td>
+                                    @if (totalReports > 0)
+                                    {
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>@totalReports report(s)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>OK
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    @if (!hasMultiple)
+                                    {
+                                        var eq = group.Items[0];
                                         <form asp-controller="Admin" asp-action="DeleteEquipment" method="post" class="d-inline"
-                                              onsubmit="return confirm('Delete equipment \'@eq.Name\'? All its repair notes will also be removed.');">
+                                              onsubmit="return confirm('Delete equipment \'@eq.Name\'? All its repair notes will also be removed.');"
+                                              onclick="event.stopPropagation();">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="equipmentId" value="@eq.Id" />
                                             <button type="submit" class="btn btn-action-delete">
                                                 <i class="bi bi-trash-fill me-1"></i> Delete
                                             </button>
                                         </form>
-                                    </td>
-                                </tr>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-secondary small">Click row to expand</span>
+                                    }
+                                </td>
+                            </tr>
+
+                            @if (hasMultiple)
+                            {
+                                foreach (var eq in group.Items)
+                                {
+                                    bool needsRepair = eq.RepairNotes.Any();
+                                    <tr class="equipment-child-row" data-parent-group="@i" style="display:none; background-color:#1a1a1a;">
+                                        <td class="ps-5 text-white">
+                                            <i class="bi bi-arrow-return-right text-secondary me-2"></i>
+                                            @eq.Name
+                                        </td>
+                                        <td class="text-secondary small">@(eq.Description ?? "—")</td>
+                                        <td class="text-white">@eq.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                            @if (needsRepair)
+                                            {
+                                                <span class="badge bg-danger">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>@eq.RepairNotes.Count report(s)
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle me-1"></i>OK
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <form asp-controller="Admin" asp-action="DeleteEquipment" method="post" class="d-inline"
+                                                  onsubmit="return confirm('Delete equipment \'@eq.Name\'? All its repair notes will also be removed.');"
+                                                  onclick="event.stopPropagation();">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="equipmentId" value="@eq.Id" />
+                                                <button type="submit" class="btn btn-action-delete">
+                                                    <i class="bi bi-trash-fill me-1"></i> Delete
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
                             }
-                        </tbody>
-                    </table>
-                </div>
-            }
-        </div>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
     </div>
 </div>
 
@@ -221,20 +312,55 @@
 </div>
 
 @section Scripts {
-    <script>
-        function filterEquipment() {
-            const query = document.getElementById('equipmentSearchInput').value.toLowerCase();
-            const rows = document.querySelectorAll('#equipmentTable tbody tr');
-            let visibleCount = 0;
+        <style>
+            .clickable-group {
+                cursor: pointer;
+            }
 
-            rows.forEach(function (row) {
-                const text = row.innerText.toLowerCase();
-                const match = text.includes(query);
-                row.style.display = match ? '' : 'none';
-                if (match) visibleCount++;
-            });
+                .clickable-group:hover {
+                    background-color: #222;
+                }
+        </style>
+        <script>
+            function toggleGroup(id) {
+                const rows = document.querySelectorAll('tr[data-parent-group="' + id + '"]');
+                if (!rows.length) return; // single-item row, nothing to expand
 
-            document.getElementById('noEquipmentResults').style.display = visibleCount === 0 ? '' : 'none';
-        }
-    </script>
+                const caret = document.getElementById('caret-' + id);
+                const isHidden = rows[0].style.display === 'none';
+
+                rows.forEach(r => r.style.display = isHidden ? '' : 'none');
+
+                if (caret) {
+                    caret.classList.toggle('bi-caret-right-fill', !isHidden);
+                    caret.classList.toggle('bi-caret-down-fill', isHidden);
+                }
+            }
+
+            function filterEquipment() {
+                const query = document.getElementById('equipmentSearchInput').value.toLowerCase();
+                const groupRows = document.querySelectorAll('#equipmentTable tbody tr.equipment-group-row');
+                const childRows = document.querySelectorAll('#equipmentTable tbody tr.equipment-child-row');
+                let visibleCount = 0;
+
+                // Collapse everything first so search starts from a clean state
+                childRows.forEach(r => r.style.display = 'none');
+                document.querySelectorAll('.group-caret').forEach(c => {
+                    c.classList.remove('bi-caret-down-fill');
+                    c.classList.add('bi-caret-right-fill');
+                });
+
+                groupRows.forEach(function (row) {
+                    const groupId = row.getAttribute('data-group-id');
+                    const childText = Array.from(document.querySelectorAll('tr[data-parent-group="' + groupId + '"]'))
+                        .map(r => r.innerText.toLowerCase()).join(' ');
+                    const text = (row.innerText + ' ' + childText).toLowerCase();
+                    const match = text.includes(query);
+                    row.style.display = match ? '' : 'none';
+                    if (match) visibleCount++;
+                });
+
+                document.getElementById('noEquipmentResults').style.display = visibleCount === 0 ? '' : 'none';
+            }
+        </script>
 }

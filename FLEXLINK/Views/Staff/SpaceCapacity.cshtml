@@ -1,147 +1,129 @@
 ﻿@{
-    ViewData["Title"] = "Space Capacity & Requests";
+    ViewData["Title"] = "Approvals";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    int currentCount = ViewBag.CurrentCount ?? 0;
-    int maxCapacity = ViewBag.MaxCapacity ?? 50;
-    bool isFull = ViewBag.IsFull ?? false;
-    double percent = maxCapacity > 0 ? Math.Round((double)currentCount / maxCapacity * 100, 0) : 0;
-
     var pendingRequests = ViewBag.PendingRequests as List<FLEXLINK.Models.RegistrationRequest> ?? new();
-    int pendingCount = ViewBag.PendingCount ?? 0;
     var paymentUsers = ViewBag.PaymentUsers as Dictionary<string, FLEXLINK.Models.Users> ?? new();
     var pendingPayments = ViewBag.PendingPayments as List<FLEXLINK.Models.UserMembership> ?? new();
-
 }
+<link rel="stylesheet" href="~/css/Staff_Cap.css"/>
 
-<div class="container mt-4" style="max-width: 700px;">
-
-    <div class="mb-4 text-center">
-        <h2 class="fw-bold mb-0">Approvals</h2>
-        <p class="text-muted">review member registration requests.</p>
+<div class="approvals-container">
+    <div>
+        <h1 class="header-title">Approvals</h1>
+        <p class="header-subtitle">Review member registration request</p>
     </div>
 
-    @* ── Registration Requests Management ── *@
-    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px; border-left: 4px solid #f5a623 !important;">
-        <div class="card-body">
-            <div class="d-flex align-items-center mb-3">
-                <span class="badge bg-warning text-dark me-2" style="font-size:0.85rem;">
-                    <i class="bi bi-bell-fill me-1"></i> @pendingCount Pending
-                </span>
-                <h6 class="fw-bold mb-0">Pending Registration Requests</h6>
-            </div>
+    <div class="row g-4">
+        @* ── Registration Requests Column ── *@
+        <div class="col-12 col-lg-6">
+            <div class="approval-card">
+                <div class="card-title-custom">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Registration Requests</span>
+                </div>
 
-            @if (pendingRequests.Any())
-            {
-                <div class="d-flex flex-column gap-2">
-                    @foreach (var req in pendingRequests)
-                    {
-                        <div class="d-flex align-items-center justify-content-between border rounded px-3 py-2 bg-light">
-                            <div class="d-flex align-items-center gap-3">
-                                <img src="@(string.IsNullOrEmpty(req.ProfilePicture) ? "/uploads/DefaultProfile.png" : req.ProfilePicture)"
-                                     style="width:48px; height:48px; border-radius:50%; object-fit:cover; cursor:pointer;"
-                                     onclick="showProfilePreview('@(string.IsNullOrEmpty(req.ProfilePicture) ? "/uploads/DefaultProfile.png" : req.ProfilePicture)', '@req.FullName')" />
-                                <div>
-                                    <p class="fw-semibold mb-0 small">@req.FullName</p>
-                                    <p class="text-muted mb-0" style="font-size:0.75rem;">
-                                        @req.Email &nbsp;·&nbsp; Requested @req.RequestedAt.ToString("MMM dd, hh:mm tt")
-                                    </p>
+                @if (pendingRequests.Any())
+                {
+                    <div class="d-flex flex-column">
+                        @foreach (var req in pendingRequests)
+                        {
+                            <div class="request-item">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="@(string.IsNullOrEmpty(req.ProfilePicture) ? "/uploads/DefaultProfile.png" : req.ProfilePicture)"
+                                         class="user-avatar"
+                                         onclick="showProfilePreview('@(string.IsNullOrEmpty(req.ProfilePicture) ? "/uploads/DefaultProfile.png" : req.ProfilePicture)', '@req.FullName')" />
+                                    <div>
+                                        <p class="user-name">@req.FullName</p>
+                                        <p class="user-meta">
+                                            @req.Email &nbsp; Requested @req.RequestedAt.ToString("MMM dd, hh:mmtt")
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="action-group">
+                                    <form asp-controller="Staff" asp-action="ApproveUser" method="post" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="requestId" value="@req.Id" />
+                                        <button type="submit" class="btn btn-approve w-100">Approve</button>
+                                    </form>
+                                    <form asp-controller="Staff" asp-action="RejectUser" method="post" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="requestId" value="@req.Id" />
+                                        <button type="submit" class="btn btn-reject w-100">Reject</button>
+                                    </form>
                                 </div>
                             </div>
-                            <div class="d-flex gap-2 ms-3">
-                                <form asp-controller="Staff" asp-action="ApproveUser" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="requestId" value="@req.Id" />
-                                    <button type="submit" class="btn btn-success btn-sm">
-                                        <i class="bi bi-check-lg me-1"></i> Approve
-                                    </button>
-                                </form>
-                                <form asp-controller="Staff" asp-action="RejectUser" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="requestId" value="@req.Id" />
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="bi bi-x-lg me-1"></i> Reject
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <p class="text-muted text-center my-3 small">No pending registration requests at this time.</p>
-            }
-        </div>
-    </div>
-
-    @* ── Membership Payment Approvals ── *@
-    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px; border-left: 4px solid #3b82f6 !important;">
-        <div class="card-body">
-            <div class="d-flex align-items-center mb-3">
-                <span class="badge bg-primary text-white me-2" style="font-size:0.85rem;">
-                    <i class="bi bi-credit-card-fill me-1"></i> @pendingPayments.Count Pending
-                </span>
-                <h6 class="fw-bold mb-0">Pending Membership Payments</h6>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center my-4 small">No pending registration requests.</p>
+                }
             </div>
-            @if (pendingPayments.Any())
-            {
-                <div class="d-flex flex-column gap-2">
-                    @foreach (var pay in pendingPayments)
-                    {
-                        <div class="d-flex align-items-center justify-content-between border rounded px-3 py-2 bg-light">
-                            @{
-                                var hasUser = paymentUsers.TryGetValue(pay.UserId, out var payUser);
-                                var payPic = (hasUser && !string.IsNullOrEmpty(payUser!.ProfilePicture)) ? payUser.ProfilePicture : "/uploads/DefaultProfile.png";
-                                var payName = hasUser ? (payUser!.FullName ?? payUser.Email) : "Unknown user";
-                            }
-                            <div class="d-flex align-items-center gap-3">
-                                <img src="@payPic"
-                                     style="width:48px; height:48px; border-radius:50%; object-fit:cover; cursor:pointer;"
-                                     onclick="showProfilePreview('@payPic', '@payName')" />
-                                <div>
-                                    <p class="fw-semibold mb-0 small">@payName</p>
-                                    <p class="text-muted mb-0" style="font-size:0.75rem;">
-                                        @pay.Months-month plan &nbsp;·&nbsp; @pay.StartDate.ToString("MMM dd") – @pay.ExpiryDate.ToString("MMM dd, yyyy")
-                                    </p>
+        </div>
+
+        @* ── Membership Payment Column ── *@
+        <div class="col-12 col-lg-6">
+            <div class="approval-card">
+                <div class="card-title-custom">
+                    <i class="bi bi-credit-card"></i>
+                    <span>Membership Payment Request</span>
+                </div>
+
+                @if (pendingPayments.Any())
+                {
+                    <div class="d-flex flex-column">
+                        @foreach (var pay in pendingPayments)
+                        {
+                            var hasUser = paymentUsers.TryGetValue(pay.UserId, out var payUser);
+                            var payPic = (hasUser && !string.IsNullOrEmpty(payUser!.ProfilePicture)) ? payUser.ProfilePicture : "/uploads/DefaultProfile.png";
+                            var payName = hasUser ? (payUser!.FullName ?? payUser.Email) : "Unknown user";
+
+                            <div class="request-item">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="@payPic"
+                                         class="user-avatar"
+                                         onclick="showProfilePreview('@payPic', '@payName')" />
+                                    <div>
+                                        <p class="user-name">@payName</p>
+                                        <p class="user-meta">
+                                            @(hasUser? payUser!.Email : "") Requested @pay.StartDate.ToString("MMM dd, hh:mmtt")
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="action-group">
+                                    <form asp-controller="Staff" asp-action="ApprovePayment" method="post" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="paymentId" value="@pay.Id" />
+                                        <button type="submit" class="btn btn-approve w-100">Approve</button>
+                                    </form>
+                                    <form asp-controller="Staff" asp-action="RejectPayment" method="post" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="paymentId" value="@pay.Id" />
+                                        <button type="submit" class="btn btn-reject w-100">Reject</button>
+                                    </form>
                                 </div>
                             </div>
-                            <div class="d-flex gap-2 ms-3">
-                                <form asp-controller="Staff" asp-action="ApprovePayment" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="paymentId" value="@pay.Id" />
-                                    <button type="submit" class="btn btn-success btn-sm">
-                                        <i class="bi bi-check-lg me-1"></i> Approve
-                                    </button>
-                                </form>
-                                <form asp-controller="Staff" asp-action="RejectPayment" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="paymentId" value="@pay.Id" />
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="bi bi-x-lg me-1"></i> Reject
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <p class="text-muted text-center my-3 small">No pending membership payments at this time.</p>
-            }
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center my-4 small">No pending payment requests.</p>
+                }
+            </div>
         </div>
     </div>
-
 </div>
 
 @* ── Profile Picture Preview Modal ── *@
 <div class="modal fade" id="profilePreviewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:16px; overflow:hidden;">
+        <div class="modal-content bg-dark text-white" style="border-radius:16px;">
             <div class="modal-header border-0 pb-0">
                 <h6 class="modal-title fw-bold" id="profilePreviewName"></h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center pt-2 pb-4">
                 <img id="profilePreviewImage" src="" alt="Profile Picture"
