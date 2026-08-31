@@ -1,217 +1,234 @@
-﻿/* Universal Font Enforcement */
-* {
+﻿* {
     font-family: 'Outfit', sans-serif !important;
+    box-sizing: border-box;
 }
 
-/* Full screen split layout setup */
+/* Force Reset Layout Body Margins and Constraints */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow-x: hidden !important;
+    background-color: #ff1a1a !important;
+}
+
+/* Page Outer Wrapper Override */
+.pending-page-wrapper {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 999 !important;
+    background-color: #ff1a1a !important;
+    overflow: hidden !important;
+}
+
+/* Main Split Container */
 .split-layout-container {
-    display: flex;
-    min-height: 100vh;
-    width: 100%;
-    background-color: #ff2a2a;
-    font-family: 'Outfit', sans-serif !important;
-    overflow-x: hidden;
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: #ff1a1a !important;
+    position: relative !important;
 }
 
-/* Left Side Branding Area */
-.left-brand-panel {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    background-color: #ff2a2a;
+/* Left Black Panel */
+.left-form-panel {
+    width: 48% !important;
+    height: 100% !important;
+    background-color: #000000 !important;
+    border-top-right-radius: 80px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 40px 50px !important;
+    z-index: 10 !important;
+    position: relative !important;
 }
 
-.brand-logo-container {
-    width: 420px;
-    height: 420px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
+/* Top Back Navigation */
+.top-nav-area {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
 }
 
-.brand-logo-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+.top-goback-link {
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-size: 15px !important;
+    font-weight: 300 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    opacity: 0.9 !important;
 }
 
-.white-f-svg {
-    width: 100%;
-    height: 100%;
+    .top-goback-link:hover {
+        opacity: 1 !important;
+    }
+
+/* Center Content Section */
+.form-content-wrapper {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
 }
 
-/* Right Side Panel */
-.right-form-panel {
-    flex: 1.3;
-    background-color: #1e2228;
-    border-top-left-radius: 40px;
-    border-bottom-left-radius: 40px;
-    padding: 40px 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: -15px 0 35px rgba(0, 0, 0, 0.35);
-    position: relative;
-}
-
-/* Inner Card Structure */
 .pending-card {
-    max-width: 440px;
-    width: 100%;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    max-width: 380px !important;
+    width: 100% !important;
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
 }
 
 .hourglass-icon-wrapper {
-    margin-bottom: 20px;
+    margin-bottom: 20px !important;
 }
 
 .hourglass-icon {
-    font-size: 3.5rem;
-    color: #f59e0b; /* Amber/Warning Accent */
+    font-size: 3.5rem !important;
+    color: #f59e0b !important;
 }
 
 .form-heading {
-    color: #ffffff;
-    font-size: 1.8rem;
-    font-weight: 600;
-    margin-bottom: 15px;
-    letter-spacing: 0.5px;
+    font-size: 32px !important;
+    font-weight: 400 !important;
+    color: #ffffff !important;
+    margin: 0 0 16px 0 !important;
 }
 
 .pending-description {
-    color: #a0a6b1;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    margin-bottom: 30px;
-    font-weight: 300;
+    color: #a0a6b1 !important;
+    font-size: 13.5px !important;
+    line-height: 1.6 !important;
+    margin: 0 0 28px 0 !important;
+    font-weight: 300 !important;
 }
 
+/* Pill Navigation Button */
 .btn-continue {
-    background-color: #111317;
-    color: #ffffff;
-    border: 1px solid #2b3038;
-    border-radius: 30px;
-    padding: 12px 36px;
-    font-size: 0.88rem;
-    font-weight: 500;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    width: 100%;
-    max-width: 260px;
+    background-color: #1a1e24 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 30px !important;
+    padding: 12px 32px !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
 }
 
     .btn-continue:hover {
-        background-color: #000000;
-        border-color: #4a515d;
-        color: #ffffff;
+        background-color: #272d36 !important;
     }
 
-/* Formal Top-Center Toast Notification Styling */
+/* Right Red Brand Area */
+.right-brand-panel {
+    width: 52% !important;
+    height: 100% !important;
+    background-color: #ff1a1a !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.brand-logo-container {
+    width: 380px !important;
+    height: 380px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.brand-logo-image,
+.white-f-svg {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+}
+
+/* Toast Notification styling */
 .toast-notification {
-    position: fixed;
+    position: fixed !important;
     top: -120px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    min-width: 340px;
-    max-width: 540px;
-    padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-    font-family: 'Outfit', sans-serif !important;
-    color: #ffffff;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 9999 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    min-width: 340px !important;
+    max-width: 520px !important;
+    padding: 16px 20px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35) !important;
+    color: #ffffff !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
     opacity: 0;
     pointer-events: none;
-    backdrop-filter: blur(8px);
 }
 
     .toast-notification.show {
-        top: 25px;
-        opacity: 1;
-        pointer-events: auto;
+        top: 25px !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
 
 .toast-content-wrapper {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    flex-grow: 1;
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    flex-grow: 1 !important;
 }
 
 .toast-warning {
-    background-color: rgba(217, 119, 6, 0.95);
-    border: 1px solid #f59e0b;
+    background-color: rgba(217, 119, 6, 0.95) !important;
+    border: 1px solid #f59e0b !important;
 }
 
 .toast-icon {
-    font-size: 1.25rem;
-    line-height: 1;
-    margin-top: 2px;
+    font-size: 1.25rem !important;
+    line-height: 1 !important;
+    margin-top: 2px !important;
 }
 
 .toast-message-body {
-    font-size: 0.85rem;
-    line-height: 1.45;
-    font-weight: 400;
+    font-size: 0.85rem !important;
+    line-height: 1.45 !important;
+    font-weight: 400 !important;
 }
 
 .toast-list-title {
-    font-weight: 600;
-    margin-bottom: 4px;
-    font-size: 0.88rem;
+    font-weight: 600 !important;
+    margin-bottom: 4px !important;
+    font-size: 0.88rem !important;
 }
 
 .toast-close {
-    background: transparent;
-    border: none;
-    color: #ffffff;
-    font-size: 1.25rem;
-    cursor: pointer;
-    line-height: 1;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-    padding: 0;
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 1.25rem !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+    opacity: 0.7 !important;
+    padding: 0 !important;
 }
 
     .toast-close:hover {
-        opacity: 1;
+        opacity: 1 !important;
     }
-
-@media (max-width: 992px) {
-    .split-layout-container {
-        flex-direction: column;
-    }
-
-    .brand-logo-container {
-        width: 260px;
-        height: 260px;
-    }
-
-    .right-form-panel {
-        border-top-left-radius: 30px;
-        border-bottom-left-radius: 0;
-        border-top-right-radius: 30px;
-        padding: 40px 20px;
-    }
-
-    .toast-notification {
-        width: 90%;
-        max-width: 90%;
-    }
-}

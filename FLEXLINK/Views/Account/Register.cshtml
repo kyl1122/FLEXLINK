@@ -5,14 +5,12 @@
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
 
-<!-- IF NAAY ERRORS DILI MO BALIK SA PAGE 1 -->
 @{
     bool step1HasErrors = new[] { "Name", "Email", "Age", "PhoneNumber", "Address" }
         .Any(k => ViewData.ModelState.ContainsKey(k) && ViewData.ModelState[k].Errors.Count > 0);
     bool startOnStep2 = !ViewData.ModelState.IsValid && !step1HasErrors;
 }
 
-<!-- Top Center Formal Toast Notification Container -->
 <div id="toastNotification" class="toast-notification" style="display: none;">
     <div class="toast-content-wrapper">
         <span class="toast-icon" id="toastIcon"></span>
@@ -21,7 +19,6 @@
     <button type="button" class="toast-close" onclick="hideToast()">&times;</button>
 </div>
 
-<!-- Google Font import for Outfit -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -29,8 +26,153 @@
 
 <div class="split-layout-container">
 
-    <!-- Left Side: Center-Aligned White Logo -->
-    <div class="left-brand-panel">
+    <div class="left-form-panel">
+        <a asp-controller="Home" asp-action="Index" class="top-goback-link">
+            &larr; Go back
+        </a>
+
+        <div class="step-indicator" id="stepIndicator">
+            <div class="indicator-step @(startOnStep2 ? "" : "active")"></div>
+            <div class="indicator-step @(startOnStep2 ? "active" : "")"></div>
+            <div class="indicator-step"></div>
+        </div>
+
+        <div class="form-content-wrapper">
+            <h2 class="form-heading">Registration</h2>
+
+            <form asp-action="Register" method="post" enctype="multipart/form-data" class="register-form" id="registerForm">
+                @Html.AntiForgeryToken()
+
+                <div class="step-fields-container">
+                    <div class="form-grid-step1" id="step1Fields" style="display:@(startOnStep2 ? "none" : "grid");">
+                        <!-- Left 3/5 wide column -->
+                        <div class="col-left">
+                            <div class="field-group">
+                                <input asp-for="Name" class="form-control custom-input" placeholder="Full Name" required />
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+                            <div class="field-group">
+                                <input asp-for="Email" class="form-control custom-input" placeholder="Email" required />
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+                            <div class="field-group">
+                                <input asp-for="Address" class="form-control custom-input" placeholder="Address" required />
+                                <span asp-validation-for="Address" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Right 2/5 narrower column -->
+                        <div class="col-right">
+                            <div class="field-group">
+                                <input asp-for="Age" class="form-control custom-input" placeholder="Age" required />
+                                <span asp-validation-for="Age" class="text-danger small"></span>
+                            </div>
+                            <div class="field-group">
+                                <input asp-for="PhoneNumber" class="form-control custom-input" required
+                                       type="text"
+                                       inputmode="numeric"
+                                       maxlength="11"
+                                       pattern="\d{11}"
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)"
+                                       placeholder="Phone Num" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-step2" id="step2Fields" style="display:@(startOnStep2 ? "grid" : "none");">
+                        <div class="col-left">
+                            <div class="field-group">
+                                <input asp-for="Password" id="Password" type="password" class="form-control custom-input" placeholder="Password" />
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="col-right">
+                            <div class="field-group">
+                                <input asp-for="ConfirmPassword" id="ConfirmPassword" type="password" class="form-control custom-input" placeholder="Confirm Password" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="full-width">
+                            <label class="form-label small text-light mb-1">Profile Picture <span class="text-danger">*</span></label>
+                            <input type="file" id="profileImageInput" name="ProfileImage" class="form-control custom-input" accept=".jpg,.jpeg,.png" />
+                            <div class="form-text-muted mt-1">Required. Max 2MB. JPG, JPEG, or PNG.</div>
+                        </div>
+                    </div>
+
+                    <div id="step3Fields" style="display:none;">
+                        <label class="form-label small text-light mb-2 fw-bold">Membership Waiver <span class="text-danger">*</span></label>
+                        <div class="waiver-box">
+                            <p><strong>MEMBERSHIP WAIVER AND RELEASE OF LIABILITY</strong></p>
+                            <p>
+                                I hereby declare that all information provided during registration is true and correct.
+                                By creating this account, I acknowledge and AGREE to ABIDE by the RULES & REGULATIONS
+                                set by FLEXLINK.
+                            </p>
+                            <p>
+                                I understand that participation in gym activities, use of equipment, and enrollment in
+                                training sessions carry inherent risks of physical injury. I voluntarily assume all such
+                                risks and hereby RELEASE and forever DISCHARGE FLEXLINK, its owners, agents, trainers,
+                                staff, and employees from any and all claims, demands, or liability for injury, loss, or
+                                damage arising from my use of the facility, equipment, or participation in any program,
+                                whether occurring from any cause, acting officially or otherwise.
+                            </p>
+                            <p>I understand that:</p>
+                            <ul>
+                                <li>Membership fees are non-refundable once approved and activated.</li>
+                                <li>I am responsible for disclosing any pre-existing medical conditions that may affect my ability to safely participate in physical activity.</li>
+                                <li>FLEXLINK reserves the right to suspend or terminate my membership for violation of gym rules and regulations, without refund.</li>
+                                <li>This waiver remains valid for the entire duration of my active membership and any renewals thereof.</li>
+                            </ul>
+                            <p>By checking the box below, I confirm that I have read, understood, and voluntarily accept the terms of this waiver.</p>
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input type="checkbox" class="form-check-input" id="waiverAgreeCheckbox" onchange="toggleSubmitButton()" />
+                            <label class="form-check-label small text-light" for="waiverAgreeCheckbox">
+                                I have read and agree to the Membership Waiver and Release of Liability.
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bottom-action-row">
+                    <div id="step1Actions" class="step-actions-wrapper" style="display:@(startOnStep2 ? "none" : "flex");">
+                        <p class="login-inline-text">
+                            Already have an account? <a asp-controller="Account" asp-action="Login">Login</a>
+                        </p>
+                        <button type="button" class="btn-continue" onclick="goToStep2()">
+                            Continue &rarr;
+                        </button>
+                    </div>
+
+                    <div id="step2Actions" class="step-actions-wrapper" style="display:@(startOnStep2 ? "flex" : "none");">
+                        <button type="button" class="btn-continue btn-back" onclick="goToStep1()">
+                            &larr; Back
+                        </button>
+                        <button type="button" class="btn-continue" onclick="goToStep3()">
+                            Continue &rarr;
+                        </button>
+                    </div>
+
+                    <div id="step3Actions" class="step-actions-wrapper" style="display:none;">
+                        <button type="button" class="btn-continue btn-back" onclick="goToStep2From3()">
+                            &larr; Back
+                        </button>
+                        <button type="submit" class="btn-continue" id="finalSubmitBtn" disabled style="opacity:0.5; cursor:not-allowed;">
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="right-brand-panel">
+        <img src="@Url.Content("~/images/Shadow.png")"
+             alt="Background Shadow"
+             class="brand-panel-shadow" />
+
         <div class="brand-logo-container">
             <img src="@Url.Content("~/images/logo_f.png")"
                  alt="Brand Logo"
@@ -49,153 +191,6 @@
                 </g>
             </svg>
         </div>
-    </div>
-
-    <!-- Right Side: Side Fill-Up Form Section -->
-    <div class="right-form-panel">
-        <!-- Top Right Navigation Link -->
-        <a asp-controller="Home" asp-action="Index" class="top-goback-link">
-            &larr; Go back
-        </a>
-
-        <!-- Dynamic Indicator Bar (Expands Active Step into Capsule) -->
-        <div class="step-indicator" id="stepIndicator">
-            <div class="indicator-step @(startOnStep2 ? "" : "active")"></div>
-            <div class="indicator-step @(startOnStep2 ? "active" : "")"></div>
-            <div class="indicator-step"></div>
-        </div>
-
-        <h2 class="form-heading">Registration</h2>
-
-        <form asp-action="Register" method="post" enctype="multipart/form-data" class="register-form" id="registerForm">
-            @Html.AntiForgeryToken()
-
-            <div class="form-grid" id="step1Fields" style="display:@(startOnStep2 ? "none" : "grid");">
-                <!-- Row 1: Name, Email, Age -->
-                <div>
-                    <input asp-for="Name" class="form-control custom-input" placeholder="Name" required />
-                    <span asp-validation-for="Name" class="text-danger small"></span>
-                </div>
-
-                <div>
-                    <input asp-for="Email" class="form-control custom-input" placeholder="Email" required />
-                    <span asp-validation-for="Email" class="text-danger small"></span>
-                </div>
-
-                <div>
-                    <input asp-for="Age" class="form-control custom-input" placeholder="Age" required />
-                    <span asp-validation-for="Age" class="text-danger small"></span>
-                </div>
-
-                <!-- Phone Number -->
-                <div>
-                    <input asp-for="PhoneNumber" class="form-control custom-input" required
-                           type="text"
-                           inputmode="numeric"
-                           maxlength="11"
-                           pattern="\d{11}"
-                           oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)"
-                           placeholder="09XXXXXXXXX" />
-                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
-                </div>
-
-                <!-- Address -->
-                <div class="full-width">
-                    <input asp-for="Address" class="form-control custom-input" placeholder="Address" required />
-                    <span asp-validation-for="Address" class="text-danger small"></span>
-                </div>
-            </div>
-
-            <div class="form-grid" id="step2Fields" style="display:@(startOnStep2 ? "grid" : "none");">
-                <!-- Password -->
-                <div>
-                    <input asp-for="Password" id="Password" class="form-control custom-input" placeholder="Password" />
-                    <span asp-validation-for="Password" class="text-danger small"></span>
-                </div>
-
-                <!-- Confirm Password -->
-                <div>
-                    <input asp-for="ConfirmPassword" id="ConfirmPassword" class="form-control custom-input" placeholder="Confirm Password" />
-                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
-                </div>
-
-                <!-- Full Width: Profile Image -->
-                <div class="full-width">
-                    <label class="form-label small text-light mb-1">Profile Picture <span class="text-danger">*</span></label>
-                    <input type="file" id="profileImageInput" name="ProfileImage" class="form-control custom-input" accept=".jpg,.jpeg,.png" />
-                    <div class="form-text-muted mt-1">Required. Max 2MB. JPG, JPEG, or PNG.</div>
-                </div>
-            </div>
-
-            <div id="step3Fields" style="display:none;">
-                <label class="form-label small text-light mb-2 fw-bold">Membership Waiver <span class="text-danger">*</span></label>
-                <div style="max-height: 260px; overflow-y: auto; background-color: rgba(255,255,255,0.05); border: 1px solid #4a515d; border-radius: 8px; padding: 16px; font-size: 0.82rem; color: #d0d3d8; line-height: 1.6; font-family: 'Outfit', sans-serif;">
-                    <p><strong>MEMBERSHIP WAIVER AND RELEASE OF LIABILITY</strong></p>
-                    <p>
-                        I hereby declare that all information provided during registration is true and correct.
-                        By creating this account, I acknowledge and AGREE to ABIDE by the RULES & REGULATIONS
-                        set by FLEXLINK.
-                    </p>
-                    <p>
-                        I understand that participation in gym activities, use of equipment, and enrollment in
-                        training sessions carry inherent risks of physical injury. I voluntarily assume all such
-                        risks and hereby RELEASE and forever DISCHARGE FLEXLINK, its owners, agents, trainers,
-                        staff, and employees from any and all claims, demands, or liability for injury, loss, or
-                        damage arising from my use of the facility, equipment, or participation in any program,
-                        whether occurring from any cause, acting officially or otherwise.
-                    </p>
-                    <p>I understand that:</p>
-                    <ul>
-                        <li>Membership fees are non-refundable once approved and activated.</li>
-                        <li>I am responsible for disclosing any pre-existing medical conditions that may affect my ability to safely participate in physical activity.</li>
-                        <li>FLEXLINK reserves the right to suspend or terminate my membership for violation of gym rules and regulations, without refund.</li>
-                        <li>This waiver remains valid for the entire duration of my active membership and any renewals thereof.</li>
-                    </ul>
-                    <p>By checking the box below, I confirm that I have read, understood, and voluntarily accept the terms of this waiver.</p>
-                </div>
-
-                <div class="form-check mt-3">
-                    <input type="checkbox" class="form-check-input" id="waiverAgreeCheckbox" onchange="toggleSubmitButton()" />
-                    <label class="form-check-label small text-light" for="waiverAgreeCheckbox">
-                        I have read and agree to the Membership Waiver and Release of Liability.
-                    </label>
-                </div>
-            </div>
-
-            <!-- BUTTONS -->
-            <div class="bottom-action-row">
-                <!-- Step 1 buttons -->
-                <div id="step1Actions" style="display:@(startOnStep2 ? "none" : "flex"); align-items:center; gap:1.5rem;">
-                    <button type="button" class="btn-continue" onclick="goToStep2()">
-                        Continue &rarr;
-                    </button>
-                    <p class="login-inline-text">
-                        Already have an account? <a asp-controller="Account" asp-action="Login">Login</a>
-                    </p>
-                </div>
-
-                <!-- Step 2 buttons -->
-                <div id="step2Actions" style="display:@(startOnStep2 ? "flex" : "none"); align-items:center; gap:1.5rem;">
-                    <button type="button" class="btn-continue" style="background-color:transparent;" onclick="goToStep1()">
-                        &larr; Back
-                    </button>
-                    <button type="button" class="btn-continue" onclick="goToStep3()">
-                        Continue &rarr;
-                    </button>
-                </div>
-
-                <!-- Step 3 buttons -->
-                <div id="step3Actions" style="display:none; align-items:center; gap:1.5rem;">
-                    <button type="button" class="btn-continue" style="background-color:transparent;" onclick="goToStep2From3()">
-                        &larr; Back
-                    </button>
-                    <button type="submit" class="btn-continue" id="finalSubmitBtn" disabled style="opacity:0.5; cursor:not-allowed;">
-                        Submit
-                    </button>
-                </div>
-
-            </div>
-        </form>
     </div>
 </div>
 
@@ -220,7 +215,6 @@
             const toastIcon = document.getElementById('toastIcon');
 
             clearTimeout(toastTimeout);
-
             toast.classList.remove('toast-restriction', 'toast-success', 'show');
 
             if (type === 'success') {
@@ -243,28 +237,20 @@
             }
 
             toast.style.display = 'flex';
-
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 10);
+            setTimeout(() => { toast.classList.add('show'); }, 10);
 
             const displayTime = Array.isArray(content) && content.length > 1 ? 6000 : 4000;
-            toastTimeout = setTimeout(() => {
-                hideToast();
-            }, displayTime);
+            toastTimeout = setTimeout(() => { hideToast(); }, displayTime);
         }
 
         function hideToast() {
             const toast = document.getElementById('toastNotification');
             toast.classList.remove('show');
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 300);
+            setTimeout(() => { toast.style.display = 'none'; }, 300);
         }
 
         function goToStep2() {
             const form = document.getElementById('registerForm');
-
             setStep2Required(false);
 
             if (!form.reportValidity()) {
@@ -279,7 +265,6 @@
             document.getElementById('step2Actions').style.display = 'flex';
 
             setStep2Required(true);
-
             updateStepIndicators(2);
             showNotification("Step 1 completed successfully!", "success");
         }
@@ -361,10 +346,10 @@
 
             @{
                     var allErrors = ViewData.ModelState.Values
-                            .SelectMany(v => v.Errors)
-                            .Select(e => e.ErrorMessage)
-                            .Where(e => !string.IsNullOrEmpty(e))
-                            .ToList();
+                                                                    .SelectMany(v => v.Errors)
+                                                                    .Select(e => e.ErrorMessage)
+                                                                    .Where(e => !string.IsNullOrEmpty(e))
+                                                                    .ToList();
             }
 
             @if (allErrors.Count > 0)

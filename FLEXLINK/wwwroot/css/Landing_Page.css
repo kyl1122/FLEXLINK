@@ -1,38 +1,33 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 html, body {
     overflow-x: hidden;
+    background-color: #000000;
+    color: #ffffff;
 }
 
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+    color: var(--bs-secondary-color);
+    text-align: end;
 }
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+    text-align: start;
 }
 
-
-/*NAV BAR*/
+/* NAVBAR */
 .flexlink-navbar {
     background-color: #000000;
     padding-top: 20px;
@@ -45,27 +40,24 @@ html, body {
         text-transform: uppercase;
         letter-spacing: 1px;
         font-weight: 500;
-        font-size: 1.05rem;
+        font-size: 0.85rem;
         margin: 0 12px;
-        list-style: none;
         padding: 8px 16px;
-        border-radius: 20px;
-        transition: background-color 0.2s ease, color 0.2s ease;
+        transition: color 0.2s ease;
     }
 
         .flexlink-navbar .nav-link:hover {
-            color: #cccccc !important;
-            list-style: none;
+            color: #ff1d25 !important;
         }
 
         .flexlink-navbar .nav-link.active {
-            background-color: #ffffff;
-            color: #000000 !important;
-            list-style: none;
+            color: #ff1d25 !important;
+            text-decoration: underline;
+            text-underline-offset: 6px;
         }
 
     .flexlink-navbar .navbar-brand img {
-        height: 42px;
+        height: 35px;
     }
 
     .flexlink-navbar .navbar-brand {
@@ -75,9 +67,7 @@ html, body {
         padding-bottom: 0;
     }
 
-
-/*Landing Page Home*/
-/* Landing Page Home */
+/* LANDING PAGE HERO */
 .hero-section {
     display: flex;
     min-height: 100vh;
@@ -87,8 +77,92 @@ html, body {
     margin-left: -50vw;
 }
 
+/* HERO LEFT (DARK CONTENT AREA) */
 .hero-left {
-    background-color: #ee1c25;
+    background-color: #000000;
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 80px;
+}
+
+.hero-forge {
+    color: #ffffff;
+    font-weight: 900;
+    font-size: 4rem;
+    letter-spacing: 2px;
+    line-height: 1;
+    text-align: left;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.hero-body {
+    color: transparent;
+    -webkit-text-stroke: 2px #ff1d25;
+    font-weight: 900;
+    font-size: 4.5rem;
+    text-align: left;
+    letter-spacing: 18px;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+}
+
+.hero-description {
+    color: #cccccc;
+    text-align: left;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    max-width: 360px;
+    margin: 0 0 35px 0;
+}
+
+.hero-btn {
+    align-self: flex-start;
+    background-color: #ff1d25;
+    color: #ffffff;
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+    border: none;
+    margin-bottom: 50px;
+}
+
+    .hero-btn:hover {
+        background-color: #d6131b;
+        color: #ffffff;
+    }
+
+/* STATS BAR */
+.hero-stats {
+    display: flex;
+    gap: 40px;
+    text-align: left;
+}
+
+.stat-item .stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.stat-item .stat-label {
+    font-size: 0.65rem;
+    color: #888888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 5px;
+    font-weight: 600;
+}
+
+/* HERO RIGHT (RED BRAND AREA) */
+.hero-right {
+    background-color: #ff1d25;
     width: 40%;
     display: flex;
     flex-direction: column;
@@ -99,73 +173,9 @@ html, body {
 }
 
 .hero-logo {
-    max-width: 220px;
+    max-width: 240px;
     margin-bottom: 20px;
 }
-
-.hero-brand {
-    color: #ffffff;
-    font-weight: 900;
-    font-size: 2.5rem;
-    letter-spacing: 3px;
-    margin-bottom: 8px;
-}
-
-.hero-tagline {
-    color: #ffffff;
-    letter-spacing: 3px;
-    font-size: 0.85rem;
-}
-
-.hero-right {
-    background-color: #2c3136;
-    width: 60%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 60px 80px;
-}
-
-.hero-welcome {
-    color: #ffffff;
-    font-weight: 800;
-    font-size: 3rem;
-    margin-bottom: 40px;
-}
-
-.hero-forge {
-    color: #ffffff;
-    font-weight: 800;
-    font-size: 2.5rem;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.hero-body {
-    color: transparent;
-    -webkit-text-stroke: 2px #ee1c25;
-    font-weight: 800;
-    font-size: 5rem;
-    text-align: center;
-    letter-spacing: 20px;
-    margin-bottom: 30px;
-}
-
-.hero-btn {
-    align-self: center;
-    margin-bottom: 30px;
-}
-
-.hero-description {
-    color: #cccccc;
-    text-align: center;
-    font-size: 1rem;
-    max-width: 500px;
-    margin: 0 auto;
-
-
-}
-
 
 .container:has(.hero-section) {
     padding-left: 0;
@@ -174,31 +184,4 @@ html, body {
 
 .main-content {
     height: auto !important;
-}
-
-/* Typography Adjustments */
-.hero-title-solid {
-    font-size: 3.8rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-    line-height: 1.05;
-}
-
-.hero-title-outline {
-    font-size: 3.8rem;
-    font-weight: 900;
-    line-height: 1.05;
-    color: transparent;
-    -webkit-text-stroke: 1.8px #ff2a2a;
-    letter-spacing: 18px; /* Wide spacing matching the reference image */
-    margin-left: 2px;
-}
-
-.hero-description {
-    color: #cccccc;
-    max-width: 320px; /* Constrains width so it breaks into 3 lines precisely */
-    font-size: 0.85rem;
-    line-height: 1.5;
-    font-weight: 400;
-    margin-left: 0;
 }

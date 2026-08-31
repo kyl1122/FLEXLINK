@@ -3,18 +3,17 @@
     ViewData["Title"] = "My Profile";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <head>
     <link rel="stylesheet" href="~/css/StyleSheet1.css" />
 </head>
 
 <div class="container-fluid dark-container py-4 px-4">
-    <!-- Header Section -->
     <div class="mb-4">
-        <h2 class="fw-bold mb-1">My Profile</h2>
-        <p class="text-secondary small mb-0">View your account details and update your information.</p>
+        <h1 class="profile-title mb-1">My Profile</h1>
+        <p class="profile-subtitle mb-0">View your account details and update your information.</p>
     </div>
 
-    <!-- Alert Notifications (Fixed Center-Top) -->
     <div class="top-center-alert-container">
         @if (TempData["ProfileSuccess"] != null)
         {
@@ -35,54 +34,49 @@
     <form asp-controller="Home" asp-action="UpdateUserProfile" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
 
-        <div class="row g-4 align-items-start mt-2">
-            <!-- Left Column: Avatar & File Upload Button -->
-            <div class="col-md-4 text-center">
-                <div class="mb-3 d-flex justify-content-center">
+        <div class="row align-items-start mt-4">
+            <!-- Left Column: Profile Picture & Upload -->
+            <div class="col-md-5 text-start pe-md-4">
+                <div class="mb-3">
                     <img src="@(string.IsNullOrEmpty(Model.ProfilePicture) ? "/uploads/DefaultProfile.png" : Model.ProfilePicture)"
                          alt="Profile Picture"
                          id="profilePreview"
-                         class="rounded-circle"
-                         style="width: 220px; height: 220px; object-fit: cover;" />
+                         class="img-fluid profile-image" />
                 </div>
 
                 <div class="mb-2">
                     <label for="profileImageInput" class="btn btn-upload-outline cursor-pointer">
-                        <i class="bi bi-camera me-1"></i> Upload Image
+                        <i class="bi bi-camera me-2"></i>Upload Image
                     </label>
                     <input type="file" name="ProfileImage" class="d-none"
                            accept=".jpg,.jpeg,.png" id="profileImageInput" />
                 </div>
-                <div class="field-hint">Max 2MB. Accepted formats: JPG, JPEG, PNG.</div>
+                <div class="field-hint mt-2">Max 2MB. Accepted formats: JPG, JPEG, PNG.</div>
             </div>
 
-            <!-- Right Column: Form Inputs Matching Layout -->
-            <div class="col-md-8">
+            <!-- Right Column: Form Inputs & Actions -->
+            <div class="col-md-7">
                 <div class="row g-3">
-                    <!-- Email field (read-only with top label hint) -->
                     <div class="col-md-6">
                         <label class="form-label field-hint mb-1">Email cannot be changed here.</label>
                         <input type="text" class="form-control dark-input"
-                               value="@(Model.Email ?? "—")" readonly />
+                               value="@(Model.Email ?? "Ace@gmail.com")" readonly />
                     </div>
 
-                    <!-- Member Since field (read-only) -->
                     <div class="col-md-6">
                         <label class="form-label field-hint mb-1">Member Since</label>
                         <input type="text" class="form-control dark-input"
                                value="@Model.CreatedAt.ToString("MMMM dd, yyyy")" readonly />
                     </div>
 
-                    <!-- Full Name field -->
                     <div class="col-12 mt-3">
-                        <input type="text" name="FullName" class="form-control dark-input py-2"
+                        <input type="text" name="FullName" class="form-control dark-input"
                                value="@(Model.FullName ?? "")"
                                placeholder="Full Name" />
                     </div>
 
-                    <!-- Phone Number & Age fields -->
                     <div class="col-md-6 mt-3">
-                        <input type="text" name="PhoneNumber" class="form-control dark-input py-2"
+                        <input type="text" name="PhoneNumber" class="form-control dark-input"
                                value="@(Model.PhoneNumber ?? "")"
                                placeholder="Phone Number"
                                inputmode="numeric"
@@ -93,29 +87,32 @@
                     </div>
 
                     <div class="col-md-6 mt-3">
-                        <input type="number" name="Age" class="form-control dark-input py-2"
+                        <input type="number" name="Age" class="form-control dark-input"
                                value="@(Model.Age > 0 ? Model.Age.ToString() : "")"
                                min="1" max="120"
                                placeholder="Age" />
                     </div>
 
-                    <!-- Address field -->
                     <div class="col-12 mt-3">
-                        <input type="text" name="Address" class="form-control dark-input py-2"
+                        <input type="text" name="Address" class="form-control dark-input"
                                value="@(Model.Address ?? "")"
                                placeholder="Address" />
                     </div>
                 </div>
 
-                <!-- Bottom Action Buttons -->
-                <div class="d-flex justify-content-end gap-3 mt-5">
+                <div class="d-flex justify-content-end gap-3 mt-5 pt-3">
                     <button type="submit" class="btn btn-dark-action">
                         Update Profile
                     </button>
+                    <a asp-action="ChangePassword" class="btn btn-dark-cancel">
+                        Change Password
+                    </a>
                     <a href="javascript:history.back()" class="btn btn-dark-cancel">
                         Cancel
                     </a>
                 </div>
+
+
             </div>
         </div>
     </form>

@@ -12,11 +12,13 @@ namespace FLEXLINK.Controllers
     {
         private readonly AppDbContext _db;
         private readonly UserManager<Users> _userManager;
+        private readonly SignInManager<Users> _signInManager;
 
-        public HomeController(AppDbContext db, UserManager<Users> userManager)
+        public HomeController(AppDbContext db, UserManager<Users> userManager, SignInManager<Users> signInManager)
         {
             _db = db;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public async Task<IActionResult> Index()
@@ -86,6 +88,48 @@ namespace FLEXLINK.Controllers
                 return RedirectToAction("Login", "Account");
 
             return View(currentUser);
+        }
+
+        // ── CHANGE PASSWORD ───────────────────────────────────────────────────
+
+        [HttpGet]
+        public async Task<IActionResult> ChangePassword()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return RedirectToAction("Login", "Account");
+
+            return View(new UserChangePasswordViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(UserChangePasswordViewModel vm)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return RedirectToAction("Login", "Account");
+
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+
+            var result = await _userManager.ChangePasswordAsync(currentUser, vm.CurrentPassword, vm.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+                return View(vm);
+            }
+
+            await _signInManager.RefreshSignInAsync(currentUser);
+
+            TempData["ProfileSuccess"] = "Password changed successfully!";
+            return RedirectToAction("UserProfile");
         }
 
         [HttpPost]

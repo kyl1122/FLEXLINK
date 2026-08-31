@@ -14,7 +14,6 @@
 </head>
 
 <div class="login-wrapper">
-    <!-- Left Dark Panel -->
     <div class="login-card">
         <div class="back-link">
             <a asp-controller="Account" asp-action="Login">
@@ -35,7 +34,7 @@
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
 
-                <button type="submit" class="btn btn-login mt-3" id="verifyBtn">
+                <button type="submit" class="btn btn-login" id="verifyBtn">
                     <span class="btn-text">Verify</span>
                     <span class="btn-spinner"></span>
                 </button>
@@ -43,7 +42,6 @@
         </div>
     </div>
 
-    <!-- Right Red Graphic Side -->
     <div class="login-graphic">
         <img src="~/images/shadow.png" alt="Shadow Overlay" class="shadow-overlay" />
 
